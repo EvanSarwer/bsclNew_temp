@@ -42,4 +42,9 @@ Route::post('/tvrshare',[SarwerAPIController::class,'tvrshare']);
 Route::post('/tvrprac',[SarwerAPIController::class,'tvr']);
 Route::post('/channeltimespent',[SarwerAPIController::class,'timespent']);
 Route::post('/usertimespent',[SarwerAPIController::class,'usertimespent']);
+Route::post('/activeuserlist',[SarwerAPIController::class,'activeuserlist']);
+Route::get('/activeuserlist',[SarwerAPIController::class,'activeuserlistget']);
+
+Route::post('/activechannellist',[SarwerAPIController::class,'activechannellist']);
+Route::get('/activechannellist',[SarwerAPIController::class,'activechannellistget']);
 ///////////END////////////

@@ -11,6 +11,124 @@ use DateTime;
 
 class SarwerAPIController extends Controller
 {
+    public function activechannellistget(){
+        $channels = Channel::all();
+        $activeChannels =[];
+        foreach ($channels as $c){
+            $viewlogs = ViewLog::where('channel_id',$c->id)
+                        ->whereNull('finished_watching_at')->get();
+
+            if(count($viewlogs) > 0){
+                $activeChannel =[
+                    "channel_id" => $c->id,
+                    "channel_name" => $c->channel_name,
+                    "channel_logo" => $c->logo,
+                    "user_count" => count($viewlogs)
+                ];
+                array_push($activeChannels,$activeChannel);
+            }
+            
+        }
+        return response()->json(["activeChannels"=> $activeChannels],200);
+    }
+
+    public function activechannellist(Request $req){
+        if($req->search != ""){
+            $channels = Channel::where('channel_name','like','%'.$req->search.'%')
+                        ->get();
+        }
+        else{
+            $channels = Channel::all();
+        }
+        $activeChannels =[];
+        if(count($channels) > 0){
+            foreach ($channels as $c){
+                $viewlogs = ViewLog::where('channel_id',$c->id)
+                            ->whereNull('finished_watching_at')->get();
+    
+                if(count($viewlogs) > 0){
+                    $activeChannel =[
+                        "channel_id" => $c->id,
+                        "channel_name" => $c->channel_name,
+                        "channel_logo" => $c->logo,
+                        "user_count" => count($viewlogs)
+                    ];
+                    array_push($activeChannels,$activeChannel);
+                }
+                
+            }
+        }
+        
+        return response()->json(["activeChannels"=> $activeChannels],200);
+    }
+
+
+
+
+    public function activeuserlistget(){
+        $viewlogs = ViewLog::whereNull('finished_watching_at')
+        ->distinct('user_id')->get();
+        $activeUsers = [];
+        if(count($viewlogs) > 0){
+            foreach($viewlogs as $v){
+                $user = User::where('id',$v->user_id)->first();
+                $channel = Channel::where('id',$v->channel_id)->first();
+                $activeUser = [
+                    "user_id" => $user->id,
+                    "user_name" => $user->user_name,
+                    "channel_id" => $channel->id,
+                    "channel_name" => $channel->channel_name,
+                    "channel_logo" => $channel->logo
+                ];
+                array_push($activeUsers,$activeUser);
+            }
+        }
+        return response()->json(["activeUsers"=>$activeUsers],200);
+
+    }
+
+    public function activeuserlist(Request $req){
+        $viewlogs = ViewLog::whereNull('finished_watching_at')
+        ->distinct('user_id')->get();
+        $activeUsers = [];
+        if(count($viewlogs) > 0){
+            foreach($viewlogs as $v){
+
+                if($req->search != ""){
+                    $user = User::where('id',$v->user_id)->where('user_name','like','%'.$req->search.'%')->first();
+                    if($user != null){
+                        $channel = Channel::where('id',$v->channel_id)->first();
+                        $activeUser = [
+                            "user_id" => $user->id,
+                            "user_name" => $user->user_name,
+                            "channel_id" => $channel->id,
+                            "channel_name" => $channel->channel_name,
+                            "channel_logo" => $channel->logo
+                        ];
+                        array_push($activeUsers,$activeUser);
+                    }
+                    
+                }
+                else{
+                    $user = User::where('id',$v->user_id)->first();
+                    $channel = Channel::where('id',$v->channel_id)->first();
+                    $activeUser = [
+                        "user_id" => $user->id,
+                        "user_name" => $user->user_name,
+                        "channel_id" => $channel->id,
+                        "channel_name" => $channel->channel_name,
+                        "channel_logo" => $channel->logo
+                    ];
+                    array_push($activeUsers,$activeUser);
+
+                }
+                
+            }
+        }
+
+        return response()->json(["activeUsers"=>$activeUsers],200);
+    }
+
     public function tvrshare1p(Request $req){
         $channelArray=array();
         $shares=array();

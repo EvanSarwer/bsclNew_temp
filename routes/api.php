@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SabbirApiController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\SarwerAPIController;
 
 /*
@@ -23,6 +24,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 /* Sabbir part */
 Route::post('/reach/percent', [SabbirApiController::class, 'reachpercent']);
+Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent']);
 Route::get('/reach/percent/dashboard', [DashboardController::class, 'reachpercentdashboard']);
 Route::post('/reachuser', [SabbirApiController::class, 'reachuser']);
 Route::get('/reachuser/dashboard', [DashboardController::class, 'reachuserdashboard']);

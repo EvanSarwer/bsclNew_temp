@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SabbirApiController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\SarwerAPIController;
 
@@ -56,4 +57,13 @@ Route::get('/activeuserlist',[SarwerAPIController::class,'activeuserlistget']);
 
 Route::post('/activechannellist',[SarwerAPIController::class,'activechannellist']);
 Route::get('/activechannellist',[SarwerAPIController::class,'activechannellistget']);
+Route::post('/testing',[SarwerAPIController::class,'testApi']);
+
+
 ///////////END////////////
+
+/////////User Status/////////
+Route::post('/user/usertimespent',[UserController::class,'usertimespent']);
+Route::get('/getchannellist',[UserController::class,'getallList']);
+
+///////////END//////////////

@@ -11,6 +11,45 @@ use DateTime;
 
 class SarwerAPIController extends Controller
 {
+    public function testApi(Request $req){
+        return response()->json(["user"=>$req->user,"time"=>$req->time],200);
+    }
+
+    public function ttestApi(Request $req){
+        if($req->timeframe == "Daily"){
+            $start = date('2022-05-19 00:00:00');
+            $addmin = 120;
+            $count = 12;
+        }
+        else if($req->timeframe == "Weekly"){
+            $start = date('2022-05-19 00:00:00');
+            $addmin = 1440;
+            $count = 7;
+        }
+        
+
+
+        $AllDateTime = [];
+        for($i=0 ; $i<$count; $i++){
+            //$addmin = $addmin + 120;
+            
+            $newtimestamp = strtotime("{$start} + {$addmin} minute");
+            $finish = date('Y-m-d H:i:s', $newtimestamp);
+            $dt = [
+                "Start"=> $start,
+                "finish"=> $finish
+            ];
+            $start = $finish;
+
+            array_push($AllDateTime,$dt);
+        }
+        return response()->json(["All Date Time"=> $AllDateTime],200);
+        
+
+    }
+
+
+
     public function activechannellistget(){
         $channels = Channel::all();
         $activeChannels =[];
@@ -268,13 +307,13 @@ class SarwerAPIController extends Controller
                         ->get();
             $total_time_viewed = 0;
             foreach ($viewelogs as $v) {
-                if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) > ($from_time))){
+                if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
                     $watched_sec = abs($to_time - $from_time);
                 }
                 else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
                     $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
                 }
-                else if(((strtotime($v->started_watching_at)) >= ($to_time)) && ((strtotime($v->finished_watching_at)) > ($from_time))){
+                else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
                     $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
                 }
                 else{

@@ -11,7 +11,18 @@ use Carbon\Carbon;
 use DateTime;
 class ChannelController extends Controller
 {
-
+  public function trendchannel()
+  {
+    $channelslist=array();
+    //$demo=array("id"=>"name"=>);
+    $channels = Channel::all('id', 'channel_name');
+    foreach ($channels as $c) {
+$demo=array("id"=>$c->id,"name"=>$c->channel_name);
+array_push($channelslist,$demo);
+    }
+    
+  return response()->json(["channels"=>$channelslist], 200);
+  }
   public function reachpercent()
   {
 
@@ -19,39 +30,136 @@ class ChannelController extends Controller
     $values = array(78.72727272727273, 78.72727272727273, 79.63636363636363, 81.81818181818183, 85.81818181818183, 81.81818181818183, 79.54545454545454, 78.72727272727273, 78.72727272727273, 81.81818181818183, 78.72727272727273, 82.9090909090909, 78.72727272727273, 78.72727272727273, 79.63636363636363, 81.81818181818183, 85.81818181818183, 81.81818181818183, 79.54545454545454, 78.72727272727273, 78.72727272727273, 81.81818181818183, 78.72727272727273, 82.9090909090909, 78.72727272727273, 78.72727272727273, 79.63636363636363, 81.81818181818183, 85.81818181818183, 81.81818181818183, 79.54545454545454, 78.72727272727273, 78.72727272727273, 81.81818181818183, 78.72727272727273, 82.9090909090909, 78.72727272727273, 78.72727272727273, 79.63636363636363, 81.81818181818183, 85.81818181818183, 81.81818181818183, 79.54545454545454, 78.72727272727273, 78.72727272727273, 81.81818181818183, 78.72727272727273, 82.9090909090909);
     //$values=array(10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,85,80,75,70,65,60,55,50,45,40,35,30,30,35,40,45,50,55,60,65,70,75,80);
     $timeRanges = array("00:00-00:30", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "23:30-24:00",);
-    return response()->json(["range" => $timeRanges, "values" => $values], 200);
+    return response()->json(["label" => $timeRanges, "values" => $values], 200);
   }
-  public function reachtrend()
+  public function reachpercenttrend(Request $req)
   {
-
     $time=array();
-    $inc=-26;
-    for($i=0;$i<13;$i++){
-    $inc=$inc+2;
+    $length=12;
+if($req->time=="Daily"){
+  $inc=-20; //daily
+  for($i=0;$i<13;$i++){
+  $inc=$inc+2;
+  //echo "".$inc;
+  array_push($time,((string)$inc)." hours");
+  }
+}
+elseif($req->time=="Weekly"){
+  $inc=-174;  //weekly
+  $length=14;
+    for($i=0;$i<15;$i++){
+    $inc=$inc+12;
     //echo "".$inc;
     array_push($time,((string)$inc)." hours");
     }
+}
+elseif($req->time=="Monthly"){
+  $inc=-750;  //monthly
+  $length=31;
+    for($i=0;$i<32;$i++){
+    $inc=$inc+24;
+    //echo "".$inc;
+    array_push($time,((string)$inc)." hours");
+    }
+}
+elseif($req->time=="Yearly"){
+  $inc=-13;  //yearly
+  $length=12;
+    for($i=0;$i<13;$i++){
+    $inc=$inc+1;
+    //echo "".$inc;
+    array_push($time,((string)$inc)." months");
+    }
+}
+
     $channelArray = array();
     $reachs = array();
     $totalReachs = array();
     $viewer = array();
-    /*if($req->start=="" && $req->finish==""){
-    return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
-    }
-    $startDate=date('Y-m-d',strtotime("-1 days"));
-    $startTime="00:00:00";
-    $finishDate=date('Y-m-d',strtotime("-1 days"));
-    $finishTime="23:59:59";*/
     $channels = Channel::all('id', 'channel_name');
     $users = User::all();
     $numOfUser = $users->count();
-    //return response()->json(["reachsum" => array_sum($reachllistnew), "reach" => $reachllistnew, "channels" => $channellistnew], 200);
- 
-    //$all=array();
-for($i=0;$i<12;$i++)
+
+    for($i=0;$i<$length;$i++)
     {
       
-      $viewers = ViewLog::where('channel_id', 1)
+      $viewers = ViewLog::where('channel_id', $req->id)
+        ->where(function ($query) use ($time,$i) {
+          $query->where('finished_watching_at', '>', date("Y-m-d H:i:s", strtotime($time[$i])))
+            ->orWhereNull('finished_watching_at');
+        })
+        ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i+1])))
+        ->get();
+
+      foreach ($viewers as $v) {
+        array_push($viewer, $v->user->id);
+      }
+      $viewer = array_values(array_unique($viewer));
+      $numofViewer = count($viewer);
+      $reach = ($numofViewer / $numOfUser) * 100;
+      unset($viewer);
+      $viewer = array();
+      
+      array_push($channelArray,"");
+      array_push($reachs, $reach);
+
+    }
+    
+
+  return response()->json(["reachsum" => array_sum($reachs), "values" => $reachs, "label" => $channelArray], 200);
+  }
+  public function reachtrend(Request $req)
+  {
+    $time=array();
+    $length=12;
+if($req->time=="Daily"){
+  $inc=-20; //daily
+  for($i=0;$i<13;$i++){
+  $inc=$inc+2;
+  //echo "".$inc;
+  array_push($time,((string)$inc)." hours");
+  }
+}
+elseif($req->time=="Weekly"){
+  $inc=-174;  //weekly
+  $length=14;
+    for($i=0;$i<15;$i++){
+    $inc=$inc+12;
+    //echo "".$inc;
+    array_push($time,((string)$inc)." hours");
+    }
+}
+elseif($req->time=="Monthly"){
+  $inc=-750;  //monthly
+  $length=31;
+    for($i=0;$i<32;$i++){
+    $inc=$inc+24;
+    //echo "".$inc;
+    array_push($time,((string)$inc)." hours");
+    }
+}
+elseif($req->time=="Yearly"){
+  $inc=-13;  //yearly
+  $length=12;
+    for($i=0;$i<13;$i++){
+    $inc=$inc+1;
+    //echo "".$inc;
+    array_push($time,((string)$inc)." months");
+    }
+}
+
+    $channelArray = array();
+    $reachs = array();
+    $totalReachs = array();
+    $viewer = array();
+    $channels = Channel::all('id', 'channel_name');
+    $users = User::all();
+    $numOfUser = $users->count();
+
+    for($i=0;$i<$length;$i++)
+    {
+      
+      $viewers = ViewLog::where('channel_id', $req->id)
         ->where(function ($query) use ($time,$i) {
           $query->where('finished_watching_at', '>', date("Y-m-d H:i:s", strtotime($time[$i])))
             ->orWhereNull('finished_watching_at');
@@ -67,22 +175,14 @@ for($i=0;$i<12;$i++)
       $reach = $numofViewer;//($numofViewer / $numOfUser) * 100;
       unset($viewer);
       $viewer = array();
-      /*$arr=array(
-            'channel_name' => $c->channel_name,
-            'reach' => $reach
-          );
-          array_push($all,$arr);*/
-      //array_push($channelArray,$c->channel_name);
       
       array_push($channelArray,"");
-      //array_push($channelArray, date("Y-m-d H:i:s", strtotime($time[$i]))."-".date("Y-m-d H:i:s", strtotime($time[$i+1])));
       array_push($reachs, $reach);
-      //array_push($reachs,$reach);
 
     }
     
 
-  return response()->json(["reachsum" => array_sum($reachs), "values" => $reachs, "range" => $channelArray], 200);
+  return response()->json(["reachsum" => array_sum($reachs), "values" => $reachs, "label" => $channelArray], 200);
   }
   public function tvrtrend()
   {
@@ -161,6 +261,6 @@ for($i=0;$i<12;$i++)
     }
     
 
-  return response()->json(["reachsum" => array_sum($tvrs), "values" => $tvrs, "range" => $channelArray], 200);
+  return response()->json(["reachsum" => array_sum($tvrs), "values" => $tvrs, "label" => $channelArray], 200);
   }
 }

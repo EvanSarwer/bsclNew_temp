@@ -103,7 +103,48 @@ class UserController extends Controller
     }
 
     public function getallList(){
-        $chnls = Channel::all('id','channel_name');
-        return response()->json(["Channels"=>$chnls],200);
+        $users = User::all('id','user_name');
+        return response()->json(["users"=>$users],200);
+    }
+
+    public function userAllTimeView(Request $req){
+        if($req->user != ""){
+
+            $channelArray=array();
+            $total_time =array();
+            $total =0.00;
+
+            $channels=Channel::all('id','channel_name','logo');
+            foreach ($channels as $c) {
+                $viewlogs = ViewLog::where('channel_id', $c->id)
+                ->where('user_id', $req->user)
+                ->get();
+                $total_time_viewed = 0;
+                
+                foreach ($viewlogs as $v) {
+                    $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    $total_time_viewed = $total_time_viewed + $watched_sec;
+                    //$timeviewed = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at))/60;
+                }
+                //$total_time_viewed = ($total_time_viewed)/60;
+                //$tota_time_viewed = $tota_time_viewed / $diff;
+                //$total_time_viewed=round($total_time_viewed);
+                $total_time_viewed = date("H:i:s", $total_time_viewed);
+                
+                $chnls =[
+                    "id" => $c->id,
+                    "channel_name" => $c->channel_name,
+                    "logo" => $c->logo,
+                    "totaltime" => $total_time_viewed
+                ];
+
+                //array_push($total_time,$total_time_viewed);
+                array_push($channelArray,$chnls);
+
+            }
+            return response()->json(["channels"=>$channelArray],200);
+
+        }
+        return response()->json(["error"=> "Error"],200);
     }
 }

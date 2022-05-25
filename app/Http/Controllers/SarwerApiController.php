@@ -17,7 +17,7 @@ class SarwerAPIController extends Controller
 
     public function ttestApi(Request $req){
         if($req->timeframe == "Daily"){
-            $start = date('2022-05-19 00:00:00');
+            $start = date("Y-m-d H:i:s");
             $addmin = 120;
             $count = 12;
         }
@@ -26,7 +26,11 @@ class SarwerAPIController extends Controller
             $addmin = 1440;
             $count = 7;
         }
-        
+        else if($req->timeframe == "Monthly"){
+            $start = date('2022-05-19 00:00:00');
+            $addmin = 14400;
+            $count = 30;
+        }
 
 
         $AllDateTime = [];

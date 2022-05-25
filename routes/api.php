@@ -59,13 +59,14 @@ Route::get('/activeuserlist',[SarwerAPIController::class,'activeuserlistget']);
 
 Route::post('/activechannellist',[SarwerAPIController::class,'activechannellist']);
 Route::get('/activechannellist',[SarwerAPIController::class,'activechannellistget']);
-Route::post('/testing',[SarwerAPIController::class,'testApi']);
+Route::post('/testing',[SarwerAPIController::class,'ttestApi']);
 
 
 ///////////END////////////
 
 /////////User Status/////////
 Route::post('/user/usertimespent',[UserController::class,'usertimespent']);
-Route::get('/getchannellist',[UserController::class,'getallList']);
+Route::post('/user/useralltimeview',[UserController::class,'userAllTimeView']);
+Route::get('/getuserlist',[UserController::class,'getallList']);
 
 ///////////END//////////////

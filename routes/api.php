@@ -6,6 +6,7 @@ use App\Http\Controllers\SabbirApiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChannelController;
+use App\Http\Controllers\LiveChannelController;
 use App\Http\Controllers\SarwerAPIController;
 
 /*
@@ -71,3 +72,8 @@ Route::post('/user/userdaytimeviewlist',[UserController::class,'userDayTimeViewL
 Route::get('/getuserlist',[UserController::class,'getallList']);
 
 ///////////END//////////////
+
+//////////Live Channels/////////
+Route::post('/livechannel/activechannellistgraph',[LiveChannelController::class,'activechannellistgraph']);
+
+///////////END////////////////

@@ -321,4 +321,61 @@ public function tvrgraphdashboard(){
       return response()->json(["tvrs"=>$ntvrs,"channels"=>$nchannelArray],200);
       
       }      
+
+      public function activechannellistget(){
+        $channels = Channel::all();
+        $activeChannels =[];
+        foreach ($channels as $c){
+            $viewlogs = ViewLog::where('channel_id',$c->id)
+                        ->whereNull('finished_watching_at')->get();
+
+            if(count($viewlogs) > 0){
+                $activeChannel =[
+                    "channel_id" => $c->id,
+                    "channel_name" => $c->channel_name,
+                    "channel_logo" => $c->logo,
+                    "user_count" => count($viewlogs)
+                ];
+                array_push($activeChannels,$activeChannel);
+            }
+            
+        }
+        //array_multisort(array_column($inventory, 'key_name'), SORT_DESC, SORT_NATURAL|SORT_FLAG_CASE, $inventory);     // Case Insensitive Sort
+        array_multisort(array_column($activeChannels, 'user_count'), SORT_DESC, $activeChannels);
+        return response()->json(["activeChannels"=> $activeChannels],200);
+    }
+
+    public function activeuserlistget(){
+      $viewlogs = ViewLog::whereNull('finished_watching_at')
+      ->distinct('user_id')->get();
+      $activeUsers = [];
+      if(count($viewlogs) > 0){
+        $total_time_viewed = 0;
+              foreach($viewlogs as $v){
+              $user = User::where('id',$v->user_id)->first();
+              $channel = Channel::where('id',$v->channel_id)->first();
+
+              $finishDateTime = date('2022-05-18 23:59:59');
+              $from_time = strtotime($finishDateTime);
+              $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
+              $total_time_viewed = ($watched_sec)/60;
+              //$tota_time_viewed = $tota_time_viewed / $diff;
+              $total_time_viewed=round($total_time_viewed);
+
+              $activeUser = [
+                  "user_id" => $user->id,
+                  "user_name" => $user->user_name,
+                  "channel_id" => $channel->id,
+                  "channel_name" => $channel->channel_name,
+                  "channel_logo" => $channel->logo,
+                  "start_watching" => $v->started_watching_at,
+                  "totaltime" => $total_time_viewed
+              ];
+              array_push($activeUsers,$activeUser);
+          }
+      }
+      array_multisort(array_column($activeUsers, 'totaltime'), SORT_DESC, $activeUsers);
+      return response()->json(["activeUsers"=>$activeUsers],200);
+
+  }
 }

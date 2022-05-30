@@ -65,6 +65,12 @@ Route::post('/testing',[SarwerAPIController::class,'ttestApi']);
 
 ///////////END////////////
 
+//////////Dashboard///////////
+Route::get('/dashboard/activechannellist',[DashboardController::class,'activechannellistget']);
+Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserlistget']);
+
+/////////END////////////
+
 /////////User Status/////////
 Route::post('/user/usertimespent',[UserController::class,'usertimespent']);
 Route::post('/user/useralltimeview',[UserController::class,'userAllTimeView']);

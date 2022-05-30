@@ -28,7 +28,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('trend/channels', [ChannelController::class, 'trendchannel']);
 Route::post('trend/reach/zero', [ChannelController::class, 'reachtrend']);
 Route::post('trend/reach/percent', [ChannelController::class, 'reachpercenttrend']);
-Route::get('trend/tvr/percent', [ChannelController::class, 'tvrtrend']);
+Route::post('trend/tvr/percent', [ChannelController::class, 'tvrtrend']);
+Route::post('trend/tvr/zero', [ChannelController::class, 'tvrtrendzero']);
 Route::post('/reach/percent', [SabbirApiController::class, 'reachpercent']);
 Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent']);
 Route::get('/reach/percent/dashboard', [DashboardController::class, 'reachpercentdashboard']);

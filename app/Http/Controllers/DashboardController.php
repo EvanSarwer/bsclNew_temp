@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $totalReachs=array();
         $viewer=array();
         /*if($req->start=="" && $req->finish==""){
-        return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
+        return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
         $startDate=date('Y-m-d',strtotime("-365 days"));
         $startTime="00:00:00";
@@ -73,7 +73,7 @@ class DashboardController extends Controller
             $cc++;
               }
             }
-      return response()->json(["reach"=>$nreachs,"channels"=>$nchannelArray],200);
+      return response()->json(["value"=>$nreachs,"label"=>$nchannelArray],200);
       }
 
       
@@ -84,7 +84,7 @@ public function reachuserdashboard(){
     $reachs=array();
     $viewer=array();
     /*if($req->start=="" && $req->finish==""){
-    return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
+    return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
     }*/
     $startDate=date('Y-m-d',strtotime("-365 days"));
     $startTime="00:00:00";
@@ -136,7 +136,7 @@ public function reachuserdashboard(){
         $cc++;
           }
         }
-  return response()->json(["reach"=>$nreachs,"channels"=>$nchannelArray],200);
+  return response()->json(["value"=>$nreachs,"label"=>$nchannelArray],200);
   }
 
 
@@ -148,7 +148,7 @@ public function tvrgraphdashboard(){
         $viewer=array();
         $ldate = date('Y-m-d H:i:s');
         /*if($req->start=="" && $req->finish==""){
-        return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
+        return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
         $startDate=date('Y-m-d',strtotime("-365 days"));
         $startTime="00:00:00";
@@ -226,7 +226,7 @@ public function tvrgraphdashboard(){
             $cc++;
               }
             }
-      return response()->json(["tvrs"=>$ntvrs,"channels"=>$nchannelArray],200);
+      return response()->json(["value"=>$ntvrs,"label"=>$nchannelArray],200);
             
       }
 
@@ -240,7 +240,7 @@ public function tvrgraphdashboard(){
         $viewer=array();
         $ldate = date('Y-m-d H:i:s');
         /*if($req->start=="" && $req->finish==""){
-        return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
+        return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
         $startDate=date('Y-m-d',strtotime("-365 days"));
         $startTime="00:00:00";
@@ -318,7 +318,7 @@ public function tvrgraphdashboard(){
             $cc++;
               }
             }
-      return response()->json(["tvrs"=>$ntvrs,"channels"=>$nchannelArray],200);
+      return response()->json(["value"=>$ntvrs,"label"=>$nchannelArray],200);
       
       }      
 

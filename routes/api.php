@@ -25,21 +25,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 /* Sabbir part */
-Route::get('trend/channels', [ChannelController::class, 'trendchannel']);
-Route::post('trend/reach/zero', [ChannelController::class, 'reachtrend']);
-Route::post('trend/reach/percent', [ChannelController::class, 'reachpercenttrend']);
-Route::post('trend/tvr/percent', [ChannelController::class, 'tvrtrend']);
-Route::post('trend/tvr/zero', [ChannelController::class, 'tvrtrendzero']);
+
 Route::post('/reach/percent', [SabbirApiController::class, 'reachpercent']);
-Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent']);
-Route::get('/reach/percent/dashboard', [DashboardController::class, 'reachpercentdashboard']);
 Route::post('/reachuser', [SabbirApiController::class, 'reachuser']);
-Route::get('/reachuser/dashboard', [DashboardController::class, 'reachuserdashboard']);
 Route::post('/tvrgraph', [SabbirApiController::class, 'tvrgraph']);
 Route::post('/tvrgraphallchannel', [SabbirApiController::class, 'tvrgraphallchannel']);
-Route::get('/tvrgraph/dashboard', [DashboardController::class, 'tvrgraphdashboard']);
 Route::post('/tvrgraphallchannelzero', [SabbirApiController::class, 'tvrgraphallchannelzero']);
-Route::get('/tvrgraphzero/dashboard', [DashboardController::class, 'tvrgraphzerodashboard']);
 Route::post('/timecheck', [SabbirController::class, 'timecheck']);
 Route::post('/timespent', [SabbirApiController::class, 'timespent']);
 Route::post('/share', [SabbirApiController::class, 'share']);
@@ -69,7 +60,10 @@ Route::post('/testing',[SarwerAPIController::class,'ttestApi']);
 //////////Dashboard///////////
 Route::get('/dashboard/activechannellist',[DashboardController::class,'activechannellistget']);
 Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserlistget']);
-
+Route::get('/reachuser/dashboard', [DashboardController::class, 'reachuserdashboard']);
+Route::get('/reach/percent/dashboard', [DashboardController::class, 'reachpercentdashboard']);
+Route::get('/tvrgraph/dashboard', [DashboardController::class, 'tvrgraphdashboard']);
+Route::get('/tvrgraphzero/dashboard', [DashboardController::class, 'tvrgraphzerodashboard']);
 /////////END////////////
 
 /////////User Status/////////
@@ -84,3 +78,12 @@ Route::get('/getuserlist',[UserController::class,'getallList']);
 Route::post('/livechannel/activechannellistgraph',[LiveChannelController::class,'activechannellistgraph']);
 
 ///////////END////////////////
+
+//////////Channels////////////
+Route::get('trend/channels', [ChannelController::class, 'trendchannel']);
+Route::post('trend/reach/zero', [ChannelController::class, 'reachtrend']);
+Route::post('trend/reach/percent', [ChannelController::class, 'reachpercenttrend']);
+Route::post('trend/tvr/percent', [ChannelController::class, 'tvrtrend']);
+Route::post('trend/tvr/zero', [ChannelController::class, 'tvrtrendzero']);
+Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent']);
+//////////END/////////////////

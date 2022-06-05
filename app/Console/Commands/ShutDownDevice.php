@@ -63,7 +63,8 @@ class ShutDownDevice extends Command
             ->where('finished_watching_at')->first();
             if($v_log){
                 $v_log->finished_watching_at = $user->last_request;
-                $v_log->duration_minute = 0.00;
+                $v_log->duration_minute = abs(strtotime($v_log->started_watching_at)-strtotime($user->last_request))/60;
+                
                 $v_log->save();
             }
         }

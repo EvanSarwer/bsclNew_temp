@@ -210,4 +210,69 @@ class UserController extends Controller
         }
         return response()->json(["error"=> "Error"],200);
     }
+
+    public function usertimespent2(Request $req){
+        if($req->user != "" && $req->start != "" && $req->finish != ""){
+            
+            $startDate=substr($req->start,0,10);
+            $startTime=substr($req->start,11,19);
+            $finishDate=substr($req->finish,0,10);
+            $finishTime=substr($req->finish,11,19);
+
+            $startDateTime = date($startDate)." ".$startTime;
+            $finishDateTime = date($finishDate)." ".$finishTime;
+            
+
+            $to_time = strtotime($startDate." ".$startTime);
+            $from_time = strtotime($finishDate." ".$finishTime);
+            $diff=abs($to_time - $from_time) / 60;
+
+            $channelArray=array();
+            $total_time =array();
+            $total =0.00;
+
+            $channels=Channel::all('id','channel_name');
+            foreach ($channels as $c) {
+                $viewlogs = ViewLog::where('channel_id', $c->id)
+                ->where('user_id', $req->user)
+                ->where(function($query) use ($startDateTime,$finishDateTime){
+                    $query->where('finished_watching_at','>',$startDateTime)
+                    ->orWhereNull('finished_watching_at');
+                    })
+                ->where('started_watching_at','<',$finishDateTime)
+                ->get();
+                $total_time_viewed = 0;
+                
+                foreach ($viewlogs as $v) {
+                    if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                        $watched_sec = abs($to_time - $from_time);
+                    }
+                    else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                        $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
+                    }
+                    else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                        $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
+                    }
+                    else{
+                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    }
+                    $total_time_viewed = $total_time_viewed + $watched_sec;
+                    //$timeviewed = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at))/60;
+                }
+                $total_time_viewed = ($total_time_viewed)/60;
+                //$tota_time_viewed = $tota_time_viewed / $diff;
+                $total_time_viewed=round($total_time_viewed);
+                
+                array_push($total_time,$total_time_viewed);
+                array_push($channelArray,$c->channel_name);
+
+            }
+            return response()->json(["totaltime"=>$total_time,"channels"=>$channelArray],200);
+
+        }
+        return response()->json(["error"=> "Error"],200);
+    }
+
+
+
 }

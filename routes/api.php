@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\LiveChannelController;
 use App\Http\Controllers\SarwerAPIController;
+use App\Http\Controllers\OverviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,7 +55,6 @@ Route::post('/activechannellist',[SarwerAPIController::class,'activechannellist'
 Route::get('/activechannellist',[SarwerAPIController::class,'activechannellistget']);
 Route::post('/testing',[SarwerAPIController::class,'ttestApi']);
 
-
 ///////////END////////////
 
 //////////Dashboard///////////
@@ -66,11 +66,23 @@ Route::get('/tvrgraph/dashboard', [DashboardController::class, 'tvrgraphdashboar
 Route::get('/tvrgraphzero/dashboard', [DashboardController::class, 'tvrgraphzerodashboard']);
 /////////END////////////
 
+//////////Overview///////////
+Route::post('/overview/reachusergraph',[OverviewController::class,'reachusergraph']);
+Route::post('/overview/reachpercentgraph',[OverviewController::class,'reachpercentgraph']);
+Route::post('/overview/tvrgraphallchannelzero',[OverviewController::class,'tvrgraphallchannelzero']);
+Route::post('/overview/tvrgraphallchannelpercent',[OverviewController::class,'tvrgraphallchannelpercent']);
+Route::post('/overview/tvrsharegraph',[OverviewController::class,'tvrsharegraph']);
+Route::post('/overview/timespentgraph',[OverviewController::class,'timespentgraph']);
+//////////END///////////////
+
 /////////User Status/////////
 Route::post('/user/usertimespent',[UserController::class,'usertimespent']);
 Route::post('/user/useralltimeview',[UserController::class,'userAllTimeView']);
 Route::post('/user/userdaytimeviewlist',[UserController::class,'userDayTimeViewList']);
 Route::get('/getuserlist',[UserController::class,'getallList']);
+
+//
+Route::post('/user/userdefined/usertimespent',[UserController::class,'usertimespent2']);
 
 ///////////END//////////////
 

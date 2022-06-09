@@ -11,6 +11,100 @@ use Carbon\Carbon;
 use DateTime;
 class ChannelController extends Controller
 {
+  public function definedtrend(Request $req)
+  {
+    $viewer = array();
+    $viewertvr = array(); 
+    $ldate = date('H:i:s');
+    $users = User::all();
+    $numOfUser = $users->count();
+        $start=$req->start;
+        if($start==""){
+          $start="00:00:00";
+        }
+        $finish=$req->finish;
+        if($finish=""){
+          $finish="23:59:59";
+        }
+        $diff = abs(strtotime($start) - strtotime($finish)) / 60;
+        $month=$req->month;
+        if(empty($month)){
+          $month=array('1','2','3','4','5','6','7','8','9','10','11','12');
+        }
+        $month=implode(",", $month);
+        $year=$req->year;
+        if(empty($year)){
+          $year=array('2022','2021','2020','2019','2018');
+        }
+        $year=implode(",", $year);
+        $day=$req->day;
+        if(empty($day)){
+          $day=array('0','1','2','3','4','5','6');
+        }
+        $day=implode(",", $day);
+        $viewers = ViewLog::where('channel_id', 36)
+        ->where(function ($query) use ($finish,$start) {
+          $query->whereTime('finished_watching_at', '>', $start)
+            ->orWhereNull('finished_watching_at');
+        })
+        ->whereTime('started_watching_at', '<', $finish)
+        ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+          $query
+          ->whereRaw("month(started_watching_at) in ($month)")
+          ->orWhereRaw("month(finished_watching_at) in ($month)");
+        })
+        ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+          $query->whereRaw("year(started_watching_at) in ($year)")
+          ->orWhereRaw("year(finished_watching_at) in ($year)");
+        })
+        ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+          $query->whereRaw("weekday(started_watching_at) in ($day)")
+          ->orWhereRaw("weekday(finished_watching_at) in ($day)");
+        })
+        
+        
+        
+        ->get();
+        
+//return response()->json(["reach" => $viewers], 200);
+
+      foreach ($viewers as $v) {
+        array_push($viewer, $v->user->id);
+      }
+      $viewer = array_values(array_unique($viewer));
+      $numofViewer = count($viewer);
+      $reachp = ($numofViewer / $numOfUser) * 100;
+      $reach0=$numofViewer;
+      //unset($viewer);
+      //$viewer = array();
+
+      foreach ($viewers as $v) {
+        if ($v->finished_watching_at == null) {
+          if ((strtotime(substr($v->started_watching_at,11))) < (strtotime($start))) {
+            $timeviewd = abs(strtotime($start) - strtotime($ldate));
+          } else if ((strtotime(substr($v->started_watching_at,11))) >= (strtotime($start))) {
+            $timeviewd = abs(strtotime(substr($v->started_watching_at,11)) - strtotime($ldate));
+          }
+        } else if (((strtotime(substr($v->started_watching_at,11))) < (strtotime($start))) && ((strtotime(substr($v->finished_watching_at,11))) > (strtotime($finish)))) {
+          $timeviewd = abs(strtotime($start) - strtotime($finish));
+        } else if (((strtotime(substr($v->started_watching_at,11))) < (strtotime($start))) && ((strtotime(substr($v->finished_watching_at,11))) <= (strtotime($finish)))) {
+          $timeviewd = abs(strtotime($start) - strtotime(substr($v->finished_watching_at,11)));
+        } else if (((strtotime(substr($v->started_watching_at,11))) >= (strtotime($start))) && ((strtotime(substr($v->finished_watching_at,11))) > (strtotime($finish)))) {
+          $timeviewd = abs(strtotime(substr($v->started_watching_at,11)) - strtotime($finish));
+        } else {
+          $timeviewd = abs(strtotime(substr($v->finished_watching_at,11)) - strtotime(substr($v->started_watching_at,11)));
+        }
+        //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime(substr($v->started_watching_at,11)));
+        $timeviewd = $timeviewd / 60;
+        array_push($viewertvr, $timeviewd);
+      }
+      $tvr0=array_sum($viewer);
+      $tvr = array_sum($viewer) / $numOfUser;
+      //$tvr=$tvr/60;
+      $tvr = $tvr / $diff;
+      $tvrp = $tvr * 100;
+return response()->json(["reachp" => $reachp,"reach0"=>$reach0,"tvrp"=>$tvrp,"tvr0"=>$tvr0], 200);
+  }
   public function trendchannel()
   {
     $channelslist=array();

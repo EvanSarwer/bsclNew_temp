@@ -98,4 +98,5 @@ Route::post('trend/reach/percent', [ChannelController::class, 'reachpercenttrend
 Route::post('trend/tvr/percent', [ChannelController::class, 'tvrtrend']);
 Route::post('trend/tvr/zero', [ChannelController::class, 'tvrtrendzero']);
 Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent']);
+Route::post('channel/definedtrend', [ChannelController::class, 'definedtrend']);
 //////////END/////////////////

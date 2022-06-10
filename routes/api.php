@@ -9,6 +9,7 @@ use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\LiveChannelController;
 use App\Http\Controllers\SarwerAPIController;
 use App\Http\Controllers\OverviewController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,12 @@ Route::get('/activechannellist',[SarwerAPIController::class,'activechannellistge
 Route::post('/testing',[SarwerAPIController::class,'ttestApi']);
 
 ///////////END////////////
+
+//=========Auth Start=========//
+Route::post('/auth/sign-in', [AuthController::class, 'signIn']);
+Route::post('/auth/sign-up', [AuthController::class, 'signUp']);
+Route::get('/auth/current-user', [AuthController::class, 'currentUser']);
+//=========Auth End==========//
 
 //////////Dashboard///////////
 Route::get('/dashboard/activechannellist',[DashboardController::class,'activechannellistget']);

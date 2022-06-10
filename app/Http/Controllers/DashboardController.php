@@ -351,6 +351,8 @@ public function tvrgraphdashboard(){
       $activeUsers = [];
       if(count($viewlogs) > 0){
         $total_time_viewed = 0;
+        $total_time = 0;
+        $duration = "";
               foreach($viewlogs as $v){
               $user = User::where('id',$v->user_id)->first();
               $channel = Channel::where('id',$v->channel_id)->first();
@@ -361,6 +363,21 @@ public function tvrgraphdashboard(){
               $total_time_viewed = ($watched_sec)/60;
               //$tota_time_viewed = $tota_time_viewed / $diff;
               $total_time_viewed=round($total_time_viewed);
+              if ($total_time_viewed >= 1440){
+                $total_time = (($total_time_viewed/60)/24);
+                $total_time = floor($total_time);
+                $duration = $total_time." day";
+
+              }
+              elseif($total_time_viewed >= 60){
+                $total_time = ($total_time_viewed/60);
+                $total_time = floor($total_time);
+                $duration = $total_time." hour";
+              }
+              else{
+                $total_time = floor($total_time_viewed);
+                $duration = $total_time." minute";
+              }
 
               $activeUser = [
                   "user_id" => $user->id,
@@ -369,7 +386,8 @@ public function tvrgraphdashboard(){
                   "channel_name" => $channel->channel_name,
                   "channel_logo" => $channel->logo,
                   "start_watching" => $v->started_watching_at,
-                  "totaltime" => $total_time_viewed
+                  "totaltime" => $total_time_viewed,
+                  "duration" => $duration
               ];
               array_push($activeUsers,$activeUser);
           }

@@ -23,7 +23,7 @@ class ChannelController extends Controller
           $start="00:00:00";
         }
         $finish=$req->finish;
-        if($finish=""){
+        if($finish==""){
           $finish="23:59:59";
         }
         $diff = abs(strtotime($start) - strtotime($finish)) / 60;
@@ -42,12 +42,14 @@ class ChannelController extends Controller
           $day=array('0','1','2','3','4','5','6');
         }
         $day=implode(",", $day);
-        $viewers = ViewLog::where('channel_id', $req->id)
+
+        
+        $viewers = ViewLog::where('channel_id', 36)
         ->where(function ($query) use ($finish,$start) {
           $query->whereTime('finished_watching_at', '>', $start)
             ->orWhereNull('finished_watching_at');
         })
-        ->whereTime('started_watching_at', '<', $finish)
+         ->whereTime('started_watching_at', '<', $finish)
         ->where(function ($query) use ($finish,$start,$month,$year,$day) {
           $query
           ->whereRaw("month(started_watching_at) in ($month)")
@@ -66,7 +68,7 @@ class ChannelController extends Controller
         
         ->get();
         
-return response()->json(["reach" => $viewers], 200);
+//return response()->json([$viewers], 200);
 
       foreach ($viewers as $v) {
         array_push($viewer, $v->user->id);

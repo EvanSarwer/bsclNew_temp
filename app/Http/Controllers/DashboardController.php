@@ -357,7 +357,8 @@ public function tvrgraphdashboard(){
               $user = User::where('id',$v->user_id)->first();
               $channel = Channel::where('id',$v->channel_id)->first();
 
-              $finishDateTime = date('2022-05-18 23:59:59');
+              //$finishDateTime = date('2022-05-18 23:59:59');
+              $finishDateTime = date('Y-m-d h:m:i');
               $from_time = strtotime($finishDateTime);
               $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
               $total_time_viewed = ($watched_sec)/60;

@@ -273,6 +273,39 @@ class UserController extends Controller
         return response()->json(["error"=> "Error"],200);
     }
 
+    public function LastSeventyTwoViewsGraph(Request $req){
+        $rows = 0;
+        $chart_labels = [];
+        $chart_data = [];
+
+        if($req->user != ""){
+
+            $data = ViewLog::where('user_id', $req->user)->where(function($query){
+                $query->where('started_watching_at', '>=', Carbon::now()->subHours(72));
+            })->with('channel:id,channel_name')->orderBy('started_watching_at')->get();
+            $channel_ids = array_unique($data->pluck('channel_id')->toArray());
+            array_splice($channel_ids, 0, 0);
+            $chart_labels = array_unique($data->whereIn('channel_id', $channel_ids)->pluck('channel.channel_name')->toArray());
+            array_splice($chart_labels, 0, 0);
+            for($i = 0; $i < count($channel_ids); $i++){
+                $rows = $rows + 1;
+                $datum = $data->where('channel_id', $channel_ids[$i]);
+                $graph_data = [];
+                $datum->map(function($temp) use(&$graph_data){
+                    array_push($graph_data, [Carbon::parse($temp->started_watching_at), Carbon::Parse($temp->finished_watching_at) ?? Carbon::now(), Carbon::Parse($temp->started_watching_at)->diffInMinutes(Carbon::parse($temp->finished_watching_at) ?? Carbon::now()) . ' min']);
+                });
+                $chart_data[$i]['data'] = $graph_data;
+            }//dd($this->chart_data);
+            return response()->json(["rows"=>$rows,"chart_data"=>$chart_data,"chart_labels"=>$chart_labels]);
+    
+        }
+        return response()->json(["error"=> "Error"],200);
+
+
+
+
+    }
+
 
 
 }

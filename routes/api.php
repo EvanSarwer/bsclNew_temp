@@ -86,6 +86,7 @@ Route::post('/overview/timespentgraph',[OverviewController::class,'timespentgrap
 Route::post('/user/usertimespent',[UserController::class,'usertimespent']);
 Route::post('/user/useralltimeview',[UserController::class,'userAllTimeView']);
 Route::post('/user/userdaytimeviewlist',[UserController::class,'userDayTimeViewList']);
+Route::post('/user/LastSeventyTwoViewsGraph',[UserController::class,'LastSeventyTwoViewsGraph']);
 Route::get('/getuserlist',[UserController::class,'getallList']);
 
 //

@@ -337,19 +337,17 @@ class UserController extends Controller
 
     }
 
-    public function last72from18(Request $req){
+    public function last24WatchingData(Request $req){
 
         if($req->user != "" ){
             
             //$startDate=date('Y-m-d',strtotime("2022-05-18"));
             //$startTime="00:00:00";
-            $finishDate=date('Y-m-d',strtotime("2022-05-18"));
-            $finishTime="23:59:59";
+            // $finishDate=date('Y-m-d',strtotime("2022-05-18"));
+            // $finishTime="23:59:59";
+            $finishDateTime = date("Y-m-d H:i:s");
 
-            //$startDateTime = date($startDate)." ".$startTime;
-            $finishDateTime = date($finishDate)." ".$finishTime;
-
-            $min = 4319;
+            $min = 1439;
             $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
             $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
             
@@ -411,10 +409,52 @@ class UserController extends Controller
 
             }
             array_multisort(array_column($channelArray, 'start'), SORT_ASC, $channelArray);
-            return response()->json(["channels"=>$channelArray],200);
+            $rows = count($channelArray);
+            return response()->json(["rows"=>$rows,"channels"=>$channelArray],200);
 
         }
         return response()->json(["error"=> "Error"],200);
+    }
+
+    function demo_test(){
+        
+        $arr = [];
+        $obj1 = array("x"=>"Design","y"=>[strtotime("2022-05-16 11:57:29"),strtotime("2022-05-16 12:55:04")]);
+        //$obj1 = array("x"=>"Design","y"=>[12,14]);
+        $obj2 = array("x"=>"Code","y"=>[strtotime("2022-05-16 12:55:43"),strtotime("2022-05-16 13:54:33")]);
+        $obj3 = array("x"=>"Code","y"=>[strtotime("2022-05-16 14:12:14"),strtotime("2022-05-16 14:29:56")]);
+        $obj4 = array("x"=>"Test","y"=>[strtotime("2022-05-16 14:38:28"),strtotime("2022-05-16 14:51:33")]);
+        $arr[] = (object)$obj1;
+        $arr[] = (object)$obj2;
+        $arr[] = (object)$obj3;
+        $arr[] = (object)$obj4;
+        return $arr;
+
+        return response("[
+  
+            {
+              x: 'Design',
+              y: [
+                12,
+                14
+              ]
+            },
+            {
+              x: 'Code',
+              y: [
+                15,
+                16
+              ]
+            },
+            {
+              x: 'Code',
+              y: [
+                10,
+                11
+              ]
+            }
+            
+          ]");
     }
 
 

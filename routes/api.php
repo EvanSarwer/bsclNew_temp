@@ -88,7 +88,7 @@ Route::post('/user/useralltimeview',[UserController::class,'userAllTimeView']);
 Route::post('/user/userdaytimeviewlist',[UserController::class,'userDayTimeViewList']);
 Route::post('/user/LastSeventyTwoViewsGraph',[UserController::class,'LastSeventyTwoViewsGraph']);
 Route::post('/user/LastTweentyFourViewsGraph',[UserController::class,'LastTweentyFourViewsGraph']);
-Route::post('/user/last72from18',[UserController::class,'last72from18']);
+Route::post('/user/last24WatchingData',[UserController::class,'last24WatchingData']);
 Route::get('/getuserlist',[UserController::class,'getallList']);
 
 //
@@ -110,3 +110,5 @@ Route::post('trend/tvr/zero', [ChannelController::class, 'tvrtrendzero']);
 Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent']);
 Route::post('channel/definedtrend', [ChannelController::class, 'definedtrend']);
 //////////END/////////////////
+
+Route::get("/test",[UserController::class,'demo_test']);

@@ -10,7 +10,7 @@ use App\Http\Controllers\LiveChannelController;
 use App\Http\Controllers\SarwerAPIController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\AppUserController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -110,6 +110,15 @@ Route::post('trend/tvr/percent', [ChannelController::class, 'tvrtrend']);
 Route::post('trend/tvr/zero', [ChannelController::class, 'tvrtrendzero']);
 Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent']);
 Route::post('channel/definedtrend', [ChannelController::class, 'definedtrend']);
+//////////END/////////////////
+
+//Tanvir APIs//
+Route::post('/appuser/create',[AppUserController::class,'store']);
+Route::post('/appuser/edit',[AppUserController::class,'edit']);
+Route::post('/appuser/delete',[AppUserController::class,'delete']);
+Route::any('/appuser/activate',[AppUserController::class,'activateDeactivate']);
+Route::get('/appuser/list',[AppUserController::class,'list']);
+Route::get('/appuser/get/{user_name}',[AppUserController::class,'get']);
 //////////END/////////////////
 
 Route::get("/test",[UserController::class,'demo_test']);

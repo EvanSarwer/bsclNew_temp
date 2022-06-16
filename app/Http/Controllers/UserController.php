@@ -275,7 +275,7 @@ class UserController extends Controller
         if($req->user != ""){
 
             $data = ViewLog::where('user_id', $req->user)->where(function($query){
-                $query->where('started_watching_at', '>=', Carbon::now()->subHours(730));
+                $query->where('started_watching_at', '>=', Carbon::now()->subHours(72));
             })->with('channel:id,channel_name')->orderBy('started_watching_at')->get();
             $channel_ids = array_unique($data->pluck('channel_id')->toArray());
             array_splice($channel_ids, 0, 0);

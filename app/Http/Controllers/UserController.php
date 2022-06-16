@@ -165,7 +165,10 @@ class UserController extends Controller
             $data[] = (object)$ch;
         }
         
-        return response()->json(["channels"=>$data],200);
+        if (count($data))return response()->json(["channels"=>$data],200);
+        return response()->json(["error"=> "Error"],200);
+        
+        
     }
 
     public function usertimespent2(Request $req){

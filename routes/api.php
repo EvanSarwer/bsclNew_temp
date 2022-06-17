@@ -119,6 +119,7 @@ Route::post('/appuser/delete',[AppUserController::class,'delete']);
 Route::any('/appuser/activate',[AppUserController::class,'activateDeactivate']);
 Route::get('/appuser/list',[AppUserController::class,'list']);
 Route::get('/appuser/get/{user_name}',[AppUserController::class,'get']);
+Route::get('/logout',[AuthController::class,'logout']);
 //////////END/////////////////
 
 Route::get("/test",[UserController::class,'demo_test']);

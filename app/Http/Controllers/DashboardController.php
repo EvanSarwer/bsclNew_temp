@@ -22,7 +22,7 @@ class DashboardController extends Controller
         /*if($req->start=="" && $req->finish==""){
         return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
-        $startDate=date('Y-m-d',strtotime("-365 days"));
+        $startDate=date('Y-m-d',strtotime("-30 days"));
         $startTime="00:00:00";
         $finishDate=date('Y-m-d',strtotime("-1 days"));
         $finishTime="23:59:59";
@@ -86,7 +86,7 @@ public function reachuserdashboard(){
     /*if($req->start=="" && $req->finish==""){
     return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
     }*/
-    $startDate=date('Y-m-d',strtotime("-365 days"));
+    $startDate=date('Y-m-d',strtotime("-30 days"));
     $startTime="00:00:00";
     $finishDate=date('Y-m-d',strtotime("-1 days"));
     $finishTime="23:59:59";
@@ -150,7 +150,7 @@ public function tvrgraphdashboard(){
         /*if($req->start=="" && $req->finish==""){
         return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
-        $startDate=date('Y-m-d',strtotime("-365 days"));
+        $startDate=date('Y-m-d',strtotime("-30 days"));
         $startTime="00:00:00";
         $finishDate=date('Y-m-d',strtotime("-1 days"));
         $finishTime="23:59:59";
@@ -242,7 +242,7 @@ public function tvrgraphdashboard(){
         /*if($req->start=="" && $req->finish==""){
         return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
-        $startDate=date('Y-m-d',strtotime("-365 days"));
+        $startDate=date('Y-m-d',strtotime("-30 days"));
         $startTime="00:00:00";
         $finishDate=date('Y-m-d',strtotime("-1 days"));
         $finishTime="23:59:59";

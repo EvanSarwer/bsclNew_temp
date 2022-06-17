@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\AppUser;
+use App\Models\Login;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -20,6 +21,7 @@ class AppUserController extends Controller
         $user->created_by="admin";
         $user->created_at = new Datetime();
         AppUser::create((array)$user);
+        Login::create((array)$user);
         return response()->json(["message"=>"User Created Successfully"]);
     }
     function edit(Request $req){
@@ -31,6 +33,8 @@ class AppUserController extends Controller
         }
         $user= AppUser::where('user_name',$req->user_name)->first();
         $user->update(["address"=>$req->address,"email"=>$req->email,"phone"=>$req->phone,"updated_at"=>new Datetime()]);
+        $user = Login::where('user_name',$req->user_name)->first();
+        $user->update(["email"=>$req->email,"updated_at"=>new Datetime(),"updated_by"=>"admin"]);
         return response()->json(["message"=>"User Updated Successfully"]);
     }
     function delete(Request $req){
@@ -39,10 +43,20 @@ class AppUserController extends Controller
         $user->deleted_by="admin";
         $user->deleted_at=new Datetime();
         $user->save();
+        $user= Login::where('user_name',$req->user_name)->first();
+        $user->active=0;
+        $user->deleted_by="admin";
+        $user->deleted_at=new Datetime();
+        $user->save();
         return response()->json(["message"=>"User Deleted Successfully"]);
     }
     function activateDeactivate(Request $req){
         $user= AppUser::where('user_name',$req->user_name)->first();
+        $user->active=$req->flag;
+        $user->updated_by="admin";
+        $user->updated_at=new Datetime();
+        $user->save();
+        $user= Login::where('user_name',$req->user_name)->first();
         $user->active=$req->flag;
         $user->updated_by="admin";
         $user->updated_at=new Datetime();
@@ -59,7 +73,7 @@ class AppUserController extends Controller
     }
     function rules(){
         return[
-            "user_name"=>"required|unique:app_users,user_name",
+            "user_name"=>"required|unique:login,user_name",
             "email"=>"required",
             "password"=>"required",
             "c_password"=>"same:password",

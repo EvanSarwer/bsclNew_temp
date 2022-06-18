@@ -14,132 +14,41 @@ class OverviewController extends Controller
     //
     public function reachusergraph(Request $req){
         
-        $channelArray = array();
-        $reachs = array();
-        $viewer = array();
-        /*if($req->start=="" && $req->finish==""){
-    return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
-    }*/
         $startDate = substr($req->start, 0, 10);
         $startTime = substr($req->start, 11, 19);
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
-        $channels = Channel::all('id', 'channel_name');
-        $users = User::all();
-        $numOfUser = $users->count();
-        //$all=array();
-
-        foreach ($channels as $c) {
-        $viewers = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($finishDate, $finishTime, $startDate, $startTime) {
-            $query->where('finished_watching_at', '>', $startDate . " " . $startTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at', '<', $finishDate . " " . $finishTime)
-            ->get();
-        foreach ($viewers as $v) {
-            array_push($viewer, $v->user->id);
+        $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
+        { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) && $c->id != 39;});
+        
+    
+        $value = [];
+        $label = [];
+        foreach($channels as $c){
+            $value[] = $c->channel_reach;
+            $label[] = $c->channel_name;
         }
-
-        //return response()->json([$viewer],200);
-        $viewer = array_values(array_unique($viewer));
-        $numofViewer = count($viewer);
-        $reach = $numofViewer;
-        unset($viewer);
-        $viewer = array();
-        /*$arr=array(
-            'channel_name' => $c->channel_name,
-            'reach' => $reach
-            );
-            array_push($all,$arr);*/
-        array_push($channelArray, $c->channel_name);
-        array_push($reachs, $reach);
-        }
-
-        $channellistnew = array();
-        $reachllistnew = array();
-        $definedchannel = array("BTV", "BTV World", "BTV Sangsad", "BTV Chattrogram", "Independent TV", "ATN Bangla", "Channel I HD", "Ekushey TV", "NTV", "RTV HD", "Boishakhi ", "Bangla Vision", "Desh TV", "My TV", "ATN News", "Mohona TV", "Bijoy TV", "Shomoy TV", "Masranga TV", "Channel 9 HD", "Channel 24", "Gazi TV", "Ekattor TV HD", "Asian TV HD", "SA TV", "Gaan Bangla TV", "Jamuna TV", "Deepto TV HD", "DBC News HD", "News 24 HD", "Bangla TV", "Duranto TV HD", "Nagorik TV HD", "Ananda TV", "T Sports HD", "nexus", "spice", "global");
-        $channellist = array();
-        $channellistnew = array();
-        $dc = count($definedchannel);
-        $channels = Channel::all('id', 'channel_name');
-        for ($i = 0; $i < 38; $i++) {
-        for ($j = 0; $j < 40; $j++) {
-            if ($definedchannel[$i] == $channelArray[$j]) {
-            array_push($channellistnew, $channelArray[$j]);
-            array_push($reachllistnew, $reachs[$j]);
-            break;
-            }
-        }
-        }
-        return response()->json(["reachsum" => array_sum($reachllistnew), "reach" => $reachllistnew, "channels" => $channellistnew], 200);
+        return response()->json(["reachsum"=>array_sum($value),"reach"=>$value,"channels"=>$label],200);
     }
 
     public function reachpercentgraph(Request $req)
     {
 
-        $channelArray = array();
-        $reachs = array();
-        $totalReachs = array();
-        $viewer = array();
-        /*if($req->start=="" && $req->finish==""){
-        return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
-        }*/
         $startDate = substr($req->start, 0, 10);
         $startTime = substr($req->start, 11, 19);
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
-        $channels = Channel::all('id', 'channel_name');
-        $users = User::all();
-        $numOfUser = $users->count();
-        //$all=array();
-
-        foreach ($channels as $c) {
-        $viewers = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($finishDate, $finishTime, $startDate, $startTime) {
-            $query->where('finished_watching_at', '>', date($startDate) . " " . $startTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at', '<', date($finishDate) . " " . $finishTime)
-            ->get();
-
-        foreach ($viewers as $v) {
-            array_push($viewer, $v->user->id);
+        $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
+        { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) && $c->id != 39;});
+        
+    
+        $value = [];
+        $label = [];
+        foreach($channels as $c){
+            $value[] = $c->channel_reach*100/Channel::count();
+            $label[] = $c->channel_name;
         }
-        $viewer = array_values(array_unique($viewer));
-        $numofViewer = count($viewer);
-        $reach = ($numofViewer / $numOfUser) * 100;
-        unset($viewer);
-        $viewer = array();
-        /*$arr=array(
-                'channel_name' => $c->channel_name,
-                'reach' => $reach
-            );
-            array_push($all,$arr);*/
-        //array_push($channelArray,$c->channel_name);
-        array_push($channelArray, $c->channel_name);
-        array_push($reachs, $reach);
-        //array_push($reachs,$reach);
-
-        }
-        $channellistnew = array();
-        $reachllistnew = array();
-        $definedchannel = array("BTV", "BTV World", "BTV Sangsad", "BTV Chattrogram", "Independent TV", "ATN Bangla", "Channel I HD", "Ekushey TV", "NTV", "RTV HD", "Boishakhi ", "Bangla Vision", "Desh TV", "My TV", "ATN News", "Mohona TV", "Bijoy TV", "Shomoy TV", "Masranga TV", "Channel 9 HD", "Channel 24", "Gazi TV", "Ekattor TV HD", "Asian TV HD", "SA TV", "Gaan Bangla TV", "Jamuna TV", "Deepto TV HD", "DBC News HD", "News 24 HD", "Bangla TV", "Duranto TV HD", "Nagorik TV HD", "Ananda TV", "T Sports HD", "nexus", "spice", "global");
-        $channellist = array();
-        $channellistnew = array();
-        $dc = count($definedchannel);
-        $channels = Channel::all('id', 'channel_name');
-        for ($i = 0; $i < 38; $i++) {
-        for ($j = 0; $j < 40; $j++) {
-            if ($definedchannel[$i] == $channelArray[$j]) {
-            array_push($channellistnew, $channelArray[$j]);
-            array_push($reachllistnew, $reachs[$j]);
-            break;
-            }
-        }
-        }
-
-        return response()->json(["reachsum" => array_sum($reachllistnew), "reach" => $reachllistnew, "channels" => $channellistnew], 200);
+        return response()->json(["reachsum"=>array_sum($value),"reach"=>$value,"channels"=>$label],200);
     }
 
     public function tvrgraphallchannelzero(Request $req)

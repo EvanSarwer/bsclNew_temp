@@ -15,128 +15,43 @@ class DashboardController extends Controller
     public function reachpercentdashboard(){
       
       
-        $channelArray=array();
-        $reachs=array();
-        $totalReachs=array();
-        $viewer=array();
-        /*if($req->start=="" && $req->finish==""){
-        return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
-        }*/
-        $startDate=date('Y-m-d',strtotime("-30 days"));
-        $startTime="00:00:00";
-        $finishDate=date('Y-m-d',strtotime("-1 days"));
-        $finishTime="23:59:59";
-        $channels=Channel::all('id','channel_name');
-        $users=User::all();
-        $numOfUser=$users->count();
-        //$all=array();
-        
-        foreach ($channels as $c) {
-          $viewers = ViewLog::where('channel_id', $c->id)
-              ->where(function($query) use ($finishDate, $finishTime,$startDate,$startTime){
-                $query->where('finished_watching_at','>',date($startDate)." ".$startTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
-              ->get();
-            
-            foreach ($viewers as $v) {
-              array_push($viewer,$v->user->id);
-      
-              }
-            $viewer=array_values(array_unique($viewer));
-            $numofViewer=count($viewer);
-            $reach=($numofViewer/$numOfUser)*100;
-            unset($viewer);
-            $viewer=array();
-            /*$arr=array(
-                'channel_name' => $c->channel_name,
-                'reach' => $reach
-              );
-              array_push($all,$arr);*/
-              //array_push($channelArray,$c->channel_name);
-            array_push($channelArray,$c->channel_name);
-            array_push($reachs,$reach);
-              //array_push($reachs,$reach);
-      
-            }
-            $tempreach=$reachs;
-            $nreachs=array();
-            $nchannelArray=array();
-            rsort($tempreach);
-            $rlength=count($reachs);
-            $cc=0;
-            for($i=0;$i<$rlength && $cc<10;$i++){
-              if($reachs[$i]<$tempreach[10]){
-                array_push($nchannelArray,$channelArray[$i]);
-            array_push($nreachs,$reachs[$i]);
-            $cc++;
-              }
-            }
-      return response()->json(["value"=>$nreachs,"label"=>$nchannelArray],200);
-      }
+      $startDate=date('Y-m-d',strtotime("-7 days"));
+    $startTime="00:00:00";
+    $finishDate=date('Y-m-d',strtotime("-1 days"));
+    $finishTime="23:59:59";
+    $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
+    { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) >0 && $c->id != 39;})
+    ->sortByDesc('channel_reach')
+    ->take(10);
 
+    $value = [];
+    $label = [];
+    foreach($channels as $c){
+        $value[] = ($c->channel_reach)*100/Channel::count();
+        $label[] = $c->channel_name;
+    }
+    return response()->json(["value"=>$value,"label"=>$label],200);
+  }
       
 public function reachuserdashboard(){
     
     
-    $channelArray=array();
-    $reachs=array();
-    $viewer=array();
-    /*if($req->start=="" && $req->finish==""){
-    return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
-    }*/
-    $startDate=date('Y-m-d',strtotime("-30 days"));
+    $startDate=date('Y-m-d',strtotime("-7 days"));
     $startTime="00:00:00";
     $finishDate=date('Y-m-d',strtotime("-1 days"));
     $finishTime="23:59:59";
-     $channels=Channel::all('id','channel_name');
-    $users=User::all();
-    $numOfUser=$users->count();
-    //$all=array();
-    
-    foreach ($channels as $c) {
-      $viewers = ViewLog::where('channel_id', $c->id)
-            ->where(function($query) use ($finishDate, $finishTime,$startDate,$startTime){
-              $query->where('finished_watching_at','>',date($startDate)." ".$startTime)
-              ->orWhereNull('finished_watching_at');
-          })
-          ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
-            ->get();
-        foreach ($viewers as $v) {
-          array_push($viewer,$v->user->id);
-  
-          }
-          
-        //return response()->json([$viewer],200);
-        $viewer=array_values(array_unique($viewer));
-        $numofViewer=count($viewer);
-        $reach=$numofViewer;
-        unset($viewer);
-        $viewer=array();
-        /*$arr=array(
-            'channel_name' => $c->channel_name,
-            'reach' => $reach
-          );
-          array_push($all,$arr);*/
-          array_push($channelArray,$c->channel_name);
-          array_push($reachs,$reach);
-        }
-        
-        $tempreach=$reachs;
-        $nreachs=array();
-        $nchannelArray=array();
-        rsort($tempreach);
-        $rlength=count($reachs);
-        $cc=0;
-        for($i=0;$i<$rlength && $cc<10;$i++){
-          if($reachs[$i]<$tempreach[10]){
-            array_push($nchannelArray,$channelArray[$i]);
-        array_push($nreachs,$reachs[$i]);
-        $cc++;
-          }
-        }
-  return response()->json(["value"=>$nreachs,"label"=>$nchannelArray],200);
+    $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
+    { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) >0 && $c->id != 39;})
+    ->sortByDesc('channel_reach')
+    ->take(10);
+
+    $value = [];
+    $label = [];
+    foreach($channels as $c){
+        $value[] = $c->channel_reach;
+        $label[] = $c->channel_name;
+    }
+    return response()->json(["value"=>$value,"label"=>$label],200);
   }
 
 

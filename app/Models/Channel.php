@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Channel extends Model
 {
     use HasFactory;
+    public $channel_reach;
 
     public function packages(){
         return $this->belongsToMany(Package::class)->withPivot('channel_number');
@@ -27,5 +28,19 @@ class Channel extends Model
 
     public function activeViewersCount(){
         return ViewLog::where('channel_id', $this->id)->where('finished_watching_at', null)->count();
+    }
+    public function reach($startDate,$startTime,$finishDate,$finishTime){
+        $reach = ViewLog::where('channel_id', $this->id)
+                ->where(function($query) use ($finishDate, $finishTime,$startDate,$startTime){
+                $query->where('finished_watching_at','>',date($startDate)." ".$startTime)
+                ->orWhereNull('finished_watching_at');
+                })
+                ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
+                ->select('user_id')
+                ->distinct('user_id')
+                ->get();
+        $this->channel_reach = count($reach);
+        return count($reach);
+        
     }
 }

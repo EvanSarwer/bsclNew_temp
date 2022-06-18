@@ -122,4 +122,4 @@ Route::get('/appuser/get/{user_name}',[AppUserController::class,'get']);
 Route::get('/logout',[AuthController::class,'logout']);
 //////////END/////////////////
 
-Route::get("/test",[UserController::class,'demo_test']);
+Route::post("/test",[OverviewController::class,'reachuserdashboard']);

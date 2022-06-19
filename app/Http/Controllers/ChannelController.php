@@ -376,18 +376,23 @@ array_push($channelslist,$demo);
   }
   public function reachpercenttrend(Request $req)
   {
+    $fweek=false;
+    $weekdays=array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
     $time=array();
     $length=12;
     if($req->time=="Weekly"){
+      $fweek=true;
+      $tstring="w";
       $inc=-174;  //weekly
-      $length=14;
+      $length=7;
         for($i=0;$i<15;$i++){
-        $inc=$inc+12;
+        $inc=$inc+24;
         //echo "".$inc;
         array_push($time,((string)$inc)." hours");
         }
     }
     elseif($req->time=="Monthly"){
+      $tstring="d";
       $inc=-750;  //monthly
       $length=31;
         for($i=0;$i<32;$i++){
@@ -397,6 +402,7 @@ array_push($channelslist,$demo);
         }
     }
     elseif($req->time=="Yearly"){
+      $tstring="y-M";
       $inc=-13;  //yearly
       $length=12;
         for($i=0;$i<13;$i++){
@@ -407,13 +413,13 @@ array_push($channelslist,$demo);
     }
     else{
       $inc=-20; //daily
+      $tstring="h A";
       for($i=0;$i<13;$i++){
       $inc=$inc+2;
       //echo "".$inc;
       array_push($time,((string)$inc)." hours");
       }
     }
-
     $channelArray = array();
     $reachs = array();
     $totalReachs = array();
@@ -441,8 +447,12 @@ array_push($channelslist,$demo);
       $reach = ($numofViewer / $numOfUser) * 100;
       unset($viewer);
       $viewer = array();
-      
-      array_push($channelArray,"");
+      if($fweek){
+        array_push($channelArray,$weekdays[ (int)date($tstring, strtotime($time[$i]))]);
+      }
+      else{
+        array_push($channelArray,date($tstring, strtotime($time[$i])));
+      }
       array_push($reachs, $reach);
 
     }
@@ -452,18 +462,23 @@ array_push($channelslist,$demo);
   }
   public function reachtrend(Request $req)
   {
+    $fweek=false;
+    $weekdays=array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
     $time=array();
     $length=12;
     if($req->time=="Weekly"){
+      $fweek=true;
+      $tstring="w";
       $inc=-174;  //weekly
-      $length=14;
+      $length=7;
         for($i=0;$i<15;$i++){
-        $inc=$inc+12;
+        $inc=$inc+24;
         //echo "".$inc;
         array_push($time,((string)$inc)." hours");
         }
     }
     elseif($req->time=="Monthly"){
+      $tstring="d";
       $inc=-750;  //monthly
       $length=31;
         for($i=0;$i<32;$i++){
@@ -473,6 +488,7 @@ array_push($channelslist,$demo);
         }
     }
     elseif($req->time=="Yearly"){
+      $tstring="y-M";
       $inc=-13;  //yearly
       $length=12;
         for($i=0;$i<13;$i++){
@@ -483,6 +499,7 @@ array_push($channelslist,$demo);
     }
     else{
       $inc=-20; //daily
+      $tstring="h A";
       for($i=0;$i<13;$i++){
       $inc=$inc+2;
       //echo "".$inc;
@@ -516,8 +533,12 @@ array_push($channelslist,$demo);
       $reach = $numofViewer;//($numofViewer / $numOfUser) * 100;
       unset($viewer);
       $viewer = array();
-      
-      array_push($channelArray,"");
+      if($fweek){
+        array_push($channelArray,$weekdays[ (int)date($tstring, strtotime($time[$i]))]);
+      }
+      else{
+        array_push($channelArray,date($tstring, strtotime($time[$i])));
+      }
       array_push($reachs, $reach);
 
     }
@@ -527,45 +548,50 @@ array_push($channelslist,$demo);
   }
   public function tvrtrend(Request $req)
   {
-
+    $fweek=false;
+    $weekdays=array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
     $time=array();
     $length=12;
-
-if($req->time=="Weekly"){
-  $inc=-174;  //weekly
-  $length=14;
-    for($i=0;$i<15;$i++){
-    $inc=$inc+12;
-    //echo "".$inc;
-    array_push($time,((string)$inc)." hours");
+    if($req->time=="Weekly"){
+      $fweek=true;
+      $tstring="w";
+      $inc=-174;  //weekly
+      $length=7;
+        for($i=0;$i<15;$i++){
+        $inc=$inc+24;
+        //echo "".$inc;
+        array_push($time,((string)$inc)." hours");
+        }
     }
-}
-elseif($req->time=="Monthly"){
-  $inc=-750;  //monthly
-  $length=31;
-    for($i=0;$i<32;$i++){
-    $inc=$inc+24;
-    //echo "".$inc;
-    array_push($time,((string)$inc)." hours");
+    elseif($req->time=="Monthly"){
+      $tstring="d";
+      $inc=-750;  //monthly
+      $length=31;
+        for($i=0;$i<32;$i++){
+        $inc=$inc+24;
+        //echo "".$inc;
+        array_push($time,((string)$inc)." hours");
+        }
     }
-}
-elseif($req->time=="Yearly"){
-  $inc=-13;  //yearly
-  $length=12;
-    for($i=0;$i<13;$i++){
-    $inc=$inc+1;
-    //echo "".$inc;
-    array_push($time,((string)$inc)." months");
+    elseif($req->time=="Yearly"){
+      $tstring="y-M";
+      $inc=-13;  //yearly
+      $length=12;
+        for($i=0;$i<13;$i++){
+        $inc=$inc+1;
+        //echo "".$inc;
+        array_push($time,((string)$inc)." months");
+        }
     }
-}
-else{
-  $inc=-20; //daily
-  for($i=0;$i<13;$i++){
-  $inc=$inc+2;
-  //echo "".$inc;
-  array_push($time,((string)$inc)." hours");
-  }
-}
+    else{
+      $inc=-20; //daily
+      $tstring="h A";
+      for($i=0;$i<13;$i++){
+      $inc=$inc+2;
+      //echo "".$inc;
+      array_push($time,((string)$inc)." hours");
+      }
+    }
 $ldate = date('Y-m-d H:i:s');
     $tvrs = array();
     $channelArray = array();
@@ -625,8 +651,12 @@ for($i=0;$i<$length;$i++)
       $viewer = array();
   //    array_push($channelArray, $c->channel_name);
       array_push($tvrs, $tvr);
-
-      array_push($channelArray,"");
+      if($fweek){
+        array_push($channelArray,$weekdays[ (int)date($tstring, strtotime($time[$i]))]);
+      }
+      else{
+        array_push($channelArray,date($tstring, strtotime($time[$i])));
+      }
       //array_push($channelArray, date("Y-m-d H:i:s", strtotime($time[$i]))."-".date("Y-m-d H:i:s", strtotime($time[$i+1])));
 //      array_push($reachs, $reach);
       //array_push($reachs,$reach);
@@ -642,44 +672,50 @@ for($i=0;$i<$length;$i++)
   public function tvrtrendzero(Request $req)
   {
 
+    $fweek=false;
+    $weekdays=array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
     $time=array();
     $length=12;
-
-if($req->time=="Weekly"){
-  $inc=-174;  //weekly
-  $length=14;
-    for($i=0;$i<15;$i++){
-    $inc=$inc+12;
-    //echo "".$inc;
-    array_push($time,((string)$inc)." hours");
+    if($req->time=="Weekly"){
+      $fweek=true;
+      $tstring="w";
+      $inc=-174;  //weekly
+      $length=7;
+        for($i=0;$i<15;$i++){
+        $inc=$inc+24;
+        //echo "".$inc;
+        array_push($time,((string)$inc)." hours");
+        }
     }
-}
-elseif($req->time=="Monthly"){
-  $inc=-750;  //monthly
-  $length=31;
-    for($i=0;$i<32;$i++){
-    $inc=$inc+24;
-    //echo "".$inc;
-    array_push($time,((string)$inc)." hours");
+    elseif($req->time=="Monthly"){
+      $tstring="d";
+      $inc=-750;  //monthly
+      $length=31;
+        for($i=0;$i<32;$i++){
+        $inc=$inc+24;
+        //echo "".$inc;
+        array_push($time,((string)$inc)." hours");
+        }
     }
-}
-elseif($req->time=="Yearly"){
-  $inc=-13;  //yearly
-  $length=12;
-    for($i=0;$i<13;$i++){
-    $inc=$inc+1;
-    //echo "".$inc;
-    array_push($time,((string)$inc)." months");
+    elseif($req->time=="Yearly"){
+      $tstring="y-M";
+      $inc=-13;  //yearly
+      $length=12;
+        for($i=0;$i<13;$i++){
+        $inc=$inc+1;
+        //echo "".$inc;
+        array_push($time,((string)$inc)." months");
+        }
     }
-}
-else{
-  $inc=-20; //daily
-  for($i=0;$i<13;$i++){
-  $inc=$inc+2;
-  //echo "".$inc;
-  array_push($time,((string)$inc)." hours");
-  }
-}
+    else{
+      $inc=-20; //daily
+      $tstring="h A";
+      for($i=0;$i<13;$i++){
+      $inc=$inc+2;
+      //echo "".$inc;
+      array_push($time,((string)$inc)." hours");
+      }
+    }
 $ldate = date('Y-m-d H:i:s');
     $tvrs = array();
     $channelArray = array();
@@ -740,8 +776,12 @@ for($i=0;$i<$length;$i++)
       $viewer = array();
   //    array_push($channelArray, $c->channel_name);
       array_push($tvrs, $tvr);
-
-      array_push($channelArray,"");
+      if($fweek){
+        array_push($channelArray,$weekdays[ (int)date($tstring, strtotime($time[$i]))]);
+      }
+      else{
+        array_push($channelArray,date($tstring, strtotime($time[$i])));
+      }
       //array_push($channelArray, date("Y-m-d H:i:s", strtotime($time[$i]))."-".date("Y-m-d H:i:s", strtotime($time[$i+1])));
 //      array_push($reachs, $reach);
       //array_push($reachs,$reach);

@@ -11,6 +11,11 @@ use DateTime;
 
 class UserController extends Controller
 {
+    public function logs(Request $req){
+        $data = ViewLog::where('user_id',$req->user)->orderBy('id','DESC')->get();
+        
+        return response()->json(["data"=> $data],200);
+    }
     //
     public function usertimespent(Request $req){
 

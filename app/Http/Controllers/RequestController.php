@@ -12,12 +12,12 @@ class RequestController extends Controller
 
     //
  public function receive(Request $request){
-       $rr = new RawRequest();
-       $rr->channel_id = $request->channel_name;
-       $rr->device_id = $request->device_id;
-       $rr->time_stamp = $request->time_stamp;
-       $rr->server_time = Carbon::now()->toDateTimeString();;
-       $rr->save();
+    //    $rr = new RawRequest();
+    //    $rr->channel_id = $request->channel_name;
+    //    $rr->device_id = $request->device_id;
+    //    $rr->time_stamp = $request->time_stamp;
+    //    $rr->server_time = Carbon::now()->toDateTimeString();;
+    //    $rr->save();
         
         $channel_id = $request->channel_name;
         $user_id = $request->device_id;

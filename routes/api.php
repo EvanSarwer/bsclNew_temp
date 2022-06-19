@@ -11,6 +11,7 @@ use App\Http\Controllers\SarwerAPIController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AppUserController;
+use App\Http\Controllers\RequestController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -124,6 +125,7 @@ Route::any('/appuser/activate',[AppUserController::class,'activateDeactivate']);
 Route::get('/appuser/list',[AppUserController::class,'list']);
 Route::get('/appuser/get/{user_name}',[AppUserController::class,'get']);
 Route::get('/logout',[AuthController::class,'logout']);
+Route::get('/receive',[RequestController::class,'receive']);
 //////////END/////////////////
 
-Route::post("/test",[OverviewController::class,'reachuserdashboard']);
+Route::post("/test",[ChannelController::class,'demoTrend']);

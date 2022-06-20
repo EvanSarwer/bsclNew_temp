@@ -101,7 +101,7 @@ class UserController extends Controller
                 array_push($channelArray,$c->channel_name);
 
             }
-            return response()->json(["totaltime"=>$total_time,"channels"=>$channelArray],200);
+            return response()->json(["start"=>$startDateTime, "finish"=>$finishDateTime,"totaltime"=>$total_time,"channels"=>$channelArray],200);
 
         }
         return response()->json(["error"=> "Error"],200);

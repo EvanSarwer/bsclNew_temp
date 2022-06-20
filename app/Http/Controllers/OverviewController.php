@@ -19,7 +19,7 @@ class OverviewController extends Controller
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
         $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
-        { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) && $c->id != 39;});
+        {  return $c->reach( $startDate, $startTime, $finishDate,$finishTime) || !$c->channel_reach ;});
         
     
         $value = [];
@@ -39,7 +39,7 @@ class OverviewController extends Controller
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
         $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
-        { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) && $c->id != 39;});
+        { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) || !$c->channel_reach ;});
         
     
         $value = [];

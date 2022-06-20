@@ -8,6 +8,7 @@ use App\Models\Channel;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Support\Facades\Http;
 class DashboardController extends Controller
 {
 
@@ -238,6 +239,12 @@ public function tvrgraphdashboard(){
       }      
 
       public function activechannellistget(){
+        // $request = array("channel_name"=>31,"device_id"=>1,"time_stamp"=>"2022-04-07 14:51:05");
+        // $request = (object)$request;
+        
+        // $rsp = Http::get("http://123.200.5.219:8000/api/receive?channel_name=$request->channel_name&device_id=$request->device_id&time_stamp=$request->time_stamp");
+  
+        
         $channels = Channel::withCount(['viewLogs' => function($query){
           $query->where('finished_watching_at', null);
       } ])->orderBy('view_logs_count', 'DESC')->get(['id','channel_name']);  

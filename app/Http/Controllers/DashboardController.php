@@ -259,7 +259,7 @@ public function tvrgraphdashboard(){
     public function activeuserlistget(){     
       $actives = ViewLog::where('finished_watching_at', null)
             ->with(['channel', 'user'])
-            ->orderBy('started_watching_at', 'DESC')->get();
+            ->orderBy('started_watching_at', 'ASC')->get();
       foreach($actives as $a){
         $a->duration = Carbon::parse($a->started_watching_at)->diffForHumans();
         $a->totaltime = Carbon::parse($a->started_watching_at)->diffForHumans();

@@ -31,7 +31,7 @@ class DashboardController extends Controller
         $value[] = ($c->channel_reach)*100/Channel::count();
         $label[] = $c->channel_name;
     }
-    return response()->json(["value"=>$value,"label"=>$label],200);
+    return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
   }
       
 public function reachuserdashboard(){
@@ -52,7 +52,7 @@ public function reachuserdashboard(){
         $value[] = $c->channel_reach;
         $label[] = $c->channel_name;
     }
-    return response()->json(["value"=>$value,"label"=>$label],200);
+    return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
   }
 
 
@@ -144,7 +144,7 @@ public function tvrgraphdashboard(){
             $cc++;
               }
             }
-      return response()->json(["value"=>$ntvrs,"label"=>$nchannelArray],200);
+      return response()->json(["value"=>$ntvrs,"label"=>$nchannelArray,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
             
       }
 
@@ -236,7 +236,7 @@ public function tvrgraphdashboard(){
             $cc++;
               }
             }
-      return response()->json(["value"=>$ntvrs,"label"=>$nchannelArray],200);
+      return response()->json(["value"=>$ntvrs,"label"=>$nchannelArray,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
       
       }      
 

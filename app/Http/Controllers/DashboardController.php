@@ -77,6 +77,8 @@ public function tvrgraphdashboard(){
         //return response()->json([$di],200);
         //return response()->json(["tvr"=>$diff],200);
         $channels=Channel::all('id','channel_name');
+        
+        //return response()->json([$channels],200);
         $users=User::all();
         $numOfUser=$users->count();
         //$all=array();
@@ -136,7 +138,7 @@ public function tvrgraphdashboard(){
             $rlength=count($tvrs);
             $cc=0;
             for($i=0;$i<$rlength && $cc<10;$i++){
-              if($tvrs[$i]<$temptvr[10]){
+              if($tvrs[$i]>$temptvr[10]){
                 array_push($nchannelArray,$channelArray[$i]);
             array_push($ntvrs,$tvrs[$i]);
             $cc++;
@@ -228,7 +230,7 @@ public function tvrgraphdashboard(){
             $rlength=count($tvrs);
             $cc=0;
             for($i=0;$i<$rlength && $cc<10;$i++){
-              if($tvrs[$i]<$temptvr[10]){
+              if($tvrs[$i]>$temptvr[10]){
                 array_push($nchannelArray,$channelArray[$i]);
             array_push($ntvrs,$tvrs[$i]);
             $cc++;

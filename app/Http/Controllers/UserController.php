@@ -21,13 +21,12 @@ class UserController extends Controller
 
         if($req->user != "" && $req->time != ""){
             if($req->time == "Daily"){
-                $startDate=date('Y-m-d',strtotime("2022-05-18"));
-                $startTime="00:00:00";
-                $finishDate=date('Y-m-d',strtotime("2022-05-18"));
-                $finishTime="23:59:59";
 
-                $startDateTime = date($startDate)." ".$startTime;
-                $finishDateTime = date($finishDate)." ".$finishTime;
+                $finishDateTime = date("Y-m-d H:i:s");
+                $min = 1439;
+                $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+                $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+
             }
             else if($req->time == "Weekly"){
                 $startDate=date('Y-m-d',strtotime("2022-05-11"));
@@ -57,8 +56,8 @@ class UserController extends Controller
                 $finishDateTime = date($finishDate)." ".$finishTime;
             }
 
-            $to_time = strtotime($startDate." ".$startTime);
-            $from_time = strtotime($finishDate." ".$finishTime);
+            $to_time = strtotime($startDateTime);
+            $from_time = strtotime($finishDateTime);
             $diff=abs($to_time - $from_time) / 60;
 
             $channelArray=array();

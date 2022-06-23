@@ -12,9 +12,19 @@ use DateTime;
 class UserController extends Controller
 {
     public function logs(Request $req){
+        $ndata=array();
         $data = ViewLog::where('user_id',$req->user)->orderBy('id','DESC')->get();
-        
-        return response()->json(["data"=> $data],200);
+        foreach ($data as $d) {
+            $arr=array(
+                "channel_name"=>$d->channel->channel_name,
+                "started_watching_at"=>$d->started_watching_at,
+                "finished_watching_at"=>$d->finished_watching_at,
+                "duration_minute"=>$d->duration_minute
+            );
+            array_push($ndata,$arr);
+        }
+
+        return response()->json(["data"=> $ndata],200);
     }
     //
     public function usertimespent(Request $req){

@@ -44,20 +44,6 @@ Route::get('/homecount', [SabbirApiController::class, 'homecount']);
 /* Sabbir part */
 
 
-////////////Sarwer Routes///////
-Route::post('/tvrshare1p',[SarwerAPIController::class,'tvrshare1p']);
-Route::post('/tvrshare',[SarwerAPIController::class,'tvrshare']);
-Route::post('/tvrprac',[SarwerAPIController::class,'tvr']);
-Route::post('/channeltimespent',[SarwerAPIController::class,'timespent']);
-Route::post('/usertimespent',[SarwerAPIController::class,'usertimespent']);
-Route::post('/activeuserlist',[SarwerAPIController::class,'activeuserlist']);
-Route::get('/activeuserlist',[SarwerAPIController::class,'activeuserlistget']);
-
-Route::post('/activechannellist',[SarwerAPIController::class,'activechannellist']);
-Route::get('/activechannellist',[SarwerAPIController::class,'activechannellistget']);
-Route::post('/testing',[SarwerAPIController::class,'ttestApi']);
-
-///////////END////////////
 
 //=========Auth Start=========//
 Route::post('/auth/sign-in', [AuthController::class, 'signIn']);

@@ -45,6 +45,7 @@ class ChannelController extends Controller
         $day=implode(",", $day);
 
         $channels = Channel::all('id', 'channel_name');
+        if($req->id==""){
     foreach ($channels as $c) {
         $viewers = ViewLog::where('channel_id', $c->id)
         ->where(function ($query) use ($finish,$start) {
@@ -82,7 +83,55 @@ class ChannelController extends Controller
       $viewer = array();
       array_push($reachs, $reachp);
       array_push($channelArray,$c->channel_name);
+    }}
+    else{
+      foreach ($channels as $c) {
+if($c->id==((int)$req->id)){
+          $viewers = ViewLog::where('channel_id', $c->id)
+          ->where(function ($query) use ($finish,$start) {
+            $query->whereTime('finished_watching_at', '>', $start)
+              ->orWhereNull('finished_watching_at');
+          })
+           ->whereTime('started_watching_at', '<', $finish)
+          ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+            $query
+            ->whereRaw("month(started_watching_at) in ($month)")
+            ->orWhereRaw("month(finished_watching_at) in ($month)");
+          })
+          ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+            $query->whereRaw("year(started_watching_at) in ($year)")
+            ->orWhereRaw("year(finished_watching_at) in ($year)");
+          })
+          ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+            $query->whereRaw("weekday(started_watching_at) in ($day)")
+            ->orWhereRaw("weekday(finished_watching_at) in ($day)");
+          })
+          
+          
+          
+          ->get();
+          
+  
+        foreach ($viewers as $v) {
+          array_push($viewer, $v->user->id);
+        }
+        $viewer = array_values(array_unique($viewer));
+        $numofViewer = count($viewer);
+        $reachp = ($numofViewer / $numOfUser) * 100;
+        //$reach0=$numofViewer;
+        unset($viewer);
+        $viewer = array();
+        array_push($reachs, $reachp);
+        array_push($channelArray,$c->channel_name);
+      }
+      else{
+        array_push($reachs, 0);
+        array_push($channelArray,$c->channel_name);
+      }
     }
+    
+    }
+
       
 return response()->json(["label" => $channelArray,"value"=>$reachs], 200);
   }
@@ -120,7 +169,8 @@ return response()->json(["label" => $channelArray,"value"=>$reachs], 200);
         $day=implode(",", $day);
 
         $channels = Channel::all('id', 'channel_name');
-    foreach ($channels as $c) {
+        if($req->id==""){
+          foreach ($channels as $c) {
         $viewers = ViewLog::where('channel_id', $c->id)
         ->where(function ($query) use ($finish,$start) {
           $query->whereTime('finished_watching_at', '>', $start)
@@ -157,8 +207,53 @@ return response()->json(["label" => $channelArray,"value"=>$reachs], 200);
       $viewer = array();
       array_push($reachs, $reach0);
       array_push($channelArray,$c->channel_name);
-    }
-      
+    }}
+    else{
+      foreach ($channels as $c) {
+        if($c->id==((int)$req->id)){
+    $viewers = ViewLog::where('channel_id', $c->id)
+    ->where(function ($query) use ($finish,$start) {
+      $query->whereTime('finished_watching_at', '>', $start)
+        ->orWhereNull('finished_watching_at');
+    })
+     ->whereTime('started_watching_at', '<', $finish)
+    ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+      $query
+      ->whereRaw("month(started_watching_at) in ($month)")
+      ->orWhereRaw("month(finished_watching_at) in ($month)");
+    })
+    ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+      $query->whereRaw("year(started_watching_at) in ($year)")
+      ->orWhereRaw("year(finished_watching_at) in ($year)");
+    })
+    ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+      $query->whereRaw("weekday(started_watching_at) in ($day)")
+      ->orWhereRaw("weekday(finished_watching_at) in ($day)");
+    })
+    
+    
+    
+    ->get();
+    
+
+  foreach ($viewers as $v) {
+    array_push($viewer, $v->user->id);
+  }
+  $viewer = array_values(array_unique($viewer));
+  $numofViewer = count($viewer);
+  //$reachp = ($numofViewer / $numOfUser) * 100;
+  $reach0=$numofViewer;
+  unset($viewer);
+  $viewer = array();
+  array_push($reachs, $reach0);
+  array_push($channelArray,$c->channel_name);
+}
+else{
+  array_push($reachs, 0);
+  array_push($channelArray,$c->channel_name);
+}
+}
+}
 return response()->json(["label" => $channelArray,"value"=>$reachs], 200);
   }
 
@@ -197,6 +292,7 @@ return response()->json(["label" => $channelArray,"value"=>$reachs], 200);
         $day=implode(",", $day);
 
         $channels = Channel::all('id', 'channel_name');
+        if($req->id==""){
         foreach ($channels as $c) {   
         $viewers = ViewLog::where('channel_id', $c->id)
         ->where(function ($query) use ($finish,$start) {
@@ -252,7 +348,71 @@ return response()->json(["label" => $channelArray,"value"=>$reachs], 200);
       $viewer = array();
       array_push($tvrs, $tvrp);
       array_push($channelArray,$c->channel_name);
+    }}
+    else{
+      foreach ($channels as $c) { 
+        if($c->id==((int)$req->id)){  
+      $viewers = ViewLog::where('channel_id', $c->id)
+      ->where(function ($query) use ($finish,$start) {
+        $query->whereTime('finished_watching_at', '>', $start)
+          ->orWhereNull('finished_watching_at');
+      })
+       ->whereTime('started_watching_at', '<', $finish)
+      ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+        $query
+        ->whereRaw("month(started_watching_at) in ($month)")
+        ->orWhereRaw("month(finished_watching_at) in ($month)");
+      })
+      ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+        $query->whereRaw("year(started_watching_at) in ($year)")
+        ->orWhereRaw("year(finished_watching_at) in ($year)");
+      })
+      ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+        $query->whereRaw("weekday(started_watching_at) in ($day)")
+        ->orWhereRaw("weekday(finished_watching_at) in ($day)");
+      })
+      
+      
+      
+      ->get();
+      
+
+    foreach ($viewers as $v) {
+      if ($v->finished_watching_at == null) {
+        if ((strtotime(substr($v->started_watching_at,11))) < (strtotime($start))) {
+          $timeviewd = abs(strtotime($start) - strtotime($ldate));
+        } else if ((strtotime(substr($v->started_watching_at,11))) >= (strtotime($start))) {
+          $timeviewd = abs(strtotime(substr($v->started_watching_at,11)) - strtotime($ldate));
+        }
+      } else if (((strtotime(substr($v->started_watching_at,11))) < (strtotime($start))) && ((strtotime(substr($v->finished_watching_at,11))) > (strtotime($finish)))) {
+        $timeviewd = abs(strtotime($start) - strtotime($finish));
+      } else if (((strtotime(substr($v->started_watching_at,11))) < (strtotime($start))) && ((strtotime(substr($v->finished_watching_at,11))) <= (strtotime($finish)))) {
+        $timeviewd = abs(strtotime($start) - strtotime(substr($v->finished_watching_at,11)));
+      } else if (((strtotime(substr($v->started_watching_at,11))) >= (strtotime($start))) && ((strtotime(substr($v->finished_watching_at,11))) > (strtotime($finish)))) {
+        $timeviewd = abs(strtotime(substr($v->started_watching_at,11)) - strtotime($finish));
+      } else {
+        $timeviewd = abs(strtotime(substr($v->finished_watching_at,11)) - strtotime(substr($v->started_watching_at,11)));
+      }
+      //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime(substr($v->started_watching_at,11)));
+      $timeviewd = $timeviewd / 60;
+      array_push($viewer, $timeviewd);
     }
+    //$tvr0=array_sum($viewer);
+    $tvr = array_sum($viewer) / $numOfUser;
+    //$tvr=$tvr/60;
+    $tvr = $tvr / $diff;
+    $tvrp = $tvr * 100;
+    unset($viewer);
+    $viewer = array();
+    array_push($tvrs, $tvrp);
+    array_push($channelArray,$c->channel_name);
+  }
+  else{
+    array_push($tvrs, 0);
+    array_push($channelArray,$c->channel_name);
+  }
+}
+}
 return response()->json(["label" => $channelArray,"value"=>$tvrs], 200);
   }
 
@@ -293,6 +453,7 @@ return response()->json(["label" => $channelArray,"value"=>$tvrs], 200);
         $day=implode(",", $day);
 
         $channels = Channel::all('id', 'channel_name');
+        if($req->id==""){
         foreach ($channels as $c) {   
         $viewers = ViewLog::where('channel_id', $c->id)
         ->where(function ($query) use ($finish,$start) {
@@ -349,6 +510,71 @@ return response()->json(["label" => $channelArray,"value"=>$tvrs], 200);
       array_push($tvrs, $tvr0);
       array_push($channelArray,$c->channel_name);
     }
+  }
+  else{
+    foreach ($channels as $c) {  
+      if($c->id==((int)$req->id)){ 
+    $viewers = ViewLog::where('channel_id', $c->id)
+    ->where(function ($query) use ($finish,$start) {
+      $query->whereTime('finished_watching_at', '>', $start)
+        ->orWhereNull('finished_watching_at');
+    })
+     ->whereTime('started_watching_at', '<', $finish)
+    ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+      $query
+      ->whereRaw("month(started_watching_at) in ($month)")
+      ->orWhereRaw("month(finished_watching_at) in ($month)");
+    })
+    ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+      $query->whereRaw("year(started_watching_at) in ($year)")
+      ->orWhereRaw("year(finished_watching_at) in ($year)");
+    })
+    ->where(function ($query) use ($finish,$start,$month,$year,$day) {
+      $query->whereRaw("weekday(started_watching_at) in ($day)")
+      ->orWhereRaw("weekday(finished_watching_at) in ($day)");
+    })
+    
+    
+    
+    ->get();
+    
+
+  foreach ($viewers as $v) {
+    if ($v->finished_watching_at == null) {
+      if ((strtotime(substr($v->started_watching_at,11))) < (strtotime($start))) {
+        $timeviewd = abs(strtotime($start) - strtotime($ldate));
+      } else if ((strtotime(substr($v->started_watching_at,11))) >= (strtotime($start))) {
+        $timeviewd = abs(strtotime(substr($v->started_watching_at,11)) - strtotime($ldate));
+      }
+    } else if (((strtotime(substr($v->started_watching_at,11))) < (strtotime($start))) && ((strtotime(substr($v->finished_watching_at,11))) > (strtotime($finish)))) {
+      $timeviewd = abs(strtotime($start) - strtotime($finish));
+    } else if (((strtotime(substr($v->started_watching_at,11))) < (strtotime($start))) && ((strtotime(substr($v->finished_watching_at,11))) <= (strtotime($finish)))) {
+      $timeviewd = abs(strtotime($start) - strtotime(substr($v->finished_watching_at,11)));
+    } else if (((strtotime(substr($v->started_watching_at,11))) >= (strtotime($start))) && ((strtotime(substr($v->finished_watching_at,11))) > (strtotime($finish)))) {
+      $timeviewd = abs(strtotime(substr($v->started_watching_at,11)) - strtotime($finish));
+    } else {
+      $timeviewd = abs(strtotime(substr($v->finished_watching_at,11)) - strtotime(substr($v->started_watching_at,11)));
+    }
+    //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime(substr($v->started_watching_at,11)));
+    $timeviewd = $timeviewd / 60;
+    array_push($viewer, $timeviewd);
+  }
+  $tvr0=array_sum($viewer);
+  //$tvr = array_sum($viewer) / $numOfUser;
+  //$tvr=$tvr/60;
+  //$tvr = $tvr / $diff;
+  //$tvrp = $tvr * 100;
+  unset($viewer);
+  $viewer = array();
+  array_push($tvrs, $tvr0);
+  array_push($channelArray,$c->channel_name);
+}
+else{
+  array_push($tvrs, 0);
+  array_push($channelArray,$c->channel_name);
+}
+}
+}
 return response()->json(["label" => $channelArray,"value"=>$tvrs], 200);
   }
 

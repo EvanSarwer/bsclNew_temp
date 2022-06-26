@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
+use App\Models\Login;
 
 class Token extends Model
 {
@@ -13,8 +13,8 @@ class Token extends Model
     protected $table = "tokens";
     public $timestamps = false;
 
-    public function user()
+    public function login()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(Login::class, 'user_id');
     }
 }

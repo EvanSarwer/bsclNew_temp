@@ -18,8 +18,8 @@ class AuthAdmin
     public function handle(Request $request, Closure $next)
     {
         $token = $request->header('Authorization');
-        $userToken = Token::where('value', $token)->first();
-        if ($userToken && $userToken->user->user_type == 'admin') {
+        $userToken = Token::where('token', $token)->first();
+        if ($userToken && $userToken->login->role == 'admin') {
             return $next($request);
         }
         return response()->json(["msg" => "Unauthorized"], 401);

@@ -19,7 +19,7 @@ class AuthUser
     {
         $token = $request->header('Authorization');
         $userToken = Token::where('value', $token)->first();
-        if ($userToken && $userToken->user->user_type == 'user') {
+        if ($userToken && $userToken->login->role == 'general') {
             return $next($request);
         }
         return response()->json(["msg" => "Unauthorized"], 401);

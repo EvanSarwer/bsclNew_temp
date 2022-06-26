@@ -18,7 +18,7 @@ class AuthUser
     public function handle(Request $request, Closure $next)
     {
         $token = $request->header('Authorization');
-        $userToken = Token::where('value', $token)->first();
+        $userToken = Token::where('token', $token)->first();
         if ($userToken && $userToken->login->role == 'general') {
             return $next($request);
         }

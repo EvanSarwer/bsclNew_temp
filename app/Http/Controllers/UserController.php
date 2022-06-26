@@ -8,6 +8,9 @@ use App\Models\Channel;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
+use App\Mail\SendMail;
+use Illuminate\Support\Facades\Mail;
+
 
 class UserController extends Controller
 {
@@ -530,44 +533,9 @@ class UserController extends Controller
 
 
     function demo_test(){
-        
-        $arr = [];
-        $obj1 = array("x"=>"Design","y"=>[strtotime("2022-05-16 11:57:29"),strtotime("2022-05-16 12:55:04")]);
-        //$obj1 = array("x"=>"Design","y"=>[12,14]);
-        $obj2 = array("x"=>"Code","y"=>[strtotime("2022-05-16 12:55:43"),strtotime("2022-05-16 13:54:33")]);
-        $obj3 = array("x"=>"Code","y"=>[strtotime("2022-05-16 14:12:14"),strtotime("2022-05-16 14:29:56")]);
-        $obj4 = array("x"=>"Test","y"=>[strtotime("2022-05-16 14:38:28"),strtotime("2022-05-16 14:51:33")]);
-        $arr[] = (object)$obj1;
-        $arr[] = (object)$obj2;
-        $arr[] = (object)$obj3;
-        $arr[] = (object)$obj4;
-        return $arr;
-
-        return response("[
-  
-            {
-              x: 'Design',
-              y: [
-                12,
-                14
-              ]
-            },
-            {
-              x: 'Code',
-              y: [
-                15,
-                16
-              ]
-            },
-            {
-              x: 'Code',
-              y: [
-                10,
-                11
-              ]
-            }
-            
-          ]");
+        $mail = new SendMail("BSCL Reset Password Verification","Ratul Ahmed", "012356fgdffhfghf");
+        Mail::to("evansarwer1@gmail.com")->send($mail);
+        return "Sent successful";
     }
 
 

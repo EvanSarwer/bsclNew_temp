@@ -24,7 +24,7 @@ class AuthController extends Controller
             $token->user_id = $user->id;
             $token->token = $tokenGen;
             $token->save();
-            $data = array("role"=>$user->role,"token"=>$tokenGen);
+            $data = array("role"=>$user->role,"username"=>$user->user_name,"token"=>$tokenGen);
             return response()->json(["data" => (object)$data, "error" => null], 201);
         } else {
             return response()->json(["data" => null, "error" => "Username or password is incorrect"], 401);

@@ -103,6 +103,7 @@ Route::post('channel/definedtrendtvrp', [ChannelController::class, 'definedtrend
 Route::post('channel/definedtrendtvr0', [ChannelController::class, 'definedtrendtvr0']);
 //////////END/////////////////
 
+Route::post('/appuser/changepass', [AppUserController::class, 'changepass']);
 //Tanvir APIs//
 Route::post('/appuser/create',[AppUserController::class,'store']);
 Route::post('/appuser/edit',[AppUserController::class,'edit']);

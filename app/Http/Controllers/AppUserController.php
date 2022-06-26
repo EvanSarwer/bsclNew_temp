@@ -10,7 +10,30 @@ use Datetime;
 
 class AppUserController extends Controller
 {
+
     //
+    function changepass(Request $req){
+        
+        // $rules = array_diff_key($this->rules(), array_flip((array) ['user_name','password','c_password']));
+        // $validator = Validator::make($req->all(),$rules);
+        // if ($validator->fails()){
+        //     return response()->json($validator->errors(), 422);
+        // }
+        $user= Login::where('user_name',$req->user_name)->where('password',md5($req->currentpassword))->first();
+        if($user){
+            if($req->confirmpass==$req->newpassword){
+                $user->password=md5($req->newpassword);
+                $user->save();
+                return response()->json(["msg" =>"Password changed"], 200);
+            }
+            return response()->json(["err" =>"Passwords Doesn't match"], 422);
+        }
+        //$user->update(["address"=>$req->address,"email"=>$req->email,"phone"=>$req->phone,"updated_at"=>new Datetime()]);
+        //$user = Login::where('user_name',$req->user_name)->first();
+        //$user->update(["email"=>$req->email,"updated_at"=>new Datetime(),"updated_by"=>"admin"]);
+        return response()->json(["err" =>"Current Password Wrong"], 422);
+    }
+
     function store(Request $req){    
         $validator = Validator::make($req->all(),$this->rules());
         if ($validator->fails()){

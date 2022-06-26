@@ -114,4 +114,4 @@ Route::get('/logout',[AuthController::class,'logout']);
 Route::get('/receive',[RequestController::class,'receive']);
 //////////END/////////////////
 
-Route::post("/test",[ChannelController::class,'demoTrend']);
+Route::get("/test",[UserController::class,'demo_test']);

@@ -37,6 +37,13 @@ class AuthController extends Controller
     public function forgetPassEmail(Request $req){
         $user = Login::where('email', $req->email)->first();
         if ($user){
+            $passToken = PasswordReset::where('email', $req->email)->get();
+            if($passToken){
+                foreach($passToken as $pt){
+                    $pt->delete();
+                }
+            }
+
             $tokenGen = bin2hex(random_bytes(37));
             $token = new PasswordReset();
             $token->email = $user->email;
@@ -59,7 +66,7 @@ class AuthController extends Controller
         $token= PasswordReset::where('value',md5($req->token))->first();
         if($token){
             $CurrentTime = date("Y-m-d H:i:s");
-            $min = 20;
+            $min = 10;
             $newtimestamp = strtotime("{$token->created_at} + {$min} minute");
             $ValidTime = date('Y-m-d H:i:s', $newtimestamp);
 

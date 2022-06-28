@@ -9,7 +9,7 @@
 
     <a href="http://localhost:3000/forget-pass/new-password/{{ $token }}" ><button class="btn btn-info" type="button">Reset Password</button></a> <br/>
 
-    <p>This password resent link will expire in 60 minutes.</p>
+    <p>This password resent link will expire in 10 minutes.</p>
     <p>If you did not request a password reset, no further action is required.</p> <br/>
     <p>Regards,</p>
     <P>BSCL</P>

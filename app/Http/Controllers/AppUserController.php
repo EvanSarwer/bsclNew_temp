@@ -26,12 +26,12 @@ class AppUserController extends Controller
                 $user->save();
                 return response()->json(["msg" =>"Password changed"], 200);
             }
-            return response()->json(["err" =>"Passwords Doesn't match"], 422);
+            return response()->json(["err" =>"PASSWORD DOESN'T MATCH"], 422);
         }
         //$user->update(["address"=>$req->address,"email"=>$req->email,"phone"=>$req->phone,"updated_at"=>new Datetime()]);
         //$user = Login::where('user_name',$req->user_name)->first();
         //$user->update(["email"=>$req->email,"updated_at"=>new Datetime(),"updated_by"=>"admin"]);
-        return response()->json(["err" =>"Current Password Wrong"], 422);
+        return response()->json(["err" =>"CURRENT PASSWORD WRONG"], 422);
     }
 
     function store(Request $req){    

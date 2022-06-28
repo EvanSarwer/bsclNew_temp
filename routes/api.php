@@ -47,6 +47,9 @@ Route::get('/homecount', [SabbirApiController::class, 'homecount']);
 
 //=========Auth Start=========//
 Route::post('/auth/sign-in', [AuthController::class, 'signIn']);
+Route::post('/auth/forgetPassword-Email', [AuthController::class, 'forgetPassEmail']);
+Route::post('/auth/forgetPass-Validation', [AuthController::class, 'forgetPassTokenValidation']);
+Route::post('/auth/newPassSubmit', [AuthController::class, 'forgetPassSubmit']);
 Route::post('/auth/sign-up', [AuthController::class, 'signUp']);
 Route::get('/auth/current-user', [AuthController::class, 'currentUser']);
 //=========Auth End==========//

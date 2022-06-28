@@ -10,6 +10,9 @@ use App\Models\Token;
 use Carbon\Carbon;
 use DateTime;
 use App\Models\Login;
+use App\Models\PasswordReset;
+use App\Mail\SendMail;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -27,9 +30,74 @@ class AuthController extends Controller
             $data = array("role"=>$user->role,"username"=>$user->user_name,"token"=>$tokenGen);
             return response()->json(["data" => (object)$data, "error" => null], 201);
         } else {
-            return response()->json(["data" => null, "error" => "Username or password is incorrect"], 401);
+            return response()->json(["data" => null, "error" => "USERNAME OR PASSWORD IS INCORRECT"], 401);
         }
     }
+
+    public function forgetPassEmail(Request $req){
+        $user = Login::where('email', $req->email)->first();
+        if ($user){
+            $tokenGen = bin2hex(random_bytes(37));
+            $token = new PasswordReset();
+            $token->email = $user->email;
+            $token->value = md5($tokenGen);
+            $token->token = $tokenGen;
+            $token->created_at = date('Y-m-d H:i:s');
+            $token->save();
+
+            $mail = new SendMail("BSCL Reset Password Verification",$user->user_name, $tokenGen);
+            Mail::to($user->email)->send($mail);
+
+            return response()->json(["msg" =>"Check your email to get the reset link", "error" => null], 201);
+        }
+        else{
+            return response()->json(["data" => null, "error" => "Email Not Exist"], 422);
+        }
+    }
+
+    public function forgetPassTokenValidation(Request $req){
+        $token= PasswordReset::where('value',md5($req->token))->first();
+        if($token){
+            $CurrentTime = date("Y-m-d H:i:s");
+            $min = 20;
+            $newtimestamp = strtotime("{$token->created_at} + {$min} minute");
+            $ValidTime = date('Y-m-d H:i:s', $newtimestamp);
+
+            if( (strtotime($CurrentTime)) <= (strtotime($ValidTime)) ){
+                return response()->json(["email" =>$token->email], 200);
+            }
+            return response()->json(["err" =>"Token Time out"], 422);
+        }
+        return response()->json(["err" =>"Invalid Token"], 422);
+    }
+
+    public function forgetPassSubmit(Request $req){
+        $passToken= PasswordReset::where('email',$req->email)->where('value',md5($req->token))->first();
+        if($passToken){
+            $user= Login::where('email',$passToken->email)->first();
+            if($req->confirmpass==$req->newpassword){
+                $user->password=md5($req->newpassword);
+                $user->save();
+
+                $tokenGen = bin2hex(random_bytes(37));
+                $token = new Token();
+                $token->value = md5($tokenGen);
+                $token->user_id = $user->id;
+                $token->token = $tokenGen;
+                $token->save();
+                $data = array("role"=>$user->role,"username"=>$user->user_name,"token"=>$tokenGen);
+
+                $passToken->delete();
+
+                return response()->json(["data" => (object)$data,"msg" =>"Password changed Successfully","err"=> null], 200);
+            }
+            return response()->json(["err" =>"Passwords Doesn't match"], 200);
+        }
+        return response()->json(["err" =>"Invalid Token"], 422);
+    }
+
+
+
 
     public function signUp(Request $req)
     {

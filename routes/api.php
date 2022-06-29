@@ -55,6 +55,7 @@ Route::get('/auth/current-user', [AuthController::class, 'currentUser']);
 //=========Auth End==========//
 
 //////////Dashboard///////////
+Route::get('/dashboard/CurrentStatusUser', [DashboardController::class, 'CurrentStatusUser']);
 Route::get('/dashboard/activechannellist',[DashboardController::class,'activechannellistget']);
 Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserlistget']);
 Route::get('/reachuser/dashboard', [DashboardController::class, 'reachuserdashboard']);

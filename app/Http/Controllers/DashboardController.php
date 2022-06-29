@@ -12,6 +12,16 @@ use Illuminate\Support\Facades\Http;
 class DashboardController extends Controller
 {
 
+  public function CurrentStatusUser(){
+    $total_user = User::all()->count();
+    $active_user =ViewLog::whereNull('finished_watching_at')->distinct('user_id')->count();
+    $active_percent = ($active_user * 100)/$total_user ;
+    $active_percent = round($active_percent,2);
+
+    return response()->json(["total_user"=>$total_user,"active_user"=>$active_user,"active_percent"=>$active_percent],200);
+
+  }
+
     public function reachpercentdashboard(){
       
       

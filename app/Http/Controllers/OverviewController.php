@@ -18,38 +18,145 @@ class OverviewController extends Controller
         $startTime = substr($req->start, 11, 19);
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
-        $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
-        {  return $c->reach( $startDate, $startTime, $finishDate,$finishTime) || !$c->channel_reach ;});
+        $startDateTime = date($startDate)." ".$startTime;
+        $finishDateTime = date($finishDate)." ".$finishTime;
+
+        $channels = Channel::all('id', 'channel_name');
         
+        $number_of_user = [];
+        $channel_label = [];
     
-        $value = [];
-        $label = [];
-        foreach($channels as $c){
-            $value[] = $c->channel_reach;
-            $label[] = $c->channel_name;
+        foreach ($channels as $c) {
+            
+            $viewlogs = ViewLog::where('channel_id', $c->id)
+                ->where(function($query) use ($startDateTime,$finishDateTime){
+                    $query->where('finished_watching_at','>',$startDateTime)
+                    ->orWhereNull('finished_watching_at');
+                    })
+                ->where('started_watching_at','<',$finishDateTime)
+                ->distinct()->get('user_id');
+
+            $user_count = 0;
+
+            foreach ($viewlogs as $v) {
+                $user= User::where('id',$v->user_id)
+                        ->where('type','like','%'.$req->userType.'%')
+                        ->where('address','like','%'.$req->region.'%')
+                        ->where('gender','like','%'.$req->gender.'%')
+                        ->where('economic_status','like','%'.$req->economic.'%')
+                        ->where('socio_status','like','%'.$req->socio.'%')
+                        ->whereBetween('age',[$req->age1,$req->age2])
+                        ->first();
+                if($user){
+                    $user_count = $user_count + 1;
+                }
+                else{
+                    continue;
+                }
+            
+            }
+
+            array_push($channel_label,$c->channel_name);
+            array_push($number_of_user,$user_count);
+            
         }
-        return response()->json(["reachsum"=>array_sum($value),"reach"=>$value,"channels"=>$label],200);
+        
+        return response()->json(["reachsum"=>array_sum($number_of_user),"reach"=>$number_of_user,"channels"=>$channel_label],200);
+  
+
     }
 
-    public function reachpercentgraph(Request $req)
-    {
-
+    public function reachpercentgraph(Request $req){
         $startDate = substr($req->start, 0, 10);
         $startTime = substr($req->start, 11, 19);
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
-        $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
-        { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) || !$c->channel_reach ;});
+        $startDateTime = date($startDate)." ".$startTime;
+        $finishDateTime = date($finishDate)." ".$finishTime;
+
+        $channels = Channel::all('id', 'channel_name');
+        $total_user = User::count();
+
+        $number_of_user = [];
+        $channel_label = [];
+    
+        foreach ($channels as $c) {
+            
+            $viewlogs = ViewLog::where('channel_id', $c->id)
+                ->where(function($query) use ($startDateTime,$finishDateTime){
+                    $query->where('finished_watching_at','>',$startDateTime)
+                    ->orWhereNull('finished_watching_at');
+                    })
+                ->where('started_watching_at','<',$finishDateTime)
+                ->distinct()->get('user_id');
+
+            $user_count = 0;
+
+            foreach ($viewlogs as $v) {
+                $user= User::where('id',$v->user_id)
+                        ->where('type','like','%'.$req->userType.'%')
+                        ->where('address','like','%'.$req->region.'%')
+                        ->where('gender','like','%'.$req->gender.'%')
+                        ->where('economic_status','like','%'.$req->economic.'%')
+                        ->where('socio_status','like','%'.$req->socio.'%')
+                        ->whereBetween('age',[$req->age1,$req->age2])
+                        ->first();
+                if($user){
+                    $user_count = $user_count + 1;
+                }
+                else{
+                    continue;
+                }
+            
+            }
+            $user_count = ($user_count / $total_user) * 100 ;
+            $user_count = round($user_count,1);
+            array_push($channel_label,$c->channel_name);
+            array_push($number_of_user,$user_count);
+            
+        }
+        
+        return response()->json(["reachsum"=>array_sum($number_of_user),"reach"=>$number_of_user,"channels"=>$channel_label],200);
+  
+    }
+    // public function reachusergraph(Request $req){
+        
+    //     $startDate = substr($req->start, 0, 10);
+    //     $startTime = substr($req->start, 11, 19);
+    //     $finishDate = substr($req->finish, 0, 10);
+    //     $finishTime = substr($req->finish, 11, 19);
+    //     $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
+    //     {  return $c->reach( $startDate, $startTime, $finishDate,$finishTime) || !$c->channel_reach ;});
         
     
-        $value = [];
-        $label = [];
-        foreach($channels as $c){
-            $value[] = $c->channel_reach*100/Channel::count();
-            $label[] = $c->channel_name;
-        }
-        return response()->json(["reachsum"=>array_sum($value),"reach"=>$value,"channels"=>$label],200);
-    }
+    //     $value = [];
+    //     $label = [];
+    //     foreach($channels as $c){
+    //         $value[] = $c->channel_reach;
+    //         $label[] = $c->channel_name;
+    //     }
+    //     return response()->json(["reachsum"=>array_sum($value),"reach"=>$value,"channels"=>$label],200);
+    // }
+
+    // public function reachpercentgraph(Request $req)
+    // {
+
+    //     $startDate = substr($req->start, 0, 10);
+    //     $startTime = substr($req->start, 11, 19);
+    //     $finishDate = substr($req->finish, 0, 10);
+    //     $finishTime = substr($req->finish, 11, 19);
+    //     $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
+    //     { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) || !$c->channel_reach ;});
+        
+    
+    //     $value = [];
+    //     $label = [];
+    //     foreach($channels as $c){
+    //         $value[] = $c->channel_reach*100/Channel::count();
+    //         $label[] = $c->channel_name;
+    //     }
+    //     return response()->json(["reachsum"=>array_sum($value),"reach"=>$value,"channels"=>$label],200);
+    // }
 
     public function tvrgraphallchannelzero(Request $req)
     {
@@ -132,23 +239,8 @@ class OverviewController extends Controller
             array_push($channelArray, $c->channel_name);
             array_push($tvrs, $tvr);
         }
-        $channellistnew = array();
-        $tvrlistnew = array();
-        $definedchannel = array("BTV", "BTV World", "BTV Sangsad", "BTV Chattrogram", "Independent TV", "ATN Bangla", "Channel I HD", "Ekushey TV", "NTV", "RTV HD", "Boishakhi ", "Bangla Vision", "Desh TV", "My TV", "ATN News", "Mohona TV", "Bijoy TV", "Shomoy TV", "Masranga TV", "Channel 9 HD", "Channel 24", "Gazi TV", "Ekattor TV HD", "Asian TV HD", "SA TV", "Gaan Bangla TV", "Jamuna TV", "Deepto TV HD", "DBC News HD", "News 24 HD", "Bangla TV", "Duranto TV HD", "Nagorik TV HD", "Ananda TV", "T Sports HD", "nexus", "spice", "global");
-        $channellist = array();
-        $channellistnew = array();
-        $dc = count($definedchannel);
-        $channels = Channel::all('id', 'channel_name');
-        for ($i = 0; $i < 38; $i++) {
-            for ($j = 0; $j < 40; $j++) {
-            if ($definedchannel[$i] == $channelArray[$j]) {
-                array_push($channellistnew, $channelArray[$j]);
-                array_push($tvrlistnew, $tvrs[$j]);
-                break;
-            }
-            }
-        }
-        return response()->json(["tvrs" => $tvrlistnew, "channels" => $channellistnew], 200);
+        
+        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray], 200);
         //return response()->json(["tvr"=>$tvr],200);
   
     }
@@ -177,83 +269,63 @@ class OverviewController extends Controller
         //$all=array();
 
         foreach ($channels as $c) {
-        $viewers = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($finishDate, $finishTime, $startDate, $startTime) {
-            $query->where('finished_watching_at', '>', date($startDate) . " " . $startTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at', '<', date($finishDate) . " " . $finishTime)
-            ->get();
-        /*$viewers = ViewLog::where('channel_id', $c->id)
-        ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
-        ->where('finished_watching_at','>',date($startDate)." ".$startTime)
-        ->get();*/
-        foreach ($viewers as $v) {
-            $user= User::where('id',$v->user_id)
-                    ->where('type','like','%'.$req->userType.'%')
-                    ->where('address','like','%'.$req->region.'%')
-                    ->where('gender','like','%'.$req->gender.'%')
-                    ->where('economic_status','like','%'.$req->economic.'%')
-                    ->where('socio_status','like','%'.$req->socio.'%')
-                    ->whereBetween('age',[$req->age1,$req->age2])
-                    ->first();
-            if($user){
-                if ($v->finished_watching_at == null) {
-                    if ((strtotime($v->started_watching_at)) < ($start_range)) {
-                        $timeviewd = abs($start_range - strtotime($ldate));
-                    } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
-                        $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
-                    }
-                } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-                $timeviewd = abs($start_range - $finish_range);
-                } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
-                $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
-                } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-                $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
-                } else {
-                $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
-                }
-                //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-                $timeviewd = $timeviewd / 60;
-                array_push($viewer, $timeviewd);
-            }
-            else{
-                continue;
-            }
-
-
+            $viewers = ViewLog::where('channel_id', $c->id)
+                ->where(function ($query) use ($finishDate, $finishTime, $startDate, $startTime) {
+                $query->where('finished_watching_at', '>', date($startDate) . " " . $startTime)
+                    ->orWhereNull('finished_watching_at');
+                })
+                ->where('started_watching_at', '<', date($finishDate) . " " . $finishTime)
+                ->get();
             
-        }
-        //return response()->json([$viewer],200);
-        $tvr = array_sum($viewer) / $numOfUser;
-        //$tvr=$tvr/60;
-        $tvr = $tvr / $diff;
-        $tvr = $tvr * 100;
-        unset($viewer);
-        $viewer = array();
-        array_push($channelArray, $c->channel_name);
-        array_push($tvrs, $tvr);
-        }
-        $channellistnew = array();
-        $tvrlistnew = array();
-        $definedchannel = array("BTV", "BTV World", "BTV Sangsad", "BTV Chattrogram", "Independent TV", "ATN Bangla", "Channel I HD", "Ekushey TV", "NTV", "RTV HD", "Boishakhi ", "Bangla Vision", "Desh TV", "My TV", "ATN News", "Mohona TV", "Bijoy TV", "Shomoy TV", "Masranga TV", "Channel 9 HD", "Channel 24", "Gazi TV", "Ekattor TV HD", "Asian TV HD", "SA TV", "Gaan Bangla TV", "Jamuna TV", "Deepto TV HD", "DBC News HD", "News 24 HD", "Bangla TV", "Duranto TV HD", "Nagorik TV HD", "Ananda TV", "T Sports HD", "nexus", "spice", "global");
-        $channellist = array();
-        $channellistnew = array();
-        $dc = count($definedchannel);
-        $channels = Channel::all('id', 'channel_name');
-        for ($i = 0; $i < 38; $i++) {
-        for ($j = 0; $j < 40; $j++) {
-            if ($definedchannel[$i] == $channelArray[$j]) {
-            array_push($channellistnew, $channelArray[$j]);
-            array_push($tvrlistnew, $tvrs[$j]);
-            break;
-            }
-        }
-        }
-        return response()->json(["tvrs" => $tvrlistnew, "channels" => $channellistnew], 200);
-        //return response()->json(["tvr"=>$tvr],200);
+            foreach ($viewers as $v) {
+                $user= User::where('id',$v->user_id)
+                        ->where('type','like','%'.$req->userType.'%')
+                        ->where('address','like','%'.$req->region.'%')
+                        ->where('gender','like','%'.$req->gender.'%')
+                        ->where('economic_status','like','%'.$req->economic.'%')
+                        ->where('socio_status','like','%'.$req->socio.'%')
+                        ->whereBetween('age',[$req->age1,$req->age2])
+                        ->first();
+                if($user){
+                    if ($v->finished_watching_at == null) {
+                        if ((strtotime($v->started_watching_at)) < ($start_range)) {
+                            $timeviewd = abs($start_range - strtotime($ldate));
+                        } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
+                            $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
+                        }
+                    } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
+                    $timeviewd = abs($start_range - $finish_range);
+                    } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
+                    $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
+                    } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
+                    $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
+                    } else {
+                    $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+                    }
+                    //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    $timeviewd = $timeviewd / 60;
+                    array_push($viewer, $timeviewd);
+                }
+                else{
+                    continue;
+                }
 
+
+                
+            }
+            //return response()->json([$viewer],200);
+            $tvr = array_sum($viewer) / $numOfUser;
+            //$tvr=$tvr/60;
+            $tvr = $tvr / $diff;
+            $tvr = $tvr * 100;
+            unset($viewer);
+            $viewer = array();
+            array_push($channelArray, $c->channel_name);
+            array_push($tvrs, $tvr);
+        }
+        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray], 200);
     }
+
     public function tvrsharegraph(Request $req){
         
         $startDate=substr($req->start,0,10);

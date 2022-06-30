@@ -22,10 +22,115 @@ class DashboardController extends Controller
 
   }
 
-    public function reachpercentdashboard(){
+  public function CurrentStatusTopReach(){
+    $finishDateTime = date("Y-m-d H:i:s");
+    $min = 1439;
+    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+
+    $channels = Channel::all('id', 'channel_name');
+    $total_user = User::count();
+    $channel_info = [];
+
+    foreach ($channels as $c) {
+      $user_count = 0;
+      $viewlogs = ViewLog::where('channel_id',$c->id)
+          ->where(function($query) use ($startDateTime,$finishDateTime){
+              $query->where('finished_watching_at','>',$startDateTime)
+              ->orWhereNull('finished_watching_at');
+              })
+          ->where('started_watching_at','<',$finishDateTime)
+          ->distinct('user_id')->count();
+
+      $user_count = ($viewlogs / $total_user) * 100 ;
+      $channel = [
+        "channel_name"=> $c->channel_name,
+        "users"=> $user_count
+      ];
+      array_push($channel_info,$channel);      
+    }
+    array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
+    return response()->json(["top_reach"=>$channel_info[0]['channel_name']],200);
+  }
+
+  public function CurrentStatusTopTvr(){
+    $channelArray = array();
+    $tvrs = array();
+    $viewer = array();
+    $ldate = date('Y-m-d H:i:s');
+    /*if($req->start=="" && $req->finish==""){
+    return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
+    }*/
+    $finishDateTime = date("Y-m-d H:i:s");
+    $min = 1439;
+    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    $start_range = strtotime($startDateTime);
+    $finish_range = strtotime($finishDateTime);
+    $diff = abs($start_range - $finish_range) / 60;
+
+    //return response()->json([$di],200);
+    //return response()->json(["tvr"=>$diff],200);
+    $channels = Channel::all('id', 'channel_name');
+    $users = User::all();
+    $numOfUser = $users->count();
+    //$all=array();
+
+    foreach ($channels as $c) {
+      $viewers = ViewLog::where('channel_id', $c->id)
+          ->where(function ($query) use ($finishDateTime, $startDateTime) {
+          $query->where('finished_watching_at', '>', $startDateTime)
+              ->orWhereNull('finished_watching_at');
+          })
+          ->where('started_watching_at', '<', $finishDateTime)
+          ->get();
       
+      foreach ($viewers as $v) {
+          
+        if ($v->finished_watching_at == null) {
+            if ((strtotime($v->started_watching_at)) < ($start_range)) {
+                $timeviewd = abs($start_range - strtotime($ldate));
+            } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
+                $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
+            }
+        } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
+        $timeviewd = abs($start_range - $finish_range);
+        } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
+        $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
+        } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
+        $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
+        } else {
+        $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+        }
+        //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+        $timeviewd = $timeviewd / 60;
+        array_push($viewer, $timeviewd);
+          
+      }
+      //return response()->json([$viewer],200);
+      $tvr = array_sum($viewer) / $numOfUser;
+      //$tvr=$tvr/60;
+      $tvr = $tvr / $diff;
+      $tvr = $tvr * 100;
+      unset($viewer);
+      $viewer = array();
+      $chnl = [
+        "channel_name"=> $c->channel_name,
+        "tvr"=> $tvr
+      ];
+
+      array_push($channelArray, $chnl);
+    }
+    array_multisort(array_column($channelArray, 'tvr'), SORT_DESC, $channelArray);
+    return response()->json(["top_tvr" => $channelArray[0]['channel_name']], 200);
+    //return response()->json(["tvr"=>$tvr],200);
+
+
+  }
+
+  public function reachpercentdashboard(){
       
-      $startDate=date('Y-m-d',strtotime("-7 days"));
+    $startDate=date('Y-m-d',strtotime("-7 days"));
     $startTime="00:00:00";
     $finishDate=date('Y-m-d',strtotime("-1 days"));
     $finishTime="23:59:59";

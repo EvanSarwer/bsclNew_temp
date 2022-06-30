@@ -24,6 +24,7 @@ class LiveChannelController extends Controller
                 // if(count($viewlogs) > 0){
                     foreach($viewlogs as $v){
                         $user= User::where('id',$v->user_id)
+                                ->where('type','like','%'.$req->userType.'%')
                                 ->where('address','like','%'.$req->region.'%')
                                 ->where('gender','like','%'.$req->gender.'%')
                                 ->where('economic_status','like','%'.$req->economic.'%')

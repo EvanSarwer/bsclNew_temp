@@ -56,6 +56,8 @@ Route::get('/auth/current-user', [AuthController::class, 'currentUser']);
 
 //////////Dashboard///////////
 Route::get('/dashboard/CurrentStatusUser', [DashboardController::class, 'CurrentStatusUser']);
+Route::get('/dashboard/CurrentStatusTopReach', [DashboardController::class, 'CurrentStatusTopReach']);
+Route::get('/dashboard/CurrentStatusTopTvr', [DashboardController::class, 'CurrentStatusTopTvr']);
 Route::get('/dashboard/activechannellist',[DashboardController::class,'activechannellistget']);
 Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserlistget']);
 Route::get('/reachuser/dashboard', [DashboardController::class, 'reachuserdashboard']);

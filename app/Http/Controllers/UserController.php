@@ -36,37 +36,28 @@ class UserController extends Controller
             if($req->time == "Daily"){
 
                 $finishDateTime = date("Y-m-d H:i:s");
-                $min = 1439;
+                $min = 1440;
                 $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
                 $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
             }
             else if($req->time == "Weekly"){
-                $startDate=date('Y-m-d',strtotime("2022-05-11"));
-                $startTime="00:00:00";
-                $finishDate=date('Y-m-d',strtotime("2022-05-18"));
-                $finishTime="23:59:59";
-
-                $startDateTime = date($startDate)." ".$startTime;
-                $finishDateTime = date($finishDate)." ".$finishTime;
+                $finishDateTime = date("Y-m-d H:i:s");
+                $min = 10080;
+                $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+                $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
             }
             else if($req->time == "Monthly"){
-                $startDate=date('Y-m-d',strtotime("2022-05-01"));
-                $startTime="00:00:00";
-                $finishDate=date('Y-m-d',strtotime("2022-05-18"));
-                $finishTime="23:59:59";
-
-                $startDateTime = date($startDate)." ".$startTime;
-                $finishDateTime = date($finishDate)." ".$finishTime;
+                $finishDateTime = date("Y-m-d H:i:s");
+                $min = 43200;
+                $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+                $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
             }
             else if($req->time == "Yearly"){
-                $startDate=date('Y-m-d',strtotime("2022-01-01"));
-                $startTime="00:00:00";
-                $finishDate=date('Y-m-d',strtotime("2022-05-18"));
-                $finishTime="23:59:59";
-
-                $startDateTime = date($startDate)." ".$startTime;
-                $finishDateTime = date($finishDate)." ".$finishTime;
+                $finishDateTime = date("Y-m-d H:i:s");
+                $min = 525600;
+                $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+                $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
             }
 
             $to_time = strtotime($startDateTime);

@@ -160,33 +160,29 @@ class OverviewController extends Controller
         $channelArray = array();
         $tvrs = array();
         $viewer = array();
-        $ldate = date('Y-m-d H:i:s');
-        /*if($req->start=="" && $req->finish==""){
-        return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
-        }*/
+        
         $startDate = substr($req->start, 0, 10);
         $startTime = substr($req->start, 11, 19);
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
-        $start_range = strtotime($startDate . " " . $startTime);
-        $finish_range = strtotime($finishDate . " " . $finishTime);
-        $diff = abs($start_range - $finish_range) / 60;
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
+
+        $to_time = strtotime($startDateTime);
+        $from_time = strtotime($finishDateTime);
+        $diff=abs($to_time - $from_time) / 60;
         
-    
-        //return response()->json([$di],200);
-        //return response()->json(["tvr"=>$diff],200);
         $channels = Channel::all('id', 'channel_name');
         $users = User::all();
         $numOfUser = $users->count();
-        //$all=array();
     
         foreach ($channels as $c) {
             $viewers = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($finishDate, $finishTime, $startDate, $startTime) {
-                $query->where('finished_watching_at', '>', date($startDate) . " " . $startTime)
+            ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                $query->where('finished_watching_at', '>', $startDateTime)
                 ->orWhereNull('finished_watching_at');
             })
-            ->where('started_watching_at', '<', date($finishDate) . " " . $finishTime)
+            ->where('started_watching_at', '<', $finishDateTime)
             ->get();
             
             foreach ($viewers as $v) {
@@ -199,24 +195,21 @@ class OverviewController extends Controller
                         ->whereBetween('age',[$req->age1,$req->age2])
                         ->first();
                 if($user){
-                    if ($v->finished_watching_at == null) {
-                        if ((strtotime($v->started_watching_at)) < ($start_range)) {
-                        $timeviewd = abs($start_range - strtotime($ldate));
-                        } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
-                        $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
-                        }
-                    } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-                        $timeviewd = abs($start_range - $finish_range);
-                    } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
-                        $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
-                    } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-                        $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
-                    } else {
-                        $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+                    if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                        $watched_sec = abs($to_time - $from_time);
+                    }
+                    else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                        $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
+                    }
+                    else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                        $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
+                    }
+                    else{
+                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
                     }
                     //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-                    $timeviewd = $timeviewd / 60;
-                    array_push($viewer, $timeviewd);
+                    $watched_sec = $watched_sec / 60;
+                    array_push($viewer, $watched_sec);
                 }
                 else{
                     continue;
@@ -224,9 +217,9 @@ class OverviewController extends Controller
             
             }
             //return response()->json([$viewer],200);
-            $tvr = array_sum($viewer); ///$numOfUser;
+            $tvr = array_sum($viewer) / $numOfUser; ///$numOfUser;
             //$tvr=$tvr/60;
-            //$tvr=$tvr/$diff;
+            $tvr=$tvr/$diff;
             //$tvr=$tvr*100;
             unset($viewer);
             $viewer = array();
@@ -243,32 +236,29 @@ class OverviewController extends Controller
         $channelArray = array();
         $tvrs = array();
         $viewer = array();
-        $ldate = date('Y-m-d H:i:s');
-        /*if($req->start=="" && $req->finish==""){
-        return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
-        }*/
+        
         $startDate = substr($req->start, 0, 10);
         $startTime = substr($req->start, 11, 19);
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
-        $start_range = strtotime($startDate . " " . $startTime);
-        $finish_range = strtotime($finishDate . " " . $finishTime);
-        $diff = abs($start_range - $finish_range) / 60;
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
 
-        //return response()->json([$di],200);
-        //return response()->json(["tvr"=>$diff],200);
+        $to_time = strtotime($startDateTime);
+        $from_time = strtotime($finishDateTime);
+        $diff=abs($to_time - $from_time) / 60;
+        
         $channels = Channel::all('id', 'channel_name');
         $users = User::all();
         $numOfUser = $users->count();
-        //$all=array();
 
         foreach ($channels as $c) {
             $viewers = ViewLog::where('channel_id', $c->id)
-                ->where(function ($query) use ($finishDate, $finishTime, $startDate, $startTime) {
-                $query->where('finished_watching_at', '>', date($startDate) . " " . $startTime)
+                ->where(function ($query) use ($startDateTime, $startDate, $startTime) {
+                $query->where('finished_watching_at', '>', $startDateTime)
                     ->orWhereNull('finished_watching_at');
                 })
-                ->where('started_watching_at', '<', date($finishDate) . " " . $finishTime)
+                ->where('started_watching_at', '<', $finishDateTime)
                 ->get();
             
             foreach ($viewers as $v) {
@@ -281,33 +271,26 @@ class OverviewController extends Controller
                         ->whereBetween('age',[$req->age1,$req->age2])
                         ->first();
                 if($user){
-                    if ($v->finished_watching_at == null) {
-                        if ((strtotime($v->started_watching_at)) < ($start_range)) {
-                            $timeviewd = abs($start_range - strtotime($ldate));
-                        } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
-                            $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
-                        }
-                    } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-                    $timeviewd = abs($start_range - $finish_range);
-                    } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
-                    $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
-                    } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-                    $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
-                    } else {
-                    $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+                    if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                        $watched_sec = abs($to_time - $from_time);
                     }
-                    //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-                    $timeviewd = $timeviewd / 60;
-                    array_push($viewer, $timeviewd);
+                    else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                        $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
+                    }
+                    else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                        $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
+                    }
+                    else{
+                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    }
+                    $watched_sec = $watched_sec / 60;
+                    array_push($viewer, $watched_sec);
                 }
                 else{
                     continue;
                 }
 
-
-                
             }
-            //return response()->json([$viewer],200);
             $tvr = array_sum($viewer) / $numOfUser;
             //$tvr=$tvr/60;
             $tvr = $tvr / $diff;
@@ -335,7 +318,6 @@ class OverviewController extends Controller
         $channelArray=array();
         $shares=array();
         $all_tvr =array();
-        $total =0.00;
 
         $channels=Channel::all('id','channel_name');
         foreach ($channels as $c) {
@@ -387,12 +369,12 @@ class OverviewController extends Controller
             $tvr=$tvr*100;
             $tvr=round($tvr,4);
             
-            $total = ($total + $tvr);
             array_push($all_tvr,$tvr);
             array_push($channelArray,$c->channel_name);
 
         }
-        $total_tvr = round($total,5);
+        $total_tvr = array_sum($all_tvr);
+        $total_tvr = round($total_tvr,5);
         
         $total_share= 0;
         for($i=0; $i< count($all_tvr); $i++){

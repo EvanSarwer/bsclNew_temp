@@ -24,7 +24,7 @@ class DashboardController extends Controller
 
   public function CurrentStatusTopReach(){
     $finishDateTime = date("Y-m-d H:i:s");
-    $min = 1439;
+    $min = 1440;
     $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
     $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
@@ -34,13 +34,15 @@ class DashboardController extends Controller
 
     foreach ($channels as $c) {
       $user_count = 0;
-      $viewlogs = ViewLog::where('channel_id',$c->id)
+      $logs = ViewLog::where('channel_id',$c->id)
           ->where(function($query) use ($startDateTime,$finishDateTime){
               $query->where('finished_watching_at','>',$startDateTime)
               ->orWhereNull('finished_watching_at');
               })
           ->where('started_watching_at','<',$finishDateTime)
-          ->distinct('user_id')->count();
+          ->distinct()->get('user_id');
+      
+      $viewlogs = count($logs);
 
       $user_count = ($viewlogs / $total_user) * 100 ;
       $channel = [

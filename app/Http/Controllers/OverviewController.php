@@ -13,13 +13,12 @@ class OverviewController extends Controller
 {
     //
     public function reachusergraph(Request $req){
-        
         $startDate = substr($req->start, 0, 10);
         $startTime = substr($req->start, 11, 19);
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
-        $startDateTime = date($startDate)." ".$startTime;
-        $finishDateTime = date($finishDate)." ".$finishTime;
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
 
         $channels = Channel::all('id', 'channel_name');
         
@@ -71,8 +70,8 @@ class OverviewController extends Controller
         $startTime = substr($req->start, 11, 19);
         $finishDate = substr($req->finish, 0, 10);
         $finishTime = substr($req->finish, 11, 19);
-        $startDateTime = date($startDate)." ".$startTime;
-        $finishDateTime = date($finishDate)." ".$finishTime;
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
 
         $channels = Channel::all('id', 'channel_name');
         $total_user = User::count();
@@ -81,7 +80,6 @@ class OverviewController extends Controller
         $channel_label = [];
     
         foreach ($channels as $c) {
-            
             $viewlogs = ViewLog::where('channel_id', $c->id)
                 ->where(function($query) use ($startDateTime,$finishDateTime){
                     $query->where('finished_watching_at','>',$startDateTime)
@@ -158,9 +156,7 @@ class OverviewController extends Controller
     //     return response()->json(["reachsum"=>array_sum($value),"reach"=>$value,"channels"=>$label],200);
     // }
 
-    public function tvrgraphallchannelzero(Request $req)
-    {
-
+    public function tvrgraphallchannelzero(Request $req){
         $channelArray = array();
         $tvrs = array();
         $viewer = array();
@@ -175,6 +171,7 @@ class OverviewController extends Controller
         $start_range = strtotime($startDate . " " . $startTime);
         $finish_range = strtotime($finishDate . " " . $finishTime);
         $diff = abs($start_range - $finish_range) / 60;
+        
     
         //return response()->json([$di],200);
         //return response()->json(["tvr"=>$diff],200);
@@ -191,10 +188,7 @@ class OverviewController extends Controller
             })
             ->where('started_watching_at', '<', date($finishDate) . " " . $finishTime)
             ->get();
-            /*$viewers = ViewLog::where('channel_id', $c->id)
-        ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
-        ->where('finished_watching_at','>',date($startDate)." ".$startTime)
-        ->get();*/
+            
             foreach ($viewers as $v) {
                 $user= User::where('id',$v->user_id)
                         ->where('type','like','%'.$req->userType.'%')
@@ -411,14 +405,15 @@ class OverviewController extends Controller
     }
 
     public function timespentgraph(Request $req){
-        
-        $startDate=substr($req->start,0,10);
-        $startTime=substr($req->start,11,19);
-        $finishDate=substr($req->finish,0,10);
-        $finishTime=substr($req->finish,11,19);
-        $to_time = strtotime($startDate." ".$startTime);
-        $from_time = strtotime($finishDate." ".$finishTime);
-        $diff=abs($to_time - $from_time) / 60;
+        $startDate = substr($req->start, 0, 10);
+        $startTime = substr($req->start, 11, 19);
+        $finishDate = substr($req->finish, 0, 10);
+        $finishTime = substr($req->finish, 11, 19);
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
+
+        $to_time = strtotime($startDateTime);
+        $from_time = strtotime($finishDateTime);
 
         $channelArray=array();
         $total_time =array();
@@ -427,11 +422,11 @@ class OverviewController extends Controller
         $channels=Channel::all('id','channel_name');
         foreach ($channels as $c) {
             $viewlogs = ViewLog::where('channel_id', $c->id)
-            ->where(function($query) use ($finishDate, $finishTime,$startDate,$startTime){
-            $query->where('finished_watching_at','>',date($startDate)." ".$startTime)
+            ->where(function($query) use ($finishDateTime,$startDateTime){
+            $query->where('finished_watching_at','>',$startDateTime)
             ->orWhereNull('finished_watching_at');
             })
-            ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
+            ->where('started_watching_at','<',$finishDateTime)
             ->get();
             $total_time_viewed = 0;
             foreach ($viewlogs as $v) {
@@ -466,7 +461,6 @@ class OverviewController extends Controller
  
             }
             $total_time_viewed = ($total_time_viewed)/60;
-            //$tota_time_viewed = $tota_time_viewed / $diff;
             $total_time_viewed=round($total_time_viewed);
             
             array_push($total_time,$total_time_viewed);

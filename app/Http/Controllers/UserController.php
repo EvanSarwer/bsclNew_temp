@@ -282,7 +282,6 @@ class UserController extends Controller
 
             $to_time = strtotime($startDate." ".$startTime);
             $from_time = strtotime($finishDate." ".$finishTime);
-            $diff=abs($to_time - $from_time) / 60;
 
             $channelArray=array();
             $total_time =array();
@@ -317,7 +316,7 @@ class UserController extends Controller
                     //$timeviewed = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at))/60;
                 }
                 $total_time_viewed = ($total_time_viewed)/60;
-                //$tota_time_viewed = $tota_time_viewed / $diff;
+
                 $total_time_viewed=round($total_time_viewed);
                 
                 array_push($total_time,$total_time_viewed);

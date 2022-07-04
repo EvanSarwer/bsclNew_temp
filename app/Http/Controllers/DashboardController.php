@@ -178,12 +178,13 @@ public function tvrgraphdashboard(){
       
         $channelArray=array();
         $tvrs=array();
+        $temp = array();
         $viewer=array();
         $ldate = date('Y-m-d H:i:s');
         /*if($req->start=="" && $req->finish==""){
         return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
-        $startDate=date('Y-m-d',strtotime("-30 days"));
+        $startDate=date('Y-m-d',strtotime("-7 days"));
         $startTime="00:00:00";
         $finishDate=date('Y-m-d',strtotime("-1 days"));
         $finishTime="23:59:59";
@@ -247,11 +248,25 @@ public function tvrgraphdashboard(){
               $viewer=array();
               array_push($channelArray,$c->channel_name);
               array_push($tvrs,$tvr);
+              $tempc = array(
+
+                "label"=> $c->channel_name,
+        
+                "value"=> $tvr
+        
+              );
+              array_push($temp,$tempc);      
             }
-            $temptvr=$tvrs;
-            $ntvrs=array();
-            $nchannelArray=array();
-            rsort($temptvr);
+            //return response()->json([$temp],200);
+      
+            $label =array();
+            $value =array();
+            array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
+            for ($i = 0; $i<10;$i++){
+              array_push($label,$temp[$i]['label']);
+              array_push($value,$temp[$i]['value']);
+            }
+            /*rsort($temptvr);
             $rlength=count($tvrs);
             $cc=0;
             for($i=0;$i<$rlength && $cc<10;$i++){
@@ -260,8 +275,8 @@ public function tvrgraphdashboard(){
             array_push($ntvrs,$tvrs[$i]);
             $cc++;
               }
-            }
-      return response()->json(["value"=>$ntvrs,"label"=>$nchannelArray,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
+            }*/
+      return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
             
       }
 
@@ -272,12 +287,14 @@ public function tvrgraphdashboard(){
       
         $channelArray=array();
         $tvrs=array();
+        
+        $temp = array();
         $viewer=array();
         $ldate = date('Y-m-d H:i:s');
         /*if($req->start=="" && $req->finish==""){
         return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
-        $startDate=date('Y-m-d',strtotime("-30 days"));
+        $startDate=date('Y-m-d',strtotime("-7 days"));
         $startTime="00:00:00";
         $finishDate=date('Y-m-d',strtotime("-1 days"));
         $finishTime="23:59:59";
@@ -339,21 +356,36 @@ public function tvrgraphdashboard(){
               $viewer=array();
               array_push($channelArray,$c->channel_name);
               array_push($tvrs,$tvr);
+              $tempc = array(
+
+                "label"=> $c->channel_name,
+        
+                "value"=> $tvr
+        
+              );
+              array_push($temp,$tempc);  
             }
-            $temptvr=$tvrs;
-            $ntvrs=array();
-            $nchannelArray=array();
-            rsort($temptvr);
-            $rlength=count($tvrs);
-            $cc=0;
-            for($i=0;$i<$rlength && $cc<10;$i++){
-              if($tvrs[$i]>$temptvr[10]){
-                array_push($nchannelArray,$channelArray[$i]);
-            array_push($ntvrs,$tvrs[$i]);
-            $cc++;
-              }
+            $label =array();
+            $value =array();
+            array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
+            for ($i = 0; $i<10;$i++){
+              array_push($label,$temp[$i]['label']);
+              array_push($value,$temp[$i]['value']);
             }
-      return response()->json(["value"=>$ntvrs,"label"=>$nchannelArray,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
+            // $temptvr=$tvrs;
+            // $ntvrs=array();
+            // $nchannelArray=array();
+            // rsort($temptvr);
+            // $rlength=count($tvrs);
+            // $cc=0;
+            // for($i=0;$i<$rlength && $cc<10;$i++){
+            //   if($tvrs[$i]>$temptvr[10]){
+            //     array_push($nchannelArray,$channelArray[$i]);
+            // array_push($ntvrs,$tvrs[$i]);
+            // $cc++;
+            //   }
+            // }
+      return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
       
       }      
 

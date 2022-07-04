@@ -387,7 +387,104 @@ public function tvrgraphdashboard(){
             // }
       return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
       
-      }      
+      }     
+      
+      
+    public function sharegraphdashboard(Request $req){
+        
+      $startDate=date('Y-m-d',strtotime("-7 days"));
+        $startTime="00:00:00";
+        $finishDate=date('Y-m-d',strtotime("-1 days"));
+        $finishTime="23:59:59";
+        
+        $temp = array();
+      $to_time = strtotime($startDate." ".$startTime);
+      $from_time = strtotime($finishDate." ".$finishTime);
+      $diff=abs($to_time - $from_time) / 60;
+      $users=User::all();
+      $numOfUser=$users->count();
+ 
+      $channelArray=array();
+      $shares=array();
+      $all_tvr =array();
+
+      $channels=Channel::all('id','channel_name');
+      foreach ($channels as $c) {
+          $tvr =0;
+          $viewelogs = ViewLog::where('channel_id', $c->id)
+                      ->where(function($query) use ($finishDate, $finishTime,$startDate,$startTime){
+                      $query->where('finished_watching_at','>',date($startDate)." ".$startTime)
+                      ->orWhereNull('finished_watching_at');
+                      })
+                      ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
+                      ->get();
+          $total_time_viewed = 0;
+          foreach ($viewelogs as $v) {
+
+              
+                  if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                      $watched_sec = abs($to_time - $from_time);
+                  }
+                  else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                      $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
+                  }
+                  else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                      $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
+                  }
+                  else{
+                      $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                  }
+                  $total_time_viewed = $total_time_viewed + $watched_sec;
+                  //$timeviewed = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at))/60;
+              
+
+
+              
+          }
+          $total_time_viewed = ($total_time_viewed)/60;
+          $tvr = $total_time_viewed / $diff;
+          $tvr=$tvr/$numOfUser;
+          $tvr=$tvr*100;
+          $tvr=round($tvr,4);
+          
+          array_push($all_tvr,$tvr);
+          array_push($channelArray,$c->channel_name);
+
+      }
+      $total_tvr = array_sum($all_tvr);
+      $total_tvr = round($total_tvr,5);
+      
+      $total_share= 0;
+      for($i=0; $i< count($all_tvr); $i++){
+          $s = ($all_tvr[$i]/$total_tvr)*100;
+          $total_share= $total_share+$s;
+          array_push($shares,$s);
+
+      }
+      for($i=0; $i< count($all_tvr); $i++){
+        $tempc = array(
+
+          "label"=> $channelArray[$i],
+  
+          "value"=> $shares[$i]
+  
+        );
+        array_push($temp,$tempc);  
+
+      }
+      $label =array();
+            $value =array();
+            array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
+            for ($i = 0; $i<10;$i++){
+              array_push($label,$temp[$i]['label']);
+              array_push($value,$temp[$i]['value']);
+            }
+      //return response()->json(["Total-tvr"=>$total_tvr,"all_tvr"=>$all_tvr,"total_share"=>$total_share,"share"=>$shares,"channels"=>$channelArray],200);
+      return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
+      
+      //return response()->json(["share"=>$shares,"channels"=>$channelArray],200);
+  }
+
 
       public function activechannellistget(){
         // $request = array("channel_name"=>31,"device_id"=>1,"time_stamp"=>"2022-04-07 14:51:05");

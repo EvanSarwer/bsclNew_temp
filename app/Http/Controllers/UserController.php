@@ -352,8 +352,6 @@ class UserController extends Controller
 
 
 
-
-
     public function LastSeventyTwoViewsGraph(Request $req){
         $rows = 0;
         $chart_labels = [];
@@ -434,8 +432,8 @@ class UserController extends Controller
                 $total_time_viewed = floor($watched_sec/60);
                 $chnls =[
                     "channel_name" => $v->channel->channel_name,
-                    "start" => $start_time,
-                    "finish" => $finish_time,
+                    "start" => date('Y-m-d H:i:s',(strtotime($start_time)+21541)),
+                    "finish" => date('Y-m-d H:i:s',(strtotime($finish_time)+21600)),
                     "min" => $total_time_viewed." min"
                 ];
                 array_push($channelArray,$chnls);
@@ -502,8 +500,8 @@ class UserController extends Controller
                 $total_time_viewed = floor($watched_sec/60);
                 $chnls =[
                     "channel_name" => $v->channel->channel_name,
-                    "start" => $start_time,
-                    "finish" => $finish_time,
+                    "start" => date('Y-m-d H:i:s',(strtotime($start_time)+21541)),
+                    "finish" => date('Y-m-d H:i:s',(strtotime($finish_time)+21600)),
                     "min" => $total_time_viewed." min"
                 ];
                 array_push($channelArray,$chnls);
@@ -516,9 +514,6 @@ class UserController extends Controller
         }
         return response()->json(["error"=> "Error"],200);
     }
-
-
-
 
 
 

@@ -64,6 +64,7 @@ Route::get('/reachuser/dashboard', [DashboardController::class, 'reachuserdashbo
 Route::get('/reach/percent/dashboard', [DashboardController::class, 'reachpercentdashboard']);
 Route::get('/tvrgraph/dashboard', [DashboardController::class, 'tvrgraphdashboard']);
 Route::get('/tvrgraphzero/dashboard', [DashboardController::class, 'tvrgraphzerodashboard']);
+Route::get('/dashboard/timespentuni', [DashboardController::class, 'timeSpentUniverse']);
 
 Route::get('/sharegraph/dashboard', [DashboardController::class, 'sharegraphdashboard']);
 /////////END////////////

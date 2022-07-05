@@ -130,129 +130,49 @@ class DashboardController extends Controller
 
   }
 
-  // public function reachpercentdashboard(){
-      
-  //   $startDate=date('Y-m-d',strtotime("-7 days"));
-  //   $startTime="00:00:00";
-  //   $finishDate=date('Y-m-d',strtotime("-1 days"));
-  //   $finishTime="23:59:59";
-  //   $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
-  //   { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) >0 && $c->id != 39;})
-  //   ->sortByDesc('channel_reach')
-  //   ->take(10)
-  //   ->sortBy('id');
-
-  //   $value = [];
-  //   $label = [];
-  //   foreach($channels as $c){
-  //       $value[] = ($c->channel_reach)*100/Channel::count();
-  //       $label[] = $c->channel_name;
-  //   }
-  //   return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
-  // }
-
   public function reachpercentdashboard(){
-
-    $finishDateTime = date("Y-m-d H:i:s");
-    $min = 1440;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-
-    $channels = Channel::all('id', 'channel_name');
-    $total_user = User::count();
-    $channel_info = [];
-
-    foreach ($channels as $c) {
-      $user_count = 0;
-      $logs = ViewLog::where('channel_id',$c->id)
-          ->where(function($query) use ($startDateTime,$finishDateTime){
-              $query->where('finished_watching_at','>',$startDateTime)
-              ->orWhereNull('finished_watching_at');
-              })
-          ->where('started_watching_at','<',$finishDateTime)
-          ->distinct()->get('user_id');
       
-      $viewlogs = count($logs);
+    $startDate=date('Y-m-d',strtotime("-7 days"));
+    $startTime="00:00:00";
+    $finishDate=date('Y-m-d',strtotime("-1 days"));
+    $finishTime="23:59:59";
+    $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
+    { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) >0 && $c->id != 39;})
+    ->sortByDesc('channel_reach')
+    ->take(10)
+    ->sortBy('id');
 
-      $user_count = ($viewlogs / $total_user) * 100 ;
-      $channel = [
-        "channel_name"=> $c->channel_name,
-        "users"=> $user_count
-      ];
-      array_push($channel_info,$channel);      
+    $value = [];
+    $label = [];
+    foreach($channels as $c){
+        $value[] = ($c->channel_reach)*100/Channel::count();
+        $label[] = $c->channel_name;
     }
-    array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
-    $label =array();
-    $value =array();
-    for ($i = 0; $i<10;$i++){
-      array_push($label,$channel_info[$i]['channel_name']);
-      array_push($value,$channel_info[$i]['users']);
-    }
-    return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
-
+    return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
   }
 
-  public function reachuserdashboard(){
-
-    $finishDateTime = date("Y-m-d H:i:s");
-    $min = 1440;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-
-    $channels = Channel::all('id', 'channel_name');
-    $total_user = User::count();
-    $channel_info = [];
-
-    foreach ($channels as $c) {
-      $user_count = 0;
-      $logs = ViewLog::where('channel_id',$c->id)
-          ->where(function($query) use ($startDateTime,$finishDateTime){
-              $query->where('finished_watching_at','>',$startDateTime)
-              ->orWhereNull('finished_watching_at');
-              })
-          ->where('started_watching_at','<',$finishDateTime)
-          ->distinct()->get('user_id');
+  
       
-      $viewlogs = count($logs);
+public function reachuserdashboard(){
+    
+    
+    $startDate=date('Y-m-d',strtotime("-7 days"));
+    $startTime="00:00:00";
+    $finishDate=date('Y-m-d',strtotime("-1 days"));
+    $finishTime="23:59:59";
+    $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
+    { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) >0 && $c->id != 39;})
+    ->sortByDesc('channel_reach')
+    ->take(10);
 
-      //$user_count = ($viewlogs / $total_user) * 100 ;
-      $channel = [
-        "channel_name"=> $c->channel_name,
-        "users"=> $viewlogs
-      ];
-      array_push($channel_info,$channel);      
+    $value = [];
+    $label = [];
+    foreach($channels as $c){
+        $value[] = $c->channel_reach;
+        $label[] = $c->channel_name;
     }
-    array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
-    $label =array();
-    $value =array();
-    for ($i = 0; $i<10;$i++){
-      array_push($label,$channel_info[$i]['channel_name']);
-      array_push($value,$channel_info[$i]['users']);
-    }
-    return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
-
+    return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
   }
-      
-// public function reachuserdashboard(){
-    
-    
-//     $startDate=date('Y-m-d',strtotime("-7 days"));
-//     $startTime="00:00:00";
-//     $finishDate=date('Y-m-d',strtotime("-1 days"));
-//     $finishTime="23:59:59";
-//     $channels = Channel::all()->filter(function ($c) use ($finishDate, $finishTime,$startDate,$startTime)
-//     { return $c->reach( $startDate, $startTime, $finishDate,$finishTime) >0 && $c->id != 39;})
-//     ->sortByDesc('channel_reach')
-//     ->take(10);
-
-//     $value = [];
-//     $label = [];
-//     foreach($channels as $c){
-//         $value[] = $c->channel_reach;
-//         $label[] = $c->channel_name;
-//     }
-//     return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
-//   }
 
 
 public function tvrgraphdashboard(){

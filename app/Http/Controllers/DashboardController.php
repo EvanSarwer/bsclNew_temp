@@ -375,9 +375,6 @@ public function tvrgraphdashboard(){
         $temp = array();
         $viewer=array();
         $ldate = date('Y-m-d H:i:s');
-        /*if($req->start=="" && $req->finish==""){
-        return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
-        }*/
         $finishDateTime = date("Y-m-d H:i:s");
         $min = 1440;
         $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
@@ -386,12 +383,9 @@ public function tvrgraphdashboard(){
         $finish_range = strtotime($finishDateTime);
         $diff=abs($start_range - $finish_range) / 60;
         
-        //return response()->json([$di],200);
-        //return response()->json(["tvr"=>$diff],200);
         $channels=Channel::all('id','channel_name');
         $users=User::all();
         $numOfUser=$users->count();
-        //$all=array();
         
         foreach ($channels as $c) {
           $viewers = ViewLog::where('channel_id', $c->id)
@@ -456,19 +450,6 @@ public function tvrgraphdashboard(){
               array_push($label,$temp[$i]['label']);
               array_push($value,$temp[$i]['value']);
             }
-            // $temptvr=$tvrs;
-            // $ntvrs=array();
-            // $nchannelArray=array();
-            // rsort($temptvr);
-            // $rlength=count($tvrs);
-            // $cc=0;
-            // for($i=0;$i<$rlength && $cc<10;$i++){
-            //   if($tvrs[$i]>$temptvr[10]){
-            //     array_push($nchannelArray,$channelArray[$i]);
-            // array_push($ntvrs,$tvrs[$i]);
-            // $cc++;
-            //   }
-            // }
       return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
       
       }     
@@ -559,7 +540,6 @@ public function tvrgraphdashboard(){
               array_push($label,$temp[$i]['label']);
               array_push($value,$temp[$i]['value']);
             }
-      //return response()->json(["Total-tvr"=>$total_tvr,"all_tvr"=>$all_tvr,"total_share"=>$total_share,"share"=>$shares,"channels"=>$channelArray],200);
       return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
       
       //return response()->json(["share"=>$shares,"channels"=>$channelArray],200);

@@ -12,12 +12,12 @@ class RequestController extends Controller
 
     //
  public function receive(Request $request){
-    //    $rr = new RawRequest();
-    //    $rr->channel_id = $request->channel_name;
-    //    $rr->device_id = $request->device_id;
-    //    $rr->time_stamp = $request->time_stamp;
-    //    $rr->server_time = Carbon::now()->toDateTimeString();;
-    //    $rr->save();
+       $rr = new RawRequest();
+       $rr->channel_id = $request->channel_name;
+       $rr->device_id = $request->device_id;
+       $rr->time_stamp = $request->time_stamp;
+       $rr->server_time = Carbon::now()->toDateTimeString();;
+       $rr->save();
         
         $channel_id = $request->channel_name;
         $user_id = $request->device_id;
@@ -70,7 +70,7 @@ class RequestController extends Controller
         return false;
     }
    public function wrongDetect($channel_id,$time,$device_id){
-        
+        return false;
         $device = User::where('id',$device_id)->first();
         if($channel_id == 32 || $channel_id==37 || $channel_id==39){
            if($device->wrong_channel && $device->wrong_channel==$channel_id){

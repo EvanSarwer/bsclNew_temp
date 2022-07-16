@@ -11,7 +11,10 @@ use DateTime;
 use Illuminate\Support\Facades\Http;
 class DashboardController extends Controller
 {
-
+  public function __construct()
+  {
+        $this->middleware('auth.admin');
+  }
   public function CurrentStatusUser(){
     $total_user = User::all()->count();
     $active_user =ViewLog::whereNull('finished_watching_at')->distinct('user_id')->count();

@@ -432,7 +432,7 @@ class UserController extends Controller
                 $total_time_viewed = floor($watched_sec/60);
                 $chnls =[
                     "channel_name" => $v->channel->channel_name,
-                    "start" => date('Y-m-d H:i:s',(strtotime($start_time)+21541)),
+                    "start" => date('Y-m-d H:i:s',(strtotime($start_time)+21600)),
                     "finish" => date('Y-m-d H:i:s',(strtotime($finish_time)+21600)),
                     "min" => $total_time_viewed." min"
                 ];
@@ -500,7 +500,7 @@ class UserController extends Controller
                 $total_time_viewed = floor($watched_sec/60);
                 $chnls =[
                     "channel_name" => $v->channel->channel_name,
-                    "start" => date('Y-m-d H:i:s',(strtotime($start_time)+21541)),
+                    "start" => date('Y-m-d H:i:s',(strtotime($start_time)+21600)),
                     "finish" => date('Y-m-d H:i:s',(strtotime($finish_time)+21600)),
                     "min" => $total_time_viewed." min"
                 ];

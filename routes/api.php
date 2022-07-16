@@ -27,21 +27,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-/* Sabbir part */
 
-Route::post('/reach/percent', [SabbirApiController::class, 'reachpercent']);
-Route::post('/reachuser', [SabbirApiController::class, 'reachuser']);
-Route::post('/tvrgraph', [SabbirApiController::class, 'tvrgraph']);
-Route::post('/tvrgraphallchannel', [SabbirApiController::class, 'tvrgraphallchannel']);
-Route::post('/tvrgraphallchannelzero', [SabbirApiController::class, 'tvrgraphallchannelzero']);
-Route::post('/timecheck', [SabbirController::class, 'timecheck']);
-Route::post('/timespent', [SabbirApiController::class, 'timespent']);
-Route::post('/share', [SabbirApiController::class, 'share']);
-Route::get('/userstat', [SabbirApiController::class, 'userstat']);
-Route::get('/channels/viewall', [SabbirApiController::class, 'channels']);
-Route::get('/demo', [SabbirApiController::class, 'demo']);
-Route::get('/homecount', [SabbirApiController::class, 'homecount']);
-/* Sabbir part */
 
 
 

@@ -12,6 +12,10 @@ use DateTime;
 class LiveChannelController extends Controller
 {
     //
+    public function __construct()
+{
+      $this->middleware('auth.admin');
+}
     public function activechannellistgraph(Request $req){
         $channels = Channel::all();
         $activeChannels =[];

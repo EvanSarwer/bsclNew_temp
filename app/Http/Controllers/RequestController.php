@@ -45,14 +45,25 @@ class RequestController extends Controller
             //return $minutes;
             //$tmp_log->delete();
         }
-       if($channel_id != 999){
-            $var=new ViewLog;
-            //$var->id=5010;
-            $var->user_id = $user_id;
-            $var->channel_id = $channel_id;
-            $var->started_watching_at = $started_watching_at;
-            $var->save();
-        }
+        if($channel_id != 999){
+             $var=new ViewLog;
+             //$var->id=5010;
+             $var->user_id = $user_id;
+             $var->channel_id = $channel_id;
+             $var->started_watching_at = $started_watching_at;
+             $var->save();
+
+             $user = User::where('id', $user_id)->first();
+        $user->tvoff=1;
+        $user->save();
+         }
+         else if($channel_id == 999){
+              
+        $user = User::where('id', $user_id)->first();
+        $user->tvoff=0;
+        $user->save();
+          }
+        
         
     }
     public function updateLastReq($u_id,$time){

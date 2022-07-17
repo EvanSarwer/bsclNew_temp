@@ -14,4 +14,37 @@ class DeviceController extends Controller
             return response()->json(["data" => $user], 200);
         }
     }
+    public function deviceOff()
+    {
+        $offdevice=array();
+        $ldate = date('Y-m-d H:i:s');
+        $user = User::select("id","user_name","last_request")->get();
+        //return response()->json(["data" => $user], 200);
+        if ($user) {
+            foreach ($user as $u) {
+                if(abs(strtotime($u->last_request) - strtotime($ldate))>600||$u->last_request==null){
+                    
+                    array_push($offdevice,$u);
+                }
+            }
+            return response()->json(["data" => $offdevice], 200);
+        }
+    }
+    public function currentlyWatching()
+    {
+        $cw=array();
+        $ldate = date('Y-m-d H:i:s');
+        $user = User::select("id","user_name","last_request")->get();
+        //return response()->json(["data" => $user], 200);
+        if ($user) {
+            foreach ($user as $u) {
+                if(abs(strtotime($u->last_request) - strtotime($ldate))<180  && $u->last_request!=null){
+                    
+                    array_push($cw,$u);
+                }
+            }
+            return response()->json(["data" => $cw], 200);
+        }
+    }
+    
 }

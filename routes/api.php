@@ -12,6 +12,7 @@ use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AppUserController;
 use App\Http\Controllers\RequestController;
+use App\Http\Controllers\DeviceController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -40,6 +41,11 @@ Route::post('/auth/sign-up', [AuthController::class, 'signUp']);
 Route::get('/auth/current-user', [AuthController::class, 'currentUser'])->middleware('auth.admin');
 //=========Auth End==========//
 
+////////////////Device//////////////
+
+////////////////Device//////////////
+
+Route::get('/device/tvoff', [DeviceController::class, 'tvoff']);
 //////////Dashboard///////////
 Route::get('/dashboard/CurrentStatusUser', [DashboardController::class, 'CurrentStatusUser']);
 Route::get('/dashboard/CurrentStatusTopReach', [DashboardController::class, 'CurrentStatusTopReach']);

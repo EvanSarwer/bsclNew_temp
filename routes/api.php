@@ -46,6 +46,8 @@ Route::get('/auth/current-user', [AuthController::class, 'currentUser'])->middle
 ////////////////Device//////////////
 
 Route::get('/device/tvoff', [DeviceController::class, 'tvoff']);
+Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff']);
+Route::get('/device/currentlywatching', [DeviceController::class, 'currentlyWatching']);
 //////////Dashboard///////////
 Route::get('/dashboard/CurrentStatusUser', [DashboardController::class, 'CurrentStatusUser']);
 Route::get('/dashboard/CurrentStatusTopReach', [DashboardController::class, 'CurrentStatusTopReach']);

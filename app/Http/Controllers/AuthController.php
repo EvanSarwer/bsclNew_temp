@@ -30,7 +30,7 @@ class AuthController extends Controller
             $data = array("role"=>$user->role,"username"=>$user->user_name,"token"=>$tokenGen);
             return response()->json(["data" => (object)$data, "error" => null], 201);
         } else {
-            return response()->json(["data" => null, "error" => "USERNAME OR PASSWORD IS INCORRECT"], 401);
+            return response()->json(["data" => null, "error" => "USERNAME OR PASSWORD IS INCORRECT"], 422);
         }
     }
 

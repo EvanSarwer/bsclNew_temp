@@ -26,7 +26,7 @@ class UserController extends Controller
                 "channel_name"=>$d->channel->channel_name,
                 "started_watching_at"=>$d->started_watching_at,
                 "finished_watching_at"=>$d->finished_watching_at,
-                "duration_minute"=>$d->duration_minute
+                "duration_sec"=>abs(strtotime($d->started_watching_at)-strtotime($d->finished_watching_at))
             );
             array_push($ndata,$arr);
         }

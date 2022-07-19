@@ -134,7 +134,7 @@ class UserController extends Controller
                 
                 foreach ($viewlogs as $v) {
                     if(($v->finished_watching_at) == Null){
-                        $finishDateTime = date('2022-05-18 23:59:59');
+                        $finishDateTime = date("Y-m-d H:i:s");
                         $from_time = strtotime($finishDateTime);
                         $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
                     }

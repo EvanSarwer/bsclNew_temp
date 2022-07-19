@@ -425,13 +425,13 @@ public function tvrgraphdashboard(){
             }
               //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
               $timeviewd=$timeviewd/60;
-              array_push($viewer,$timeviewd);
+              array_push($viewer,$timeviewd); 
       
               }
               //return response()->json([$viewer],200);
-              $tvr=array_sum($viewer);///$numOfUser;
+              $tvr=array_sum($viewer) /$numOfUser;
               //$tvr=$tvr/60;
-              //$tvr=$tvr/$diff;
+              $tvr=$tvr/$diff;
               //$tvr=$tvr*100;
               unset($viewer);
               $viewer=array();

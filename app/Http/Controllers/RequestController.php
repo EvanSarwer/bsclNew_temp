@@ -26,8 +26,8 @@ class RequestController extends Controller
             $this->updateLastReq($user_id,$started_watching_at);
             return;
         }
-        //$started_watching_at = $request->time_stamp;
-        $started_watching_at =  Carbon::now()->toDateTimeString();;
+        $started_watching_at = $request->time_stamp;
+        //$started_watching_at =  Carbon::now()->toDateTimeString();;
         $log = ViewLog::where('user_id',$user_id)
         ->where('finished_watching_at',NULL)->first();   
         $this->updateLastReq($user_id,$started_watching_at);

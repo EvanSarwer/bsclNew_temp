@@ -82,6 +82,7 @@ Route::post('/user/LastTweentyFourViewsGraph',[UserController::class,'LastTweent
 Route::post('/user/last24WatchingData',[UserController::class,'last24WatchingData']);
 Route::post('/user/last72WatchingData',[UserController::class,'last72WatchingData']);
 Route::get('/getuserlist',[UserController::class,'getallList']);
+Route::post('/user/deviceinfo',[UserController::class,'device_info']);
 
 //
 Route::post('/user/userdefined/usertimespent',[UserController::class,'usertimespent2']);

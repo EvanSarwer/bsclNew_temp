@@ -11,17 +11,35 @@ use DateTime;
 use Illuminate\Support\Facades\Http;
 class DashboardController extends Controller
 {
-  public function __construct()
-  {
-        $this->middleware('auth.admin');
-  }
+  // public function __construct()
+  // {
+  //       $this->middleware('auth.admin');
+  // }
   public function CurrentStatusUser(){
     $total_user = User::all()->count();
+    $stb_total = User::where('type','STB')->get()->count();
+    $ott_total = $total_user - $stb_total;
     $active_user =ViewLog::whereNull('finished_watching_at')->distinct('user_id')->count();
     $active_percent = ($active_user * 100)/$total_user ;
     $active_percent = round($active_percent,2);
 
-    return response()->json(["total_user"=>$total_user,"active_user"=>$active_user,"active_percent"=>$active_percent],200);
+    $cw=array();
+    $ldate = date('Y-m-d H:i:s');
+    $stb_user = User::where('type','STB')->select("id","user_name","last_request")->get();
+    $stb_active = 0;
+    if ($stb_user) {
+        foreach ($stb_user as $u) {
+            if(abs(strtotime($u->last_request) - strtotime($ldate))<180  && $u->last_request!=null){
+                
+                array_push($cw,$u);
+            }
+        }
+        $stb_active = count($cw);
+    }
+    
+    $ott_active = $active_user - $stb_active;
+
+    return response()->json(["total_user"=>$total_user,"stb_total"=>$stb_total,"ott_total"=>$ott_total,"stb_active"=>$stb_active,"ott_active"=>$ott_active, "active_user"=>$active_user,"active_percent"=>$active_percent],200);
 
   }
 

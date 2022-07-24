@@ -12,6 +12,7 @@ use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AppUserController;
 use App\Http\Controllers\RequestController;
+use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\DeviceController;
 /*
 |--------------------------------------------------------------------------
@@ -41,13 +42,22 @@ Route::post('/auth/sign-up', [AuthController::class, 'signUp']);
 Route::get('/auth/current-user', [AuthController::class, 'currentUser'])->middleware('auth.admin');
 //=========Auth End==========//
 
-////////////////Device//////////////
+
+
+////////////////Excel//////////////
+
+Route::post('/excel/reachp', [ExcelController::class, 'reachp']);
+Route::post('/excel/reach0', [ExcelController::class, 'reach0']);
+////////////////Excel//////////////
 
 ////////////////Device//////////////
 
 Route::get('/device/tvoff', [DeviceController::class, 'tvoff']);
 Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff']);
 Route::get('/device/currentlywatching', [DeviceController::class, 'currentlyWatching']);
+////////////////Device//////////////
+
+
 //////////Dashboard///////////
 Route::get('/dashboard/CurrentStatusUser', [DashboardController::class, 'CurrentStatusUser']);
 Route::get('/dashboard/CurrentStatusTopReach', [DashboardController::class, 'CurrentStatusTopReach']);

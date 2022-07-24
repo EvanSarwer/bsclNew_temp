@@ -9,7 +9,8 @@ class DeviceController extends Controller
 {
     public function tvoff()
     {
-        $user = User::where('tvoff', 0)->select("id","user_name")->get();
+        $user = User::where('type', "STB")
+        ->where('tvoff', 0)->select("id","user_name")->get();
         if ($user) {
             return response()->json(["data" => $user], 200);
         }
@@ -18,7 +19,8 @@ class DeviceController extends Controller
     {
         $offdevice=array();
         $ldate = date('Y-m-d H:i:s');
-        $user = User::select("id","user_name","last_request")->get();
+        $user = User::where('type', "STB")
+        ->select("id","user_name","last_request")->get();
         //return response()->json(["data" => $user], 200);
         if ($user) {
             foreach ($user as $u) {
@@ -34,7 +36,8 @@ class DeviceController extends Controller
     {
         $cw=array();
         $ldate = date('Y-m-d H:i:s');
-        $user = User::select("id","user_name","last_request")->get();
+        $user = User::where('type', "STB")
+        ->select("id","user_name","last_request")->get();
         //return response()->json(["data" => $user], 200);
         if ($user) {
             foreach ($user as $u) {

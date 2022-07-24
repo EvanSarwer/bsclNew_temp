@@ -73,6 +73,9 @@ class DashboardController extends Controller
       array_push($channel_info,$channel);      
     }
     array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
+    if($channel_info[0]['channel_name'] == "unknown"){
+      return response()->json(["top_reach"=>$channel_info[1]['channel_name']],200);
+    }
     return response()->json(["top_reach"=>$channel_info[0]['channel_name']],200);
   }
 
@@ -145,11 +148,13 @@ class DashboardController extends Controller
       array_push($channelArray, $chnl);
     }
     array_multisort(array_column($channelArray, 'tvr'), SORT_DESC, $channelArray);
+    if($channelArray[0]['channel_name'] == "unknown"){
+      return response()->json(["top_tvr" => $channelArray[1]['channel_name']], 200);
+    }
     return response()->json(["top_tvr" => $channelArray[0]['channel_name']], 200);
     //return response()->json(["tvr"=>$tvr],200);
-
-
   }
+
 
 //   public function reachpercentdashboard(){
       
@@ -229,8 +234,12 @@ public function reachpercentdashboard(){
   $label =array();
   $value =array();
   for ($i = 0; $i<10;$i++){
-    array_push($label,$channel_info[$i]['channel_name']);
-    array_push($value,$channel_info[$i]['users']);
+    if($channel_info[$i]['channel_name'] == "unknown"){
+      $k=1;
+    }
+    $n = $i + $k;
+    array_push($label,$channel_info[$n]['channel_name']);
+    array_push($value,$channel_info[$n]['users']);
   }
   return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
 
@@ -269,9 +278,16 @@ public function reachuserdashboard(){
   array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
   $label =array();
   $value =array();
+  $k=0;
   for ($i = 0; $i<10;$i++){
-    array_push($label,$channel_info[$i]['channel_name']);
-    array_push($value,$channel_info[$i]['users']);
+
+    if($channel_info[$i]['channel_name'] == "unknown"){
+      $k=1;
+    }
+    $n = $i + $k;
+    array_push($label,$channel_info[$n]['channel_name']);
+    array_push($value,$channel_info[$n]['users']);
+
   }
   return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
 
@@ -368,6 +384,7 @@ public function tvrgraphdashboard(){
             $value =array();
             array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
             for ($i = 0; $i<10;$i++){
+              
               array_push($label,$temp[$i]['label']);
               array_push($value,$temp[$i]['value']);
             }

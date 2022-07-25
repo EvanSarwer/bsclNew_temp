@@ -19,19 +19,50 @@ class UserController extends Controller
         $this->middleware('auth.admin');
     }
     public function logs(Request $req){
-        $ndata=array();
-        $data = ViewLog::where('user_id',$req->user)->orderBy('id','DESC')->get();
-        foreach ($data as $d) {
-            $arr=array(
-                "channel_name"=>$d->channel->channel_name,
-                "started_watching_at"=>$d->started_watching_at,
-                "finished_watching_at"=>$d->finished_watching_at,
-                "duration_sec"=>abs(strtotime($d->started_watching_at)-strtotime($d->finished_watching_at))
-            );
-            array_push($ndata,$arr);
-        }
+        if($req->user != "" && $req->start != "" && $req->finish != ""){
+            
+            $startDate=substr($req->start,0,10);
+            $startTime=substr($req->start,11,19);
+            $finishDate=substr($req->finish,0,10);
+            $finishTime=substr($req->finish,11,19);
 
-        return response()->json(["data"=> $ndata],200);
+            $startDateTime = date($startDate)." ".$startTime;
+            $finishDateTime = date($finishDate)." ".$finishTime;
+
+            //return response()->json(["user"=>$req->user,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
+
+            $ndata=array();
+            $data = ViewLog::where('user_id', $req->user)
+                ->where(function($query) use ($startDateTime,$finishDateTime){
+                    $query->where('finished_watching_at','>',$startDateTime)
+                    ->orWhereNull('finished_watching_at');
+                    })
+                ->where('started_watching_at','<',$finishDateTime)
+                ->orderBy('id','DESC')->get();
+        
+            //$data = ViewLog::where('user_id',$req->user)->orderBy('id','DESC')->get();
+            //return response()->json(["user"=>$req->user,"start"=>$startDateTime,"finish"=>$finishDateTime,"data"=>$data],200);
+            foreach ($data as $d) {
+                if(($d->finished_watching_at) == Null ){
+                    $from_time = date('Y-m-d H:i:s');
+                }
+                else{
+                    $from_time = $d->finished_watching_at;
+                }
+                $arr=array(
+                    "log_id"=>$d->id,
+                    "channel_name"=>$d->channel->channel_name,
+                    "started_watching_at"=>$d->started_watching_at,
+                    "finished_watching_at"=>$d->finished_watching_at,
+                    "duration_sec"=>abs(strtotime($d->started_watching_at)-strtotime($from_time))
+                );
+                array_push($ndata,$arr);
+            }
+
+            return response()->json(["data"=> $ndata],200);
+        }
+        return response()->json(["error"=> "Error"],200);
+        
     }
     //
     public function usertimespent(Request $req){

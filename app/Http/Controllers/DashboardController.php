@@ -233,6 +233,7 @@ public function reachpercentdashboard(){
   array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
   $label =array();
   $value =array();
+  $k=0;
   for ($i = 0; $i<10;$i++){
     if($channel_info[$i]['channel_name'] == "unknown"){
       $k=1;
@@ -383,10 +384,15 @@ public function tvrgraphdashboard(){
             $label =array();
             $value =array();
             array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
+            $k=0;
             for ($i = 0; $i<10;$i++){
-              
-              array_push($label,$temp[$i]['label']);
-              array_push($value,$temp[$i]['value']);
+
+              if($temp[$i]['label'] == "unknown"){
+                $k=1;
+              }
+              $n = $i + $k;
+              array_push($label,$temp[$n]['label']);
+              array_push($value,$temp[$n]['value']);
             }
             /*rsort($temptvr);
             $rlength=count($tvrs);
@@ -484,9 +490,15 @@ public function tvrgraphdashboard(){
             $label =array();
             $value =array();
             array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
+            $k=1;
             for ($i = 0; $i<10;$i++){
-              array_push($label,$temp[$i]['label']);
-              array_push($value,$temp[$i]['value']);
+
+              if($temp[$i]['label'] == "unknown"){
+                $k=1;
+              }
+              $n = $i + $k;
+              array_push($label,$temp[$n]['label']);
+              array_push($value,$temp[$n]['value']);
             }
       return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
       
@@ -572,12 +584,17 @@ public function tvrgraphdashboard(){
 
       }
       $label =array();
-            $value =array();
-            array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
-            for ($i = 0; $i<10;$i++){
-              array_push($label,$temp[$i]['label']);
-              array_push($value,$temp[$i]['value']);
-            }
+      $value =array();
+      array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
+      $k=0;
+      for ($i = 0; $i<10;$i++){
+        if($temp[$i]['label'] == "unknown"){
+          $k=1;
+        }
+        $n = $i + $k;
+        array_push($label,$temp[$n]['label']);
+        array_push($value,$temp[$n]['value']);
+      }
       return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
       
       //return response()->json(["share"=>$shares,"channels"=>$channelArray],200);
@@ -669,9 +686,14 @@ public function tvrgraphdashboard(){
         $label =array();
         $value =array();
         array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
+        $k=0;
         for ($i = 0; $i<10;$i++){
-          array_push($label,$temp[$i]['label']);
-          array_push($value,$temp[$i]['value']);
+          if($temp[$i]['label'] == "unknown"){
+            $k=1;
+          }
+          $n = $i + $k;
+          array_push($label,$temp[$n]['label']);
+          array_push($value,$temp[$n]['value']);
         }
         // $temptvr=$tvrs;
         // $ntvrs=array();

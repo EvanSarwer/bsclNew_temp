@@ -11,10 +11,11 @@ use DateTime;
 use Illuminate\Support\Facades\Http;
 class DashboardController extends Controller
 {
-  // public function __construct()
-  // {
-  //       $this->middleware('auth.admin');
-  // }
+  public function __construct()
+  {
+        $this->middleware('auth.admin');
+  }
+  
   public function CurrentStatusUser(){
     $total_user = User::all()->count();
     $stb_total = User::where('type','STB')->get()->count();
@@ -490,7 +491,7 @@ public function tvrgraphdashboard(){
             $label =array();
             $value =array();
             array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
-            $k=1;
+            $k=0;
             for ($i = 0; $i<10;$i++){
 
               if($temp[$i]['label'] == "unknown"){

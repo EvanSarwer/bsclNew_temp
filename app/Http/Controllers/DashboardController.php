@@ -23,20 +23,24 @@ class DashboardController extends Controller
     $active_user =ViewLog::whereNull('finished_watching_at')->distinct('user_id')->count();
     $active_percent = ($active_user * 100)/$total_user ;
     $active_percent = round($active_percent,2);
-
-    $cw=array();
-    $ldate = date('Y-m-d H:i:s');
-    $stb_user = User::where('type','STB')->select("id","user_name","last_request")->get();
-    $stb_active = 0;
-    if ($stb_user) {
-        foreach ($stb_user as $u) {
-            if(abs(strtotime($u->last_request) - strtotime($ldate))<180  && $u->last_request!=null){
+    //$stb_active=ViewLog::where('type','STB')->whereNull('finished_watching_at')->distinct('user_id')->count();
+    
+    $stb_active = User::whereHas('viewLogs', function($query){
+                    $query->where('finished_watching_at', null);
+                  })->get()->count();
+    // $stb_user = User::where('type','STB')->select("id","user_name","last_request")->get();
+    // $stb_active = 0;
+    // $cw=array();
+    // $ldate = date('Y-m-d H:i:s');
+    // if ($stb_user) {
+    //     foreach ($stb_user as $u) {
+    //         if(abs(strtotime($u->last_request) - strtotime($ldate))<180  && $u->last_request!=null){
                 
-                array_push($cw,$u);
-            }
-        }
-        $stb_active = count($cw);
-    }
+    //             array_push($cw,$u);
+    //         }
+    //     }
+    //     $stb_active = count($cw);
+    // }
     
     $ott_active = $active_user - $stb_active;
 

@@ -46,8 +46,10 @@ Route::get('/auth/current-user', [AuthController::class, 'currentUser'])->middle
 
 ////////////////Excel//////////////
 
-Route::post('/excel/reachp', [ExcelController::class, 'reachp']);
-Route::post('/excel/reach0', [ExcelController::class, 'reach0']);
+// Route::post('/excel/reachp', [ExcelController::class, 'reachp']);
+// Route::post('/excel/reach0', [ExcelController::class, 'reach0']);
+// Route::post('/excel/tvr0', [ExcelController::class, 'tvr0']);
+// Route::post('/excel/tvrp', [ExcelController::class, 'tvrp']);
 ////////////////Excel//////////////
 
 ////////////////Device//////////////

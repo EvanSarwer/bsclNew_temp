@@ -20,6 +20,7 @@ class LiveChannelController extends Controller
         $channels = Channel::all();
         $activeChannels =[];
         $number_of_user=[];
+        $points=[];
         if(count($channels) > 0){
             foreach ($channels as $c){
                 $viewlogs = ViewLog::where('channel_id',$c->id)
@@ -37,6 +38,9 @@ class LiveChannelController extends Controller
                                 ->first();
                         if($user){
                             $user_count = $user_count + 1;
+                            $uu = array("id"=>$user->id, "title"=>$user->user_name, "lat"=>$user->lat, "lng"=>$user->lng);
+                            array_push($points,$uu);
+                            
                         }
                         else{
                             continue;
@@ -58,6 +62,6 @@ class LiveChannelController extends Controller
             }
         }
         
-        return response()->json(["channels"=>$activeChannels,"user_count"=>$number_of_user],200);
+        return response()->json(["channels"=>$activeChannels,"user_count"=>$number_of_user,"points"=>$points],200);
     }
 }

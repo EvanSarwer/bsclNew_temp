@@ -52,7 +52,12 @@ Route::get('/auth/current-user', [AuthController::class, 'currentUser'])->middle
 // Route::post('/excel/tvrp', [ExcelController::class, 'tvrp']);
 ////////////////Excel//////////////
 
-////////////////Device//////////////
+////////////////Device User//////////////
+Route::get('/deviceuser/list',[DeviceController::class,'deviceUserList']);
+Route::post('/deviceuser/create',[DeviceController::class,'addDeviceUser']);
+Route::post('/deviceuser/delete',[DeviceController::class,'deleteDeviceUser']);
+Route::get('/deviceuser/get/{user_name}',[DeviceController::class,'getDeviceUser']);
+Route::post('/deviceuser/edit',[DeviceController::class,'editDeviceUser']);
 
 Route::get('/device/tvoff', [DeviceController::class, 'tvoff']);
 Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff']);

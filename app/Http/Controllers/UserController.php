@@ -43,18 +43,41 @@ class UserController extends Controller
             //$data = ViewLog::where('user_id',$req->user)->orderBy('id','DESC')->get();
             //return response()->json(["user"=>$req->user,"start"=>$startDateTime,"finish"=>$finishDateTime,"data"=>$data],200);
             foreach ($data as $d) {
-                if(($d->finished_watching_at) == Null ){
-                    $from_time = date('Y-m-d H:i:s');
+                // if(($d->finished_watching_at) == Null ){
+                //     $from_time = date('Y-m-d H:i:s');
+                // }
+                // else{
+                //     $from_time = $d->finished_watching_at;
+                // }
+
+                if(((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null ) )){
+                    $to_time = $startDateTime;
+                    $from_time = $finishDateTime;
+                }
+                else if(((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && ((strtotime($d->finished_watching_at)) <= (strtotime($finishDateTime)))){
+                    $to_time = $startDateTime;
+                    $from_time = $d->finished_watching_at;
+
+                }
+                else if(((strtotime($d->started_watching_at)) >= (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null ) )){
+                    $to_time = $d->started_watching_at;
+                    $from_time = $finishDateTime;
                 }
                 else{
+                    $to_time = $d->started_watching_at;
                     $from_time = $d->finished_watching_at;
                 }
+
+
+
+
+
                 $arr=array(
                     "log_id"=>$d->id,
                     "channel_name"=>$d->channel->channel_name,
-                    "started_watching_at"=>$d->started_watching_at,
-                    "finished_watching_at"=>$d->finished_watching_at,
-                    "duration_sec"=>abs(strtotime($d->started_watching_at)-strtotime($from_time))
+                    "started_watching_at"=>$to_time,
+                    "finished_watching_at"=>$from_time,
+                    "duration_sec"=>abs(strtotime($to_time)-strtotime($from_time))
                 );
                 array_push($ndata,$arr);
             }

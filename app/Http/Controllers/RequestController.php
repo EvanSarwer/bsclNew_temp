@@ -81,14 +81,14 @@ class RequestController extends Controller
         return false;
     }
    public function wrongDetect($channel_id,$time,$device_id){
-        return false;
+        return false;//
         $device = User::where('id',$device_id)->first();
-        if($channel_id == 32 || $channel_id==37 || $channel_id==39){
+        if($channel_id == 32 || $channel_id==37 || $channel_id==39){//only 39
            if($device->wrong_channel && $device->wrong_channel==$channel_id){
             $date = new DateTime($device->wrong_time);
             $date2 = new DateTime();
             $diff = $date2->getTimestamp() - $date->getTimestamp();
-            if($diff > 40){
+            if($diff > 40){//seconds ex 30
                 $device->wrong_time = null;
                 $device->wrong_channel= null;
                 $device->save();

@@ -13,6 +13,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AppUserController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ExcelController;
+use App\Http\Controllers\TrendController;
 use App\Http\Controllers\DeviceController;
 /*
 |--------------------------------------------------------------------------
@@ -114,7 +115,10 @@ Route::post('trend/tvr/percent', [ChannelController::class, 'tvrtrend']);
 Route::post('trend/tvr/zero', [ChannelController::class, 'tvrtrendzero']);
 Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent']);
 Route::post('channel/definedtrendreachp', [ChannelController::class, 'definedtrendreachp']);
+Route::post('channel/definedtrendreachp', [ChannelController::class, 'definedtrendreachp']);
 Route::post('channel/definedtrendreach0', [ChannelController::class, 'definedtrendreach0']);
+Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0']);
+Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreachp']);
 Route::post('channel/definedtrendtvrp', [ChannelController::class, 'definedtrendtvrp']);
 Route::post('channel/definedtrendtvr0', [ChannelController::class, 'definedtrendtvr0']);
 //////////END/////////////////

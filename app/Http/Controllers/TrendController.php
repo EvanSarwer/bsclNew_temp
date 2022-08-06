@@ -14,49 +14,28 @@ class TrendController extends Controller
     //
     public function rangedtrendreachp(Request $req)
     {
-        $startDate = substr($req->start, 0, 10);
-        $startTime = substr($req->start, 11, 19);
-        $finishDate = substr($req->finish, 0, 10);
-        $finishTime = substr($req->finish, 11, 19);
-        $startDateTime = date($startDate) . " " . $startTime;
-        $finishDateTime = date($finishDate) . " " . $finishTime;
-        $time = array();
-        array_push($time, date("Y-m-d H:i:s", strtotime($startDateTime)));
-        while (true) {
-
-            $demotime = strtotime("+15 minutes", strtotime($time[count($time) - 1]));
-            if ($demotime < strtotime($finishDateTime)) {
-                array_push($time, date("Y-m-d H:i:s", $demotime));
-            } else {
-                break;
-            }
-        }
+        $time = $this->ranged_time($req->range, $req->start, $req->finish);
+        $reachs = array();
+        $label = array();
+        $len = count($time) - 1;
         //return response()->json(["time"=>$time],200);
         $reachs = array();
-        $viewer = array();
         $users = User::all();
         $numOfUser = $users->count();
-        $len = count($time) - 1;
         for ($i = 0; $i < $len; $i++) {
 
-            $viewers = ViewLog::where('channel_id', $req->id)
-                ->where(function ($query) use ($time, $i) {
-                    $query->where('finished_watching_at', '>', date("Y-m-d H:i:s", strtotime($time[$i])))
-                        ->orWhereNull('finished_watching_at');
-                })
-                ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i + 1])))
-                ->get();
+            $viewers = $this->reach($req->id, $time[$i], $time[$i + 1]);
 
-            foreach ($viewers as $v) {
-                array_push($viewer, $v->user->id);
+            array_push($reachs, ($viewers / $numOfUser) * 100);
+            if ($req->range == "15") {
+                $mid = strtotime("+450 seconds", strtotime($time[$i]));
+                $mid = date("Y-m-d H:i:s", $mid);
+                array_push($label, $mid);
+            } else {
+                $mid = strtotime("+900 seconds", strtotime($time[$i]));
+                $mid = date("Y-m-d H:i:s", $mid);
+                array_push($label, $mid);
             }
-            $viewer = array_values(array_unique($viewer));
-            $numofViewer = count($viewer);
-            $reach = ($numofViewer / $numOfUser) * 100;
-            unset($viewer);
-            $viewer = array();
-
-            array_push($reachs, $reach);
         }
 
         return response()->json(["values" => $reachs], 200);
@@ -64,51 +43,60 @@ class TrendController extends Controller
     //
     public function rangedtrendreach0(Request $req)
     {
-        $startDate = substr($req->start, 0, 10);
-        $startTime = substr($req->start, 11, 19);
-        $finishDate = substr($req->finish, 0, 10);
-        $finishTime = substr($req->finish, 11, 19);
+
+        $time = $this->ranged_time($req->range, $req->start, $req->finish);
+        $reachs = array();
+        $label = array();
+        $len = count($time) - 1;
+        for ($i = 0; $i < $len; $i++) {
+            $viewers = $this->reach($req->id, $time[$i], $time[$i + 1]);
+            array_push($reachs, $viewers);
+            if ($req->range == "15") {
+                $mid = strtotime("+450 seconds", strtotime($time[$i]));
+                $mid = date("Y-m-d H:i:s", $mid);
+                array_push($label, $mid);
+            } else {
+                $mid = strtotime("+900 seconds", strtotime($time[$i]));
+                $mid = date("Y-m-d H:i:s", $mid);
+                array_push($label, $mid);
+            }
+        }
+        return response()->json(["values" => $reachs, "label" => $label, "time" => $time], 200);
+    }
+
+    public function reach($id, $start, $finish)
+    {
+        $viewers = ViewLog::where('channel_id', $id)
+            ->where(function ($query) use ($start) {
+                $query->where('finished_watching_at', '>', $start)
+                    ->orWhereNull('finished_watching_at');
+            })
+            ->where('started_watching_at', '<', $finish)
+            ->select('user_id')
+            ->distinct('user_id')
+            ->count();
+        return $viewers;
+    }
+    
+    public function ranged_time($range, $start, $finish)
+    {
+        $startDate = substr($start, 0, 10);
+        $startTime = substr($start, 11, 19);
+        $finishDate = substr($finish, 0, 10);
+        $finishTime = substr($finish, 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
         $time = array();
         array_push($time, date("Y-m-d H:i:s", strtotime($startDateTime)));
         while (true) {
 
-            $demotime = strtotime("+15 minutes", strtotime($time[count($time) - 1]));
+            $demotime = strtotime("+" . $range . " minutes", strtotime($time[count($time) - 1]));
             if ($demotime < strtotime($finishDateTime)) {
                 array_push($time, date("Y-m-d H:i:s", $demotime));
             } else {
                 break;
             }
         }
-        //return response()->json(["time"=>$time],200);
-        $reachs = array();
-        $viewer = array();
-        $users = User::all();
-        $numOfUser = $users->count();
-        $len = count($time) - 1;
-        for ($i = 0; $i < $len; $i++) {
-
-            $viewers = ViewLog::where('channel_id', $req->id)
-                ->where(function ($query) use ($time, $i) {
-                    $query->where('finished_watching_at', '>', date("Y-m-d H:i:s", strtotime($time[$i])))
-                        ->orWhereNull('finished_watching_at');
-                })
-                ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i + 1])))
-                ->get();
-
-            foreach ($viewers as $v) {
-                array_push($viewer, $v->user->id);
-            }
-            $viewer = array_values(array_unique($viewer));
-            $numofViewer = count($viewer);
-            $reach = $numofViewer; //($numofViewer / $numOfUser) * 100;
-            unset($viewer);
-            $viewer = array();
-
-            array_push($reachs, $reach);
-        }
-
-        return response()->json(["values" => $reachs], 200);
+        return $time;
     }
 }

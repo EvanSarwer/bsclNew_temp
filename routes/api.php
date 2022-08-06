@@ -122,11 +122,20 @@ Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent'])
 Route::post('channel/definedtrendreachp', [ChannelController::class, 'definedtrendreachp']);
 Route::post('channel/definedtrendreachp', [ChannelController::class, 'definedtrendreachp']);
 Route::post('channel/definedtrendreach0', [ChannelController::class, 'definedtrendreach0']);
-Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0']);
-Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreachp']);
 Route::post('channel/definedtrendtvrp', [ChannelController::class, 'definedtrendtvrp']);
 Route::post('channel/definedtrendtvr0', [ChannelController::class, 'definedtrendtvr0']);
 //////////END/////////////////
+
+
+//////////////trend////////////////////
+
+
+Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0']);
+Route::post('channel/rangedtrendreachp', [TrendController::class, 'rangedtrendreachp']);
+// Route::post('channel/rangedtrendtvr0', [TrendController::class, 'rangedtrendtvr0']);
+// Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp']);
+//////////////trend////////////////////
+
 
 Route::post('/appuser/changepass', [AppUserController::class, 'changepass']);
 //Tanvir APIs//

@@ -132,8 +132,8 @@ Route::post('channel/definedtrendtvr0', [ChannelController::class, 'definedtrend
 
 Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0']);
 Route::post('channel/rangedtrendreachp', [TrendController::class, 'rangedtrendreachp']);
-// Route::post('channel/rangedtrendtvr0', [TrendController::class, 'rangedtrendtvr0']);
-// Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp']);
+Route::post('channel/rangedtrendtvr0', [TrendController::class, 'rangedtrendtvr0']);
+Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp']);
 //////////////trend////////////////////
 
 

@@ -12,10 +12,12 @@ use DateTime;
 
 class ChannelController extends Controller
 {
-  public function __construct()
-  {
-    $this->middleware('auth.admin');
-  }
+  // public function __construct()
+  // {
+  //       $this->middleware('auth.admin');
+  // }
+
+
   public function definedtrendreachp(Request $req)
   {
     $reachs = array();

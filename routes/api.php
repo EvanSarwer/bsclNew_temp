@@ -40,7 +40,7 @@ Route::post('/auth/forgetPassword-Email', [AuthController::class, 'forgetPassEma
 Route::post('/auth/forgetPass-Validation', [AuthController::class, 'forgetPassTokenValidation']);
 Route::post('/auth/newPassSubmit', [AuthController::class, 'forgetPassSubmit']);
 Route::post('/auth/sign-up', [AuthController::class, 'signUp']);
-Route::get('/auth/current-user', [AuthController::class, 'currentUser'])->middleware('auth.admin');
+Route::get('/auth/current-user', [AuthController::class, 'currentUser']);
 //=========Auth End==========//
 
 

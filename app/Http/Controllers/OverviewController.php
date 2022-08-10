@@ -12,10 +12,11 @@ use DateTime;
 class OverviewController extends Controller
 {
     //
-    public function __construct()
-{
-      $this->middleware('auth.admin');
-}
+    // public function __construct()
+    // {
+    //     $this->middleware('auth.admin');
+    // }
+
     public function reachusergraph(Request $req){
         $startDate = substr($req->start, 0, 10);
         $startTime = substr($req->start, 11, 19);

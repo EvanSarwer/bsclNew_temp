@@ -77,7 +77,112 @@ class TrendController extends Controller
             ->count();
         return $viewers;
     }
-    
+    public function tvr($id, $start, $finish, $type)
+    {
+
+        $viewer = array();
+        $start_range = strtotime($start);
+        $finish_range = strtotime($finish);
+        $diff = abs($start_range - $finish_range) / 60;
+        $users = User::all();
+        $numOfUser = $users->count();
+        $ldate = date('Y-m-d H:i:s');
+        $viewers = ViewLog::where('channel_id', $id)
+            ->where(function ($query) use ($start) {
+                $query->where('finished_watching_at', '>', $start)
+                    ->orWhereNull('finished_watching_at');
+            })
+            ->where('started_watching_at', '<', $finish)
+            ->get();
+
+
+        foreach ($viewers as $v) {
+            if ($v->finished_watching_at == null) {
+                if ((strtotime($v->started_watching_at)) < ($start_range)) {
+                    $timeviewd = abs($start_range - strtotime($ldate));
+                } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
+                    $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
+                }
+            } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
+                $timeviewd = abs($start_range - $finish_range);
+            } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
+                $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
+            } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
+                $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
+            } else {
+                $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+            }
+            $timeviewd = $timeviewd / 60;
+            array_push($viewer, $timeviewd);
+        }
+        if ($type == "p") {
+            $tvr = array_sum($viewer) / $numOfUser;
+            $tvr = $tvr / $diff;
+            $tvr = $tvr * 100;
+        } else {
+            $tvr = array_sum($viewer) / $numOfUser;
+            $tvr = $tvr / $diff;
+            $tvr = $tvr; //*100; 
+        }
+        unset($viewer);
+        $viewer = array();
+
+        return $tvr;
+    }
+
+    public function rangedtrendtvrp(Request $req)
+    {
+        $time = $this->ranged_time($req->range, $req->start, $req->finish);
+        $tvrs = array();
+        $label = array();
+        $len = count($time) - 1;
+        //return response()->json(["time"=>$time],200);
+        $tvrs = array();
+        $users = User::all();
+        $numOfUser = $users->count();
+        for ($i = 0; $i < $len; $i++) {
+
+            $viewers = $this->tvr($req->id, $time[$i], $time[$i + 1], "p");
+
+            array_push($tvrs, $viewers * 100);
+            if ($req->range == "15") {
+                $mid = strtotime("+450 seconds", strtotime($time[$i]));
+                $mid = date("Y-m-d H:i:s", $mid);
+                array_push($label, $mid);
+            } else {
+                $mid = strtotime("+900 seconds", strtotime($time[$i]));
+                $mid = date("Y-m-d H:i:s", $mid);
+                array_push($label, $mid);
+            }
+        }
+
+        return response()->json(["values" => $tvrs], 200);
+    }
+    //
+    public function rangedtrendtvr0(Request $req)
+    {
+
+        $time = $this->ranged_time($req->range, $req->start, $req->finish);
+        $tvrs = array();
+        $label = array();
+        $len = count($time) - 1;
+        for ($i = 0; $i < $len; $i++) {
+            $viewers = $this->tvr($req->id, $time[$i], $time[$i + 1], "0");
+            array_push($tvrs, $viewers);
+            if ($req->range == "15") {
+                $mid = strtotime("+450 seconds", strtotime($time[$i]));
+                $mid = date("Y-m-d H:i:s", $mid);
+                array_push($label, $mid);
+            } else {
+                $mid = strtotime("+900 seconds", strtotime($time[$i]));
+                $mid = date("Y-m-d H:i:s", $mid);
+                array_push($label, $mid);
+            }
+        }
+        return response()->json(["values" => $tvrs, "label" => $label, "time" => $time], 200);
+    }
+
+
     public function ranged_time($range, $start, $finish)
     {
         $startDate = substr($start, 0, 10);

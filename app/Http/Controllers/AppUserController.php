@@ -10,10 +10,10 @@ use Datetime;
 
 class AppUserController extends Controller
 {
-    public function __construct()
-{
-      $this->middleware('auth.admin');
-}
+    // public function __construct()
+    // {
+    //     $this->middleware('auth.admin');
+    // }
 
     //
     function changepass(Request $req){

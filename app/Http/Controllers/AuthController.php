@@ -141,7 +141,7 @@ class AuthController extends Controller
         $token = $req->header('Authorization');
         $userToken = Token::where('token', $token)->first();
         if (!$userToken) return response()->json(["data" => null, "error" => "Invalid Token"], 404);
-        return response()->json(["data" => $userToken->user, "error" => null], 200);
+        return response()->json(["data" => $userToken->user_id, "error" => null], 200);
     }
     function logout(Request $req){
         $token = $req->header('Authorization');

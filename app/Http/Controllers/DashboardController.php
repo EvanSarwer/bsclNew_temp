@@ -11,10 +11,10 @@ use DateTime;
 use Illuminate\Support\Facades\Http;
 class DashboardController extends Controller
 {
-  public function __construct()
-  {
-        $this->middleware('auth.admin');
-  }
+  // public function __construct()
+  // {
+  //       $this->middleware('auth.admin','auth.user');
+  // }
   
   public function CurrentStatusUser(){
     $total_user = User::all()->count();

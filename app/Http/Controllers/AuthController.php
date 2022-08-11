@@ -21,6 +21,8 @@ class AuthController extends Controller
     {
         $user = Login::where('user_name', $req->username)->where('password', md5($req->password))->first();
         if ($user) {
+            $old_tokens = Token::where('user_id',$user->id)->delete();
+
             $tokenGen = bin2hex(random_bytes(37));
             $token = new Token();
             $token->value = md5($tokenGen);

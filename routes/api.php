@@ -129,10 +129,15 @@ Route::post('channel/definedtrendtvr0', [ChannelController::class, 'definedtrend
 //////////////trend////////////////////
 
 
-Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0'])->middleware('auth.admin.user');
-Route::post('channel/rangedtrendreachp', [TrendController::class, 'rangedtrendreachp'])->middleware('auth.admin.user');
-Route::post('channel/rangedtrendtvr0', [TrendController::class, 'rangedtrendtvr0'])->middleware('auth.admin.user');
-Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp'])->middleware('auth.admin.user');
+
+Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0']);
+Route::post('trend/dayrangedreach0', [TrendController::class, 'dayrangedtrendreach0']);
+//Route::post('trend/dayrangedreachp', [TrendController::class, 'dayrangedtrendreachp']);
+Route::get('demo', [TrendController::class, 'dayrange']);
+Route::post('channel/rangedtrendreachp', [TrendController::class, 'rangedtrendreachp']);
+Route::post('channel/rangedtrendtvr0', [TrendController::class, 'rangedtrendtvr0']);
+Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp']);
+
 //////////////trend////////////////////
 
 

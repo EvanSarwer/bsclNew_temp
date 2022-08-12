@@ -11,6 +11,99 @@ use DateTime;
 
 class TrendController extends Controller
 {
+
+
+    public function dayrangedtrendreach0(Request $req)
+    {
+
+        //$numOfUser = $users->count();
+        $time = $this->dayrange($req->start, $req->finish, ((int)$req->range));
+
+        //   return response()->json(["time" => $time], 200);
+        if (((int)$req->range) == 30) {
+            $m = 900;
+            $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+        } else {
+            $m = 450;
+            $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+        }
+        //return response()->json(["time" => count($reachs)], 200);
+        $label = array();
+        foreach ($time as $tt) {
+            for ($i = 0; $i < count($tt); $i++) {
+                $viewers = $this->views($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
+                //return response()->json(["time" => $viewers], 200);
+                //return response()->json(["time" => $viewers], 200);
+                if (!empty($viewers)) {
+                    //return response()->json(["time" => $viewers,"timer" => $i], 200);
+                    $reachs[$i] = array_merge($reachs[$i], $viewers);
+                }
+            }
+        }
+        for ($i = 0; $i < count($tt); $i++) {
+            $reachs[$i] = count(array_unique($reachs[$i]));
+            $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
+            $mid = date("H:i:s", $mid);
+            array_push($label, $mid);
+        }
+        return response()->json(["values" => $reachs, "label" => $label], 200);
+    }
+
+
+    
+
+
+    public function views($id, $start, $finish)
+    {
+        $vv = array();
+        $viewers = ViewLog::where('channel_id', $id)
+            ->where(function ($query) use ($start) {
+                $query->where('finished_watching_at', '>', $start)
+                    ->orWhereNull('finished_watching_at');
+            })
+            ->where('started_watching_at', '<', $finish)
+            ->select('user_id')
+            ->distinct('user_id')
+            ->get();
+        foreach ($viewers as $v) {
+            array_push($vv, $v->user_id);
+        }
+        return $vv;
+    }
+    public function dayrange($s, $f, $d)
+    {
+
+        $ms = array();
+        if ($d == 30) {
+            $l = 48;
+        } else {
+            $l = 96;
+        }
+
+        $sa = array();
+        while (strtotime($s) <= strtotime($f)) {
+
+            array_push($sa, $s);
+            $s = date('Y-m-d', strtotime("+1 day", strtotime($s)));
+        }
+        foreach ($sa as $s) {
+            $ts = array();
+            $m = 0;
+
+            for ($i = 0; $i < $l; $i++) { //19
+                $st = (date('Y-m-d H:i:s', strtotime("+" . $m . " minutes", strtotime($s))));
+                $m = $m + $d;
+                $ft = (date('Y-m-d H:i:s', strtotime("+" . $m . " minutes", strtotime($s))));
+                $tts = array("start" => $st, "finish" => $ft);
+
+                array_push($ts, $tts);
+            }
+            array_push($ms, $ts);
+            //echo $s."<br/>";
+        }
+        return $ms;
+    }
+
     //
     public function rangedtrendreachp(Request $req)
     {
@@ -63,6 +156,8 @@ class TrendController extends Controller
         }
         return response()->json(["values" => $reachs, "label" => $label, "time" => $time], 200);
     }
+
+
 
     public function reach($id, $start, $finish)
     {
@@ -181,6 +276,7 @@ class TrendController extends Controller
         }
         return response()->json(["values" => $tvrs, "label" => $label, "time" => $time], 200);
     }
+
 
 
     public function ranged_time($range, $start, $finish)

@@ -78,7 +78,7 @@ class TrendController extends Controller
             }
         }
         for ($i = 0; $i < count($tt); $i++) {
-            $reachs[$i] = (count(array_unique($reachs[$i]))*100)/$numOfUser;
+            $reachs[$i] = (count(array_unique($reachs[$i])) * 100) / $numOfUser;
             $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
             $mid = date("H:i:s", $mid);
             array_push($label, $mid);
@@ -87,6 +87,7 @@ class TrendController extends Controller
     }
 
 
+    
     public function views($id, $start, $finish)
     {
         $vv = array();

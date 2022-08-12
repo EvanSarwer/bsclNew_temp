@@ -50,7 +50,41 @@ class TrendController extends Controller
     }
 
 
-    
+    public function dayrangedtrendreachp(Request $req)
+    {
+        $users = User::all();
+        $numOfUser = $users->count();
+        $time = $this->dayrange($req->start, $req->finish, ((int)$req->range));
+
+        //   return response()->json(["time" => $time], 200);
+        if (((int)$req->range) == 30) {
+            $m = 900;
+            $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+        } else {
+            $m = 450;
+            $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+        }
+        //return response()->json(["time" => count($reachs)], 200);
+        $label = array();
+        foreach ($time as $tt) {
+            for ($i = 0; $i < count($tt); $i++) {
+                $viewers = $this->views($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
+                //return response()->json(["time" => $viewers], 200);
+                //return response()->json(["time" => $viewers], 200);
+                if (!empty($viewers)) {
+                    //return response()->json(["time" => $viewers,"timer" => $i], 200);
+                    $reachs[$i] = array_merge($reachs[$i], $viewers);
+                }
+            }
+        }
+        for ($i = 0; $i < count($tt); $i++) {
+            $reachs[$i] = (count(array_unique($reachs[$i]))*100)/$numOfUser;
+            $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
+            $mid = date("H:i:s", $mid);
+            array_push($label, $mid);
+        }
+        return response()->json(["values" => $reachs, "label" => $label], 200);
+    }
 
 
     public function views($id, $start, $finish)

@@ -9,4 +9,4 @@ git checkout -b sabbir
 git add .
 git commit -m"${message}"
 git push -u origin sabbir
-git checkout master
+git checkout main

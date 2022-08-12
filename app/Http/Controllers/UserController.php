@@ -14,10 +14,11 @@ use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth.admin');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth.admin');
+    // }
+
     public function logs(Request $req){
         if($req->user != "" && $req->start != "" && $req->finish != ""){
             

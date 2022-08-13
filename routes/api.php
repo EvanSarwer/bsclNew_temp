@@ -132,8 +132,11 @@ Route::post('channel/definedtrendtvr0', [ChannelController::class, 'definedtrend
 
 Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0']);
 Route::post('trend/dayrangedreach0', [TrendController::class, 'dayrangedtrendreach0']);
+Route::post('trend/dayrangedtvr0', [TrendController::class, 'dayrangedtrendtvr0']);
+Route::post('trend/dayrangedtvrp', [TrendController::class, 'dayrangedtrendtvrp']);
 Route::post('trend/dayrangedreachp', [TrendController::class, 'dayrangedtrendreachp']);
-Route::get('demo', [TrendController::class, 'dayrange']);
+Route::get('demov', [TrendController::class, 'views']);
+Route::get('demot', [TrendController::class, 'timeviewed']);
 Route::post('channel/rangedtrendreachp', [TrendController::class, 'rangedtrendreachp']);
 Route::post('channel/rangedtrendtvr0', [TrendController::class, 'rangedtrendtvr0']);
 Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp']);

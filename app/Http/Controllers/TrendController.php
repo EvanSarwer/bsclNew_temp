@@ -48,6 +48,79 @@ class TrendController extends Controller
         }
         return response()->json(["values" => $reachs, "label" => $label], 200);
     }
+    public function dayrangedtrendtvr0(Request $req)
+    {
+        $users = User::all();
+        $numOfUser = $users->count();
+        //$numOfUser = $users->count();
+        $time = $this->dayrange($req->start, $req->finish, ((int)$req->range));
+
+        //   return response()->json(["time" => $time], 200);
+        if (((int)$req->range) == 30) {
+            $m = 900;
+            $dd=30*count($time);
+            $reachs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        } else {
+            $m = 450;
+            $dd=15*count($time);
+            $reachs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        }
+        //return response()->json(["time" => count($reachs)], 200);
+        $label = array();
+        foreach ($time as $tt) {
+            for ($i = 0; $i < count($tt); $i++) {
+                $viewers = $this->timeviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
+                
+                
+                    $reachs[$i] = $reachs[$i]+$viewers;
+                
+            }
+        }
+        for ($i = 0; $i < count($tt); $i++) {
+            $reachs[$i] = $reachs[$i]/($numOfUser*$dd);
+            $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
+            $mid = date("H:i:s", $mid);
+            array_push($label, $mid);
+        }
+        return response()->json(["values" => $reachs, "label" => $label], 200);
+    }
+
+    public function dayrangedtrendtvrp(Request $req)
+    {
+        $users = User::all();
+        $numOfUser = $users->count();
+        //$numOfUser = $users->count();
+        $time = $this->dayrange($req->start, $req->finish, ((int)$req->range));
+
+        //   return response()->json(["time" => $time], 200);
+        if (((int)$req->range) == 30) {
+            $m = 900;
+            $dd=30*count($time);
+            $reachs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        } else {
+            $m = 450;
+            $dd=15*count($time);
+            $reachs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        }
+        //return response()->json(["time" => count($reachs)], 200);
+        $label = array();
+        foreach ($time as $tt) {
+            for ($i = 0; $i < count($tt); $i++) {
+                $viewers = $this->timeviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
+                
+                
+                    $reachs[$i] = $reachs[$i]+$viewers;
+                
+            }
+        }
+        for ($i = 0; $i < count($tt); $i++) {
+            $reachs[$i] = ($reachs[$i]/($numOfUser*$dd))*100;
+            $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
+            $mid = date("H:i:s", $mid);
+            array_push($label, $mid);
+        }
+        return response()->json(["values" => $reachs, "label" => $label], 200);
+    }
 
 
     public function dayrangedtrendreachp(Request $req)
@@ -90,6 +163,7 @@ class TrendController extends Controller
     
     public function views($id, $start, $finish)
     {
+        //$id=36;$start="2022-08-12 00:00:00" ;$finish="2022-08-12 00:30:00";
         $vv = array();
         $viewers = ViewLog::where('channel_id', $id)
             ->where(function ($query) use ($start) {
@@ -103,6 +177,45 @@ class TrendController extends Controller
         foreach ($viewers as $v) {
             array_push($vv, $v->user_id);
         }
+        //return response()->json(["values" => $vv], 200);
+        return $vv;
+    }
+    public function timeviewed($id, $start, $finish)
+    {
+        //$id=36;$start="2022-08-12 00:00:00" ;$finish="2022-08-12 00:30:00";
+        $viewer = array();
+        $viewers = ViewLog::where('channel_id', $id)
+                ->where(function ($query) use ($start) {
+                $query->where('finished_watching_at', '>', $start)
+                    ->orWhereNull('finished_watching_at');
+                })
+                ->where('started_watching_at', '<', $finish)
+                ->get();
+            
+            foreach ($viewers as $v) {
+                
+                    if(((strtotime($v->started_watching_at)) < (strtotime($start))) && (((strtotime($v->finished_watching_at)) > (strtotime($finish))) || (($v->finished_watching_at) == Null ) )){
+                        $watched_sec = abs(strtotime($start) - strtotime($finish));
+                    }
+                    else if(((strtotime($v->started_watching_at)) < (strtotime($start))) && ((strtotime($v->finished_watching_at)) <= (strtotime($finish)))){
+                        $watched_sec = abs(strtotime($start) - strtotime($v->finished_watching_at));
+                    }
+                    else if(((strtotime($v->started_watching_at)) >= (strtotime($start))) && (((strtotime($v->finished_watching_at)) > (strtotime($finish))) || (($v->finished_watching_at) == Null ) )){
+                        $watched_sec = abs(strtotime($v->started_watching_at) - strtotime($finish));
+                    }
+                    else{
+                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    }
+                    $watched_sec = $watched_sec / 60;
+                    array_push($viewer, $watched_sec);
+                
+
+            }
+
+            $vv = array_sum($viewer);
+            
+        //return response()->json(["values" => $vv], 200);
+        
         return $vv;
     }
     public function dayrange($s, $f, $d)

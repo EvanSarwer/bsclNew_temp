@@ -206,8 +206,9 @@ class DashboardController extends Controller
 //   }
 
 public function reachpercentdashboard(){
-
-  $finishDateTime = date("Y-m-d H:i:s");
+  $yesterday = date("Y-m-d");
+  $finishDateTime = $yesterday." 00:00:00";
+  //$finishDateTime = date("Y-m-d H:i:s");
   $min = 1440;
   $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
   $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
@@ -252,8 +253,9 @@ public function reachpercentdashboard(){
 }
 
 public function reachuserdashboard(){
-
-  $finishDateTime = date("Y-m-d H:i:s");
+  $yesterday = date("Y-m-d");
+  $finishDateTime = $yesterday." 00:00:00";
+  //$finishDateTime = date("Y-m-d H:i:s");
   $min = 1440;
   $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
   $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
@@ -307,11 +309,13 @@ public function tvrgraphdashboard(){
         $tvrs=array();
         $temp = array();
         $viewer=array();
-        $ldate = date('Y-m-d H:i:s');
+        //$ldate = date('Y-m-d H:i:s');
         /*if($req->start=="" && $req->finish==""){
         return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
-        $finishDateTime = date("Y-m-d H:i:s");
+        $yesterday = date("Y-m-d");
+        $finishDateTime = $yesterday." 00:00:00";
+        //$finishDateTime = date("Y-m-d H:i:s");
         $min = 1440;
         $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
         $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
@@ -343,10 +347,10 @@ public function tvrgraphdashboard(){
             foreach ($viewers as $v) {
               if($v->finished_watching_at==null){
                 if((strtotime($v->started_watching_at)) < ($start_range)){
-                  $timeviewd = abs($start_range - strtotime($ldate));
+                  $timeviewd = abs($start_range - strtotime($finishDateTime));
                 }
                 else if((strtotime($v->started_watching_at)) >= ($start_range)){
-                  $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
+                  $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime));
                 }
               }
               else if(((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))){
@@ -423,8 +427,10 @@ public function tvrgraphdashboard(){
         
         $temp = array();
         $viewer=array();
-        $ldate = date('Y-m-d H:i:s');
-        $finishDateTime = date("Y-m-d H:i:s");
+
+        $yesterday = date("Y-m-d");
+        $finishDateTime = $yesterday." 00:00:00";
+        //$finishDateTime = date("Y-m-d H:i:s");
         $min = 1440;
         $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
         $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
@@ -451,10 +457,10 @@ public function tvrgraphdashboard(){
             foreach ($viewers as $v) {
               if($v->finished_watching_at==null){
                 if((strtotime($v->started_watching_at)) < ($start_range)){
-                  $timeviewd = abs($start_range - strtotime($ldate));
+                  $timeviewd = abs($start_range - strtotime($finishDateTime));
                 }
                 else if((strtotime($v->started_watching_at)) >= ($start_range)){
-                  $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
+                  $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime));
                 }
               }
               else if(((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))){
@@ -511,8 +517,9 @@ public function tvrgraphdashboard(){
       
       
     public function sharegraphdashboard(Request $req){
-        
-      $finishDateTime = date("Y-m-d H:i:s");
+      $yesterday = date("Y-m-d");
+      $finishDateTime = $yesterday." 00:00:00";  
+      //$finishDateTime = date("Y-m-d H:i:s");
       $min = 1440;
       $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
       $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
@@ -613,11 +620,12 @@ public function tvrgraphdashboard(){
     
     $temp = array();
     $viewer=array();
-    $ldate = date('Y-m-d H:i:s');
     /*if($req->start=="" && $req->finish==""){
     return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
     }*/
-    $finishDateTime = date("Y-m-d H:i:s");
+    $yesterday = date("Y-m-d");
+    $finishDateTime = $yesterday." 00:00:00";
+    //$finishDateTime = date("Y-m-d H:i:s");
     $min = 1440;
     $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
     $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
@@ -647,10 +655,10 @@ public function tvrgraphdashboard(){
         foreach ($viewers as $v) {
           if($v->finished_watching_at==null){
             if((strtotime($v->started_watching_at)) < ($start_range)){
-              $timeviewd = abs($start_range - strtotime($ldate));
+              $timeviewd = abs($start_range - strtotime($finishDateTime));
             }
             else if((strtotime($v->started_watching_at)) >= ($start_range)){
-              $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
+              $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime));
             }
           }
           else if(((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))){

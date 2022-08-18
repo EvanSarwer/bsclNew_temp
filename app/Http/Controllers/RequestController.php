@@ -18,7 +18,9 @@ class RequestController extends Controller
        $rr->time_stamp = $request->time_stamp;
        $rr->server_time = Carbon::now()->toDateTimeString();;
        $rr->save();
-        
+       if($request->channel_name>=41&&$request->channel_name<=41){
+        $request->channel_name=888;
+       }
         $channel_id = $request->channel_name;
         $user_id = $request->device_id;
         if($channel_id ==24) {

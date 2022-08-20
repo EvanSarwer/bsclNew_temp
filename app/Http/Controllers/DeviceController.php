@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\DeselectPeriod;
+use App\Models\DeselectLog;
+use App\Models\ViewLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Datetime;
+use Carbon\Carbon;
 
 class DeviceController extends Controller
 {
@@ -54,6 +58,15 @@ class DeviceController extends Controller
     public function deviceUserList(){
         $data = User::all();
         foreach($data as $d){
+            $user_deselect = DeselectPeriod::where('user_id',$d->id)->whereNotNull('start_date')
+                                            ->whereNull('end_date')->first();
+            if($user_deselect){
+                $d->deselect = "deselect";
+            }else{
+                $d->deselect = "";
+            }
+
+
             if($d->gender == "m"){
                 $d->gender = "Male";
             }elseif($d->gender == "f"){
@@ -138,6 +151,77 @@ class DeviceController extends Controller
             "socio_status"=>"required",
             "age"=>"required"
         ];
+    }
+
+    public function deselectuser(Request $req){
+
+        if($req->deselect == "deselect"){
+            $user_deselect_period = DeselectPeriod::where('user_id',$req->user_id)->whereNotNull('start_date')->whereNull('end_date')->first();
+            if($user_deselect_period){  
+                return response()->json(["message"=>"User Already Deselected"]);
+            }else{
+                $user_deselect = new DeselectPeriod();
+                $user_deselect->user_id = $req->user_id;
+                $user_deselect->save();
+
+                $log = ViewLog::where('user_id',$req->user_id)
+                        ->where('finished_watching_at',NULL)->first();
+                if($log){
+                    $log->finished_watching_at = Carbon::now()->toDateTimeString();;
+                    $time = new DateTime($log->started_watching_at);
+                    $diff = $time->diff(new DateTime($log->finished_watching_at));
+                    $minutes = ($diff->days * 24 * 60) +
+                            ($diff->h * 60) + $diff->i;
+                    $minutes = $minutes>999 ? 999:$minutes;          
+                    $log->duration_minute = $minutes;
+                    $log->save();
+
+                    $var=new DeselectLog;
+                    $var->user_id = $req->user_id;
+                    $var->channel_id = $log->channel_id;
+                    $var->started_watching_at = new Datetime();
+                    $var->save();
+
+                    return response()->json(["message"=>"User Deselected & Log Changed"]);
+                }
+                return response()->json(["message"=>"User Deselected & Log Not Affected"]);
+
+            }
+
+        }elseif($req->deselect == ""){
+            $user_deselect_period = DeselectPeriod::where('user_id',$req->user_id)->whereNotNull('start_date')->whereNull('end_date')->first();
+            if($user_deselect_period){  
+                $user_deselect_period->update(["end_date"=>new Datetime()]);
+
+                $Deselect_log = DeselectLog::where('user_id',$req->user_id)
+                        ->where('finished_watching_at',NULL)->first();
+                if($Deselect_log){
+                    $Deselect_log->finished_watching_at = Carbon::now()->toDateTimeString();;
+                    $time = new DateTime($Deselect_log->started_watching_at);
+                    $diff = $time->diff(new DateTime($Deselect_log->finished_watching_at));
+                    $minutes = ($diff->days * 24 * 60) +
+                            ($diff->h * 60) + $diff->i;
+                    $minutes = $minutes>999 ? 999:$minutes;          
+                    $Deselect_log->duration_minute = $minutes;
+                    $Deselect_log->save();
+
+                    $var=new ViewLog;
+                    $var->user_id = $req->user_id;
+                    $var->channel_id = $Deselect_log->channel_id;
+                    $var->started_watching_at = new Datetime();
+                    $var->save();
+
+                    return response()->json(["message"=>"User Deselection Released & Log Changed"]);
+                }
+                return response()->json(["message"=>"User Deselection Released & Log Not Affected"]);
+
+            }
+            return response()->json(["message"=>"Already User Deselection Released"]);
+
+        }
+
+
+
     }
     
 }

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use DateTime;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\DeselectPeriod;
+use App\Models\DeselectLog;
 use App\Models\RawRequest;
 class RequestController extends Controller
 {
@@ -18,8 +20,9 @@ class RequestController extends Controller
        $rr->time_stamp = $request->time_stamp;
        $rr->server_time = Carbon::now()->toDateTimeString();;
        $rr->save();
-       if($request->channel_name>=40&&$request->channel_name<=100)
-{ $request->channel_name=888; }
+
+        if($request->channel_name>=40&&$request->channel_name<=100)
+        { $request->channel_name=888; }
         $channel_id = $request->channel_name;
         $user_id = $request->device_id;
         if($channel_id ==24) {
@@ -29,34 +32,75 @@ class RequestController extends Controller
         }
         $started_watching_at = $request->time_stamp;
         //$started_watching_at =  Carbon::now()->toDateTimeString();;
-        $log = ViewLog::where('user_id',$user_id)
-        ->where('finished_watching_at',NULL)->first();   
-        $this->updateLastReq($user_id,$started_watching_at);
-       if ( ($log && $this->wrongDetect($channel_id,$started_watching_at,$user_id )) || ($log && $channel_id == $log->channel_id)) return;
-        if($log){
-            $log->finished_watching_at = $started_watching_at;
-            $time = new DateTime($log->started_watching_at);
-            $diff = $time->diff(new DateTime($log->finished_watching_at));
-            $minutes = ($diff->days * 24 * 60) +
-                       ($diff->h * 60) + $diff->i;
-            
-            $minutes = $minutes>999 ? 999:$minutes;          
-            $log->duration_minute = $minutes;
-            $log->save();
-            //return $minutes;
-            //$tmp_log->delete();
-        }
-        if($channel_id != 999){
-            $var=new ViewLog;
-            //$var->id=5010;
-            $var->user_id = $user_id;
-            $var->channel_id = $channel_id;
-            $var->started_watching_at = $started_watching_at;
-            $var->save();
 
-            $user = User::where('id', $user_id)->first();
-            $user->tvoff=1;
-            $user->save();
+        $deselect_user = DeselectPeriod::where('user_id',$user_id)->whereNotNull('start_date')->whereNull('end_date')->first();
+        if($deselect_user){
+            $Deselect_log = DeselectLog::where('user_id',$user_id)
+                          ->where('finished_watching_at',NULL)->first();
+            $this->updateLastReq($user_id,$started_watching_at);
+            if ( ($Deselect_log && $this->wrongDetect($channel_id,$started_watching_at,$user_id )) || ($Deselect_log && $channel_id == $Deselect_log->channel_id)) return;
+                if($Deselect_log){
+                    $Deselect_log->finished_watching_at = $started_watching_at;
+                    $time = new DateTime($Deselect_log->started_watching_at);
+                    $diff = $time->diff(new DateTime($Deselect_log->finished_watching_at));
+                    $minutes = ($diff->days * 24 * 60) +
+                            ($diff->h * 60) + $diff->i;
+                    
+                    $minutes = $minutes>999 ? 999:$minutes;          
+                    $Deselect_log->duration_minute = $minutes;
+                    $Deselect_log->save();
+                    //return $minutes;
+                    //$tmp_log->delete();
+                }
+        }else{
+            $log = ViewLog::where('user_id',$user_id)
+            ->where('finished_watching_at',NULL)->first();   
+            $this->updateLastReq($user_id,$started_watching_at);
+            if ( ($log && $this->wrongDetect($channel_id,$started_watching_at,$user_id )) || ($log && $channel_id == $log->channel_id)) return;
+                if($log){
+                    $log->finished_watching_at = $started_watching_at;
+                    $time = new DateTime($log->started_watching_at);
+                    $diff = $time->diff(new DateTime($log->finished_watching_at));
+                    $minutes = ($diff->days * 24 * 60) +
+                            ($diff->h * 60) + $diff->i;
+                    
+                    $minutes = $minutes>999 ? 999:$minutes;          
+                    $log->duration_minute = $minutes;
+                    $log->save();
+                    //return $minutes;
+                    //$tmp_log->delete();
+                }
+
+        }
+
+
+        if($channel_id != 999){
+            $deselect_user = DeselectPeriod::where('user_id',$user_id)->whereNotNull('start_date')->whereNull('end_date')->first();
+            if($deselect_user){
+                $var=new DeselectLog;
+                //$var->id=5010;
+                $var->user_id = $user_id;
+                $var->channel_id = $channel_id;
+                $var->started_watching_at = $started_watching_at;
+                $var->save();
+
+                $user = User::where('id', $user_id)->first();
+                $user->tvoff=1;
+                $user->save();
+
+            }else{
+                $var=new ViewLog;
+                //$var->id=5010;
+                $var->user_id = $user_id;
+                $var->channel_id = $channel_id;
+                $var->started_watching_at = $started_watching_at;
+                $var->save();
+
+                $user = User::where('id', $user_id)->first();
+                $user->tvoff=1;
+                $user->save();
+            }
+            
         }
         else if($channel_id == 999){
               

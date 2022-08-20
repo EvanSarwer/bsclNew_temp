@@ -26,6 +26,16 @@ class Channel extends Model
         return $this->hasMany(ViewLog::class);
     }
 
+    public function deselectLogs(){
+        return $this->hasMany(DeselctLog::class, 'channel_id');
+    }
+
+
+
+
+
+
+
     public function activeViewersCount(){
         return ViewLog::where('channel_id', $this->id)->where('finished_watching_at', null)->count();
     }

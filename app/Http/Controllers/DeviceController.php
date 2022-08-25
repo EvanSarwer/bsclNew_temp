@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Device;
 use App\Models\DeselectPeriod;
 use App\Models\DeselectLog;
 use App\Models\ViewLog;
@@ -55,8 +56,8 @@ class DeviceController extends Controller
             return response()->json(["data" => $cw], 200);
         }
     }
-    public function deviceUserList(){
-        $data = User::all();
+    public function deviceList(){
+        $data = Device::all();
         foreach($data as $d){
             $user_deselect = DeselectPeriod::where('user_id',$d->id)->whereNotNull('start_date')
                                             ->whereNull('end_date')->first();
@@ -64,13 +65,6 @@ class DeviceController extends Controller
                 $d->deselect = "deselect";
             }else{
                 $d->deselect = "";
-            }
-
-
-            if($d->gender == "m"){
-                $d->gender = "Male";
-            }elseif($d->gender == "f"){
-                $d->gender= "Female";
             }
 
             if($d->economic_status == "a1"){
@@ -93,27 +87,27 @@ class DeviceController extends Controller
         return response()->json($data);
     }
 
-    public function addDeviceUser(Request $req){    
+    public function addDevice(Request $req){    
         $validator = Validator::make($req->all(),$this->rules());
         if ($validator->fails()){
             return response()->json($validator->errors(), 422);
         }
         
-        $user = (object)$req->all();
+        $device = (object)$req->all();
         //return response()->json(["message"=>$user->user_name]);
-        User::create((array)$user);
+        Device::create((array)$device);
 
-        return response()->json(["message"=>"Device User Created Successfully"]);
+        return response()->json(["message"=>"Device Created Successfully"]);
     }
 
-    public function editDeviceUser(Request $req){
+    public function editDevice(Request $req){
         
-        $rules = array_diff_key($this->rules(), array_flip((array) ['user_name']));
+        $rules = array_diff_key($this->rules(), array_flip((array) ['device_name']));
         $validator = Validator::make($req->all(),$rules);
         if ($validator->fails()){
             return response()->json($validator->errors(), 422);
         }
-        $user= User::where('user_name',$req->user_name)->first();
+        $device= Device::where('id',$req->id)->first();
 
         // if($user->lat == ""){
         //     if($req->lat != ""){
@@ -122,34 +116,35 @@ class DeviceController extends Controller
         // }else{
         //     $user->update(["address"=>$req->address,"type"=>$req->type,"age"=>$req->age,"gender"=>$req->gender,"socio_status"=>$req->socio_status,"economic_status"=>$req->economic_status,"updated_at"=>new Datetime()]);
         // }
-
-        $user->update(["address"=>$req->address,"lat"=>$req->lat,"lng"=>$req->lng,"type"=>$req->type,"age"=>$req->age,"gender"=>$req->gender,"socio_status"=>$req->socio_status,"economic_status"=>$req->economic_status,"updated_at"=>new Datetime()]);
+        $device->update(["address"=>$req->address,"lat"=>$req->lat,"lng"=>$req->lng,"type"=>$req->type,"socio_status"=>$req->socio_status,"economic_status"=>$req->economic_status,"updated_at"=>new Datetime()]);
         
-        
-        return response()->json(["message"=>"Device User Updated Successfully"]);
+        return response()->json(["message"=>"Device Updated Successfully"]);
     }
 
-    function getDeviceUser($user_name){
-        $user = User::where('user_name',$user_name)->first();
-        return response()->json($user);
+    function getDevice($device_id){
+        $device = Device::where('id',$device_id)->first();
+        $dUser = $device->users;
+        $deviceUser= $dUser->sortBy('user_index');
+
+        return response()->json([ "device"=>$device,"deviceUser"=>$deviceUser],200);
     }
 
-    public function deleteDeviceUser(Request $req){
-        $user= User::where('user_name',$req->user_name)->first();
-        $user->delete();
+    public function deleteDevice(Request $req){
+        $device= Device::where('id',$req->id)->first();
+        $device->delete();
         
-        return response()->json(["message"=>"User Deleted Successfully"]);
+        return response()->json(["message"=>"Device Deleted Successfully"]);
     }
 
     function rules(){
         return[
-            "user_name"=>"required|unique:users,user_name",
+            "device_name"=>"required|unique:devices,device_name",
             "address"=>"required",
             "type"=>"required",
-            "gender"=>"required",
+            //"gender"=>"required",
             "economic_status"=>"required",
             "socio_status"=>"required",
-            "age"=>"required"
+            //"age"=>"required"
         ];
     }
 

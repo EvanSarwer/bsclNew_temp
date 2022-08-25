@@ -21,6 +21,12 @@ class RequestController extends Controller
        $rr->server_time = Carbon::now()->toDateTimeString();;
        $rr->save();
 
+       if ($request->offline === 1){
+            $this->storeOffline($request);
+            $this->updateLastReq($request->device_id,Carbon::now()->toDateTimeString());
+            return;
+       }
+
         if($request->channel_name>=40&&$request->channel_name<=100)
         { $request->channel_name=888; }
         $channel_id = $request->channel_name;
@@ -31,7 +37,7 @@ class RequestController extends Controller
             return;
         }
         $started_watching_at = $request->time_stamp;
-        //$started_watching_at =  Carbon::now()->toDateTimeString();;
+        //$started_watching_at =  Carbon::now()->toDateTimeString();
 
         $deselect_user = DeselectPeriod::where('user_id',$user_id)->whereNotNull('start_date')->whereNull('end_date')->first();
         if($deselect_user){
@@ -187,6 +193,9 @@ class RequestController extends Controller
         }
         $ot.="</tbody></table></body></html>";
         return $ot;
+    }
+    public function storeOffline($req){
+        
     }
    
 }

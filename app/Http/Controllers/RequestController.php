@@ -65,7 +65,7 @@ class RequestController extends Controller
             return;
         }
         $started_watching_at = $request->time_stamp;
-        //$started_watching_at =  Carbon::now()->toDateTimeString();;
+        //$started_watching_at =  Carbon::now()->toDateTimeString();
 
         $deselect_user = DeselectPeriod::where('user_id', $user_id)->whereNotNull('start_date')->whereNull('end_date')->first();
         if ($deselect_user) {
@@ -224,4 +224,5 @@ class RequestController extends Controller
         $ot .= "</tbody></table></body></html>";
         return $ot;
     }
+
 }

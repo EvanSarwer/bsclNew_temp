@@ -54,11 +54,11 @@ Route::post('/excel/tvrp', [ExcelController::class, 'tvrp'])->middleware('auth.a
 ////////////////Excel//////////////
 
 ////////////////Device User//////////////
-Route::get('/deviceuser/list',[DeviceController::class,'deviceUserList'])->middleware('auth.admin');
-Route::post('/deviceuser/create',[DeviceController::class,'addDeviceUser'])->middleware('auth.admin');
-Route::post('/deviceuser/delete',[DeviceController::class,'deleteDeviceUser'])->middleware('auth.admin');
-Route::get('/deviceuser/get/{user_name}',[DeviceController::class,'getDeviceUser'])->middleware('auth.admin');
-Route::post('/deviceuser/edit',[DeviceController::class,'editDeviceUser'])->middleware('auth.admin');
+Route::get('/device/list',[DeviceController::class,'deviceList']);
+Route::post('/device/create',[DeviceController::class,'addDevice']);
+Route::post('/device/delete',[DeviceController::class,'deleteDevice']);
+Route::get('/device/get/{device_id}',[DeviceController::class,'getDevice']);
+Route::post('/device/edit',[DeviceController::class,'editDevice']);
 Route::post('/deviceuser/deselect',[DeviceController::class,'deselectuser']);
 
 

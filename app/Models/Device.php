@@ -11,7 +11,11 @@ class Device extends Model
     use HasFactory;
     protected $table = 'devices';
     public $timestamps = false;
-    public function user(){
+    protected $fillable = [
+        'device_name','address','lat','lng', 'type', 'economic_status', 'socio_status'
+    ];
+
+    public function users(){
         return $this->hasMany(User::class);
     }
 }

@@ -156,7 +156,8 @@ Route::get('/appuser/list',[AppUserController::class,'list'])->middleware('auth.
 Route::get('/appuser/get/{user_name}',[AppUserController::class,'get'])->middleware('auth.admin');
 Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.user');
 
-Route::get('/receive',[RequestController::class,'receive']);
+Route::post('/receive',[RequestController::class,'receive']);
+Route::post('/receiver',[RequestController::class,'receiver']);
 //////////END/////////////////
 
 Route::get("/test",[UserController::class,'demo_test']);

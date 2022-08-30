@@ -85,6 +85,8 @@ class ExcelController extends Controller
         $finishTime = substr($req["finish"], 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
+        $to_time = strtotime($startDateTime);
+        $from_time = strtotime($finishDateTime);
         $diff=abs(strtotime($startDateTime) - strtotime($finishDateTime)) / 60;
 
         $viewers = ViewLog::where('channel_id', $request->id)
@@ -96,29 +98,21 @@ class ExcelController extends Controller
             ->get();
             
             foreach ($viewers as $v) {
-                if($v->finished_watching_at==null){
-                    if((strtotime($v->started_watching_at)) < ($start_range)){
-                      $timeviewd = abs($start_range - strtotime($ldate));
-                    }
-                    else if((strtotime($v->started_watching_at)) >= ($start_range)){
-                      $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
-                    }
-                  }
-                  else if(((strtotime($v->started_watching_at)) < (strtotime($startDateTime))) && (((strtotime($v->finished_watching_at)) > (strtotime($finishDateTime))) || (($v->finished_watching_at) == Null ) )){
-                        $watched_sec = abs(strtotime($startDateTime) - strtotime($finishDateTime));
-                    }
-                    else if(((strtotime($v->started_watching_at)) < (strtotime($startDateTime))) && ((strtotime($v->finished_watching_at)) <= (strtotime($finishDateTime)))){
-                        $watched_sec = abs(strtotime($startDateTime) - strtotime($v->finished_watching_at));
-                    }
-                    else if(((strtotime($v->started_watching_at)) >= (strtotime($startDateTime))) && (((strtotime($v->finished_watching_at)) > (strtotime($finishDateTime))) || (($v->finished_watching_at) == Null ) )){
-                        $watched_sec = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime));
-                    }
-                    else{
-                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-                    }
-                    //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-                    $watched_sec = $watched_sec / 60;
-                    array_push($viewer, $watched_sec);
+                if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    $watched_sec = abs($to_time - $from_time);
+                }
+                else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                    $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
+                }
+                else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
+                }
+                else{
+                    $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                }
+                //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                $watched_sec = $watched_sec / 60;
+                array_push($viewer, $watched_sec);
                 
             
             }
@@ -147,6 +141,8 @@ class ExcelController extends Controller
         $finishTime = substr($req["finish"], 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
+        $to_time = strtotime($startDateTime);
+        $from_time = strtotime($finishDateTime);
         $diff=abs(strtotime($startDateTime) - strtotime($finishDateTime)) / 60;
 
         $viewers = ViewLog::where('channel_id', $request->id)
@@ -158,29 +154,21 @@ class ExcelController extends Controller
             ->get();
             
             foreach ($viewers as $v) {
-                if($v->finished_watching_at==null){
-                    if((strtotime($v->started_watching_at)) < ($start_range)){
-                      $timeviewd = abs($start_range - strtotime($ldate));
-                    }
-                    else if((strtotime($v->started_watching_at)) >= ($start_range)){
-                      $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
-                    }
-                  }
-                  else if(((strtotime($v->started_watching_at)) < (strtotime($startDateTime))) && (((strtotime($v->finished_watching_at)) > (strtotime($finishDateTime))) || (($v->finished_watching_at) == Null ) )){
-                        $watched_sec = abs(strtotime($startDateTime) - strtotime($finishDateTime));
-                    }
-                    else if(((strtotime($v->started_watching_at)) < (strtotime($startDateTime))) && ((strtotime($v->finished_watching_at)) <= (strtotime($finishDateTime)))){
-                        $watched_sec = abs(strtotime($startDateTime) - strtotime($v->finished_watching_at));
-                    }
-                    else if(((strtotime($v->started_watching_at)) >= (strtotime($startDateTime))) && (((strtotime($v->finished_watching_at)) > (strtotime($finishDateTime))) || (($v->finished_watching_at) == Null ) )){
-                        $watched_sec = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime));
-                    }
-                    else{
-                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-                    }
-                    //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-                    $watched_sec = $watched_sec / 60;
-                    array_push($viewer, $watched_sec);
+                if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    $watched_sec = abs($to_time - $from_time);
+                }
+                else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                    $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
+                }
+                else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
+                }
+                else{
+                    $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                }
+                //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                $watched_sec = $watched_sec / 60;
+                array_push($viewer, $watched_sec);
                 
             
             }

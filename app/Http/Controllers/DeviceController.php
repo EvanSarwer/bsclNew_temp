@@ -14,6 +14,12 @@ use Carbon\Carbon;
 
 class DeviceController extends Controller
 {
+    public function servertime()
+    {
+        $ldate = date('Y-m-d H:i:s');
+        return response()->json(["value" => $ldate], 200);
+        
+    }
     public function tvoff()
     {
         $user = User::where('type', "STB")

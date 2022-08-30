@@ -131,6 +131,7 @@ Route::post('channel/definedtrendtvr0', [ChannelController::class, 'definedtrend
 //////////////trend////////////////////
 
 
+Route::get('servertime', [DeviceController::class, 'servertime']);
 
 Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0']);
 Route::post('trend/dayrangedreach0', [TrendController::class, 'dayrangedtrendreach0']);

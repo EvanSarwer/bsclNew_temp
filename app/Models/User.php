@@ -59,10 +59,6 @@ class User extends Authenticatable
         return $this->hasMany(DeselectLog::class, 'user_id');
     }
 
-    public function deselectPeriods(){
-        return $this->hasMany(DeselectPeriod::class, 'user_id');
-    }
-
     public function operator(){
         return $this->belongsTo(Operator::class);
     }

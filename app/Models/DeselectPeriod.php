@@ -4,15 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Device;
 
 class DeselectPeriod extends Model
 {
     use HasFactory;
     protected $table = 'deselect_periods';
     public $timestamps = false;
-    protected $fillable =['user_id', 'start_date','end_date'];
+    protected $fillable =['device_id', 'start_date','end_date'];
 
-    public function user(){
-        return $this->belongsTo(User::class, 'user_id');
+    public function device(){
+        return $this->belongsTo(Device::class, 'device_id');
     }
 }

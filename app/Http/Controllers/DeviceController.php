@@ -22,50 +22,58 @@ class DeviceController extends Controller
     }
     public function tvoff()
     {
-        $user = User::where('type', "STB")
-        ->where('tvoff', 0)->select("id","user_name")->get();
-        if ($user) {
-            return response()->json(["data" => $user], 200);
-        }
+        $tvOff=array();
+        $ldate = date('Y-m-d H:i:s');
+        $devices = Device::where('type', "STB")
+        ->where('tvoff', 0)->select("id","device_name","last_request")->get();
+        if ($devices) {
+            foreach ($devices as $d) {
+                if (abs(strtotime($d->last_request) - strtotime($ldate))<30) {
+                    array_push($tvOff,$d);
+                }
+            }
+            return response()->json(["data" => $tvOff], 200);
+        }   
     }
+
     public function deviceOff()
     {
         $offdevice=array();
         $ldate = date('Y-m-d H:i:s');
-        $user = User::where('type', "STB")
-        ->select("id","user_name","last_request")->get();
+        $devices = Device::where('type', "STB")
+        ->select("id","device_name","last_request")->get();
         //return response()->json(["data" => $user], 200);
-        if ($user) {
-            foreach ($user as $u) {
-                if(abs(strtotime($u->last_request) - strtotime($ldate))>600||$u->last_request==null){
+        if ($devices) {
+            foreach ($devices as $d) {
+                if(abs(strtotime($d->last_request) - strtotime($ldate))>45 || $d->last_request==null){
                     
-                    array_push($offdevice,$u);
+                    array_push($offdevice,$d);
                 }
             }
             return response()->json(["data" => $offdevice], 200);
         }
     }
+    
     public function currentlyWatching()
     {
         $cw=array();
         $ldate = date('Y-m-d H:i:s');
-        $user = User::where('type', "STB")
-        ->select("id","user_name","last_request")->get();
-        //return response()->json(["data" => $user], 200);
-        if ($user) {
-            foreach ($user as $u) {
-                if(abs(strtotime($u->last_request) - strtotime($ldate))<180  && $u->last_request!=null){
-                    
-                    array_push($cw,$u);
+        $devices = Device::where('type', "STB")
+        ->where('tvoff', 1)->select("id","device_name","last_request")->get();
+        if ($devices) {
+            foreach ($devices as $d) {
+                if (abs(strtotime($d->last_request) - strtotime($ldate))<40) {
+                    array_push($cw,$d);
                 }
             }
             return response()->json(["data" => $cw], 200);
         }
     }
+
     public function deviceList(){
         $data = Device::all();
         foreach($data as $d){
-            $user_deselect = DeselectPeriod::where('user_id',$d->id)->whereNotNull('start_date')
+            $user_deselect = DeselectPeriod::where('device_id',$d->id)->whereNotNull('start_date')
                                             ->whereNull('end_date')->first();
             if($user_deselect){
                 $d->deselect = "deselect";
@@ -154,18 +162,19 @@ class DeviceController extends Controller
         ];
     }
 
-    public function deselectuser(Request $req){
+    public function deselectDevice(Request $req){
 
         if($req->deselect == "deselect"){
-            $user_deselect_period = DeselectPeriod::where('user_id',$req->user_id)->whereNotNull('start_date')->whereNull('end_date')->first();
-            if($user_deselect_period){  
-                return response()->json(["message"=>"User Already Deselected"]);
+            $device_deselect_period = DeselectPeriod::where('device_id',$req->device_id)->whereNotNull('start_date')->whereNull('end_date')->first();
+            if($device_deselect_period){  
+                return response()->json(["message"=>"Device Already Deselected"]);
             }else{
                 $user_deselect = new DeselectPeriod();
-                $user_deselect->user_id = $req->user_id;
+                $user_deselect->device_id = $req->device_id;
                 $user_deselect->save();
 
-                $log = ViewLog::where('user_id',$req->user_id)
+                $user = User::where('device_id', $req->device_id)->first();   //For Old Device Request Only
+                $log = ViewLog::where('user_id',$user->id)
                         ->where('finished_watching_at',NULL)->first();
                 if($log){
                     $log->finished_watching_at = Carbon::now()->toDateTimeString();;
@@ -178,23 +187,24 @@ class DeviceController extends Controller
                     $log->save();
 
                     $var=new DeselectLog;
-                    $var->user_id = $req->user_id;
+                    $var->user_id = $user->id;
                     $var->channel_id = $log->channel_id;
                     $var->started_watching_at = new Datetime();
                     $var->save();
 
                     return response()->json(["message"=>"User Deselected & Log Changed"]);
                 }
-                return response()->json(["message"=>"User Deselected & Log Not Affected"]);
+                return response()->json(["message"=>"Device Deselected & Log Not Affected"]);
 
             }
 
         }elseif($req->deselect == ""){
-            $user_deselect_period = DeselectPeriod::where('user_id',$req->user_id)->whereNotNull('start_date')->whereNull('end_date')->first();
-            if($user_deselect_period){  
-                $user_deselect_period->update(["end_date"=>new Datetime()]);
+            $device_deselect_period = DeselectPeriod::where('device_id',$req->device_id)->whereNotNull('start_date')->whereNull('end_date')->first();
+            if($device_deselect_period){  
+                $device_deselect_period->update(["end_date"=>new Datetime()]);
 
-                $Deselect_log = DeselectLog::where('user_id',$req->user_id)
+                $user = User::where('device_id', $req->device_id)->first();   //For Old Device Request Only
+                $Deselect_log = DeselectLog::where('user_id',$user->id)
                         ->where('finished_watching_at',NULL)->first();
                 if($Deselect_log){
                     $Deselect_log->finished_watching_at = Carbon::now()->toDateTimeString();;
@@ -207,22 +217,85 @@ class DeviceController extends Controller
                     $Deselect_log->save();
 
                     $var=new ViewLog;
-                    $var->user_id = $req->user_id;
+                    $var->user_id = $user->id;
                     $var->channel_id = $Deselect_log->channel_id;
                     $var->started_watching_at = new Datetime();
                     $var->save();
 
                     return response()->json(["message"=>"User Deselection Released & Log Changed"]);
                 }
-                return response()->json(["message"=>"User Deselection Released & Log Not Affected"]);
+                return response()->json(["message"=>"Device Deselection Released & Log Not Affected"]);
 
             }
             return response()->json(["message"=>"Already User Deselection Released"]);
 
         }
 
-
-
     }
+
+    public function addDeviceUser(Request $req){    
+        $validator = Validator::make($req->all(),$this->userRules());
+        if ($validator->fails()){
+            return response()->json($validator->errors(), 422);
+        }
+        
+        $user = (object)$req->all();
+        //return response()->json(["message"=>$user->user_name]);
+        User::create((array)$user);
+
+        return response()->json(["message"=>"Device User Created Successfully"]);
+    }
+
+    public function editDeviceUser(Request $req){
+        
+        $rules = array_diff_key($this->userRules(), array_flip((array) ['user_name', 'device_id', 'user_index' ]));
+        $validator = Validator::make($req->all(),$rules);
+        if ($validator->fails()){
+            return response()->json($validator->errors(), 422);
+        }
+        $user= User::where('id',$req->user_id)->first();
+
+        // if($user->lat == ""){
+        //     if($req->lat != ""){
+        //         $user->update(["address"=>$req->address,"lat"=>$req->lat,"lng"=>$req->lng,"type"=>$req->type,"age"=>$req->age,"gender"=>$req->gender,"socio_status"=>$req->socio_status,"economic_status"=>$req->economic_status,"updated_at"=>new Datetime()]);
+        //     }
+        // }else{
+        //     $user->update(["address"=>$req->address,"type"=>$req->type,"age"=>$req->age,"gender"=>$req->gender,"socio_status"=>$req->socio_status,"economic_status"=>$req->economic_status,"updated_at"=>new Datetime()]);
+        // }
+
+        $user->update(["address"=>$req->address,"lat"=>$req->lat,"lng"=>$req->lng,"type"=>$req->type,"age"=>$req->age,"gender"=>$req->gender,"socio_status"=>$req->socio_status,"economic_status"=>$req->economic_status,"updated_at"=>new Datetime()]);
+        
+        
+        return response()->json(["message"=>"Device User Updated Successfully"]);
+    }
+
+    function getDeviceUser($user_id){
+        $user = User::where('id',$user_id)->first();
+        return response()->json($user);
+    }
+
+    public function deleteDeviceUser(Request $req){
+        $user= User::where('id',$req->user_id)->first();
+        $user->delete();
+        
+        return response()->json(["message"=>"User Deleted Successfully"]);
+    }
+
+    function userRules(){
+        return[
+            "user_name"=>"required|unique:users,user_name",
+            "address"=>"required",
+            "type"=>"required",
+            "gender"=>"required",
+            "economic_status"=>"required",
+            "socio_status"=>"required",
+            "age"=>"required",
+            "device_id"=>"required",
+            "user_index"=>"required"
+        ];
+    }
+
+
+
     
 }

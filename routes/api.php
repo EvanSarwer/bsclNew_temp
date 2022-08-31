@@ -59,12 +59,18 @@ Route::post('/device/create',[DeviceController::class,'addDevice']);
 Route::post('/device/delete',[DeviceController::class,'deleteDevice']);
 Route::get('/device/get/{device_id}',[DeviceController::class,'getDevice']);
 Route::post('/device/edit',[DeviceController::class,'editDevice']);
-Route::post('/deviceuser/deselect',[DeviceController::class,'deselectuser']);
+Route::post('/device/deselect',[DeviceController::class,'deselectDevice']);
 
 
 Route::get('/device/tvoff', [DeviceController::class, 'tvoff'])->middleware('auth.admin');
-Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff'])->middleware('auth.admin');
+Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff']);
 Route::get('/device/currentlywatching', [DeviceController::class, 'currentlyWatching'])->middleware('auth.admin');
+
+// Device User
+Route::post('/deviceuser/create',[DeviceController::class,'addDeviceUser'])->middleware('auth.admin');
+Route::post('/deviceuser/delete',[DeviceController::class,'deleteDeviceUser'])->middleware('auth.admin');
+Route::get('/deviceuser/get/{user_id}',[DeviceController::class,'getDeviceUser'])->middleware('auth.admin');
+Route::post('/deviceuser/edit',[DeviceController::class,'editDeviceUser'])->middleware('auth.admin');
 ////////////////Device//////////////
 
 

@@ -44,7 +44,7 @@ class DeviceController extends Controller
         //return response()->json(["data" => $user], 200);
         if ($devices) {
             foreach ($devices as $d) {
-                if (abs(strtotime($d->last_request) - strtotime($ldate)) > 45 || $d->last_request == null) {
+                if (abs(strtotime($d->last_request) - strtotime($ldate)) > 600 || $d->last_request == null) {
 
                     array_push($offdevice, $d);
                 }

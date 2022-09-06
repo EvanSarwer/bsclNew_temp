@@ -652,9 +652,10 @@ class UserController extends Controller
 
 
     function demo_test(){
-        $mail = new SendMail("BSCL Reset Password Verification","Ratul Ahmed", "012356fgdffhfghf");
-        Mail::to("evansarwer1@gmail.com")->send($mail);
-        return "Sent successful";
+        
+        $channel = Channel::where('channel_name', "Shomoy TV")->first('id');
+        $id=$channel->id;
+                return response()->json(["device"=>$id],200);
     }
 
 

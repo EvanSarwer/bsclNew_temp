@@ -51,6 +51,11 @@ Route::post('/excel/reachp', [ExcelController::class, 'reachp'])->middleware('au
 Route::post('/excel/reach0', [ExcelController::class, 'reach0'])->middleware('auth.admin.user');
 Route::post('/excel/tvr0', [ExcelController::class, 'tvr0'])->middleware('auth.admin.user');
 Route::post('/excel/tvrp', [ExcelController::class, 'tvrp'])->middleware('auth.admin.user');
+
+Route::post('/adtrp/reachp', [ExcelController::class, 'adtrpreachp']);//->middleware('auth.admin.user');
+Route::post('/adtrp/reach0', [ExcelController::class, 'adtrpreach0'])->middleware('auth.admin.user');
+Route::post('/adtrp/tvr0', [ExcelController::class, 'adtrptvr0'])->middleware('auth.admin.user');
+Route::post('/adtrp/tvrp', [ExcelController::class, 'adtrptvrp'])->middleware('auth.admin.user');
 ////////////////Excel//////////////
 
 ////////////////Device User//////////////

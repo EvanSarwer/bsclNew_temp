@@ -27,7 +27,7 @@ class DeviceController extends Controller
             ->where('tvoff', 0)->select("id", "device_name", "last_request")->get();
         if ($devices) {
             foreach ($devices as $d) {
-                if (abs(strtotime($d->last_request) - strtotime($ldate)) < 30) {
+                if (abs(strtotime($d->last_request) - strtotime($ldate)) <= 45) {
                     array_push($tvOff, $d);
                 }
             }

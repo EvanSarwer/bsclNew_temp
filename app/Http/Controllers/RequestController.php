@@ -334,14 +334,20 @@ class RequestController extends Controller
     }
 
     public function raw($id)
+
     {
+
         $data = RawRequest::where('device_id', $id)->orderBy('id', 'DESC')->get();
         $ot = "<table border=1><tr><td>channel_id</td><td>device_id</td><td>start</td><td>finish</td><td>people</td><td>error</td><td>server_time</td></tr>";
         foreach ($data as $d) {
             $ot .= "<tr><td>" . $d->channel_id . "</td><td>" . $d->device_id . "</td><td>" . $d->start . "</td><td>" . $d->finish . "</td><td>" . $d->people . "</td><td>" . $d->error . "</td><td>" . $d->server_time . "</td></tr>";
+
         }
+
         $ot .= "</table>";
+
         return $ot;
+
     }
     
     public function logs($id)

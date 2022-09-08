@@ -51,6 +51,11 @@ Route::post('/excel/reachp', [ExcelController::class, 'reachp'])->middleware('au
 Route::post('/excel/reach0', [ExcelController::class, 'reach0'])->middleware('auth.admin.user');
 Route::post('/excel/tvr0', [ExcelController::class, 'tvr0'])->middleware('auth.admin.user');
 Route::post('/excel/tvrp', [ExcelController::class, 'tvrp'])->middleware('auth.admin.user');
+
+Route::post('/adtrp/reachp', [ExcelController::class, 'adtrpreachp'])->middleware('auth.admin.user');
+Route::post('/adtrp/reach0', [ExcelController::class, 'adtrpreach0'])->middleware('auth.admin.user');
+Route::post('/adtrp/tvr0', [ExcelController::class, 'adtrptvr0'])->middleware('auth.admin.user');
+Route::post('/adtrp/tvrp', [ExcelController::class, 'adtrptvrp'])->middleware('auth.admin.user');
 ////////////////Excel//////////////
 
 ////////////////Device User//////////////
@@ -99,7 +104,7 @@ Route::post('/overview/timespentgraph',[OverviewController::class,'timespentgrap
 //////////END///////////////
 
 /////////User Status/////////
-Route::post('/user/logs',[UserController::class,'logs'])->middleware('auth.admin');
+Route::post('/user/logs/all',[UserController::class,'alllogs'])->middleware('auth.admin');
 Route::post('/user/usertimespent',[UserController::class,'usertimespent'])->middleware('auth.admin');
 Route::post('/user/useralltimeview',[UserController::class,'userAllTimeView'])->middleware('auth.admin');
 Route::post('/user/userdaytimeviewlist',[UserController::class,'userDayTimeViewList'])->middleware('auth.admin');
@@ -164,7 +169,7 @@ Route::get('/appuser/get/{user_name}',[AppUserController::class,'get'])->middlew
 Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.user');
 
 Route::get('/receive',[RequestController::class,'receive']);
-Route::post('/receiver',[RequestController::class,'receiver']);
+
 //////////END/////////////////
 
 Route::get("/test",[UserController::class,'demo_test']);

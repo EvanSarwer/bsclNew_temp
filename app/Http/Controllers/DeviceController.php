@@ -139,10 +139,11 @@ class DeviceController extends Controller
     function getDevice($device_id)
     {
         $device = Device::where('id', $device_id)->first();
-        $dUser = $device->users;
-        $deviceUser = $dUser->sortBy('user_index');
+        //$dUser = $device->users;
+        //$deviceUser = $dUser->sortBy('user_index');
+        $deviceUser = array();
 
-        foreach ($deviceUser as $du) {
+        foreach ($device->users as $du) {
 
             if ($du->gender == "m") {
                 $du->gender = "Male";
@@ -162,12 +163,19 @@ class DeviceController extends Controller
                 $du->economic_status = "Lower Middle Class";
             }
 
+            $du->age = Carbon::parse($du->dob)->diff(Carbon::now())->y;
+
+            //dd($age. " Years"); // To check result
+
             if ($du->socio_status == "u") {
                 $du->socio_status = "Urban";
             } elseif ($du->socio_status == "r") {
                 $du->socio_status = "Rural";
             }
+
+            array_push($deviceUser,$du);
         }
+        array_multisort(array_column($deviceUser, 'user_index'), SORT_ASC, $deviceUser);
 
         return response()->json(["device" => $device, "deviceUser" => $deviceUser], 200);
     }
@@ -282,7 +290,7 @@ class DeviceController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-        $user = User::where('id', $req->user_id)->first();
+        $user = User::where('id', $req->id)->first();
 
         // if($user->lat == ""){
         //     if($req->lat != ""){
@@ -292,7 +300,7 @@ class DeviceController extends Controller
         //     $user->update(["address"=>$req->address,"type"=>$req->type,"age"=>$req->age,"gender"=>$req->gender,"socio_status"=>$req->socio_status,"economic_status"=>$req->economic_status,"updated_at"=>new Datetime()]);
         // }
 
-        $user->update(["address" => $req->address, "lat" => $req->lat, "lng" => $req->lng, "type" => $req->type, "age" => $req->age, "gender" => $req->gender, "socio_status" => $req->socio_status, "economic_status" => $req->economic_status, "updated_at" => new Datetime()]);
+        $user->update(["dob" => $req->dob, "gender" => $req->gender, "updated_at" => new Datetime()]);
 
 
         return response()->json(["message" => "Device User Updated Successfully"]);
@@ -306,7 +314,7 @@ class DeviceController extends Controller
 
     public function deleteDeviceUser(Request $req)
     {
-        $user = User::where('id', $req->user_id)->first();
+        $user = User::where('id', $req->id)->first();
         $user->delete();
 
         return response()->json(["message" => "User Deleted Successfully"]);
@@ -316,12 +324,13 @@ class DeviceController extends Controller
     {
         return [
             "user_name" => "required|unique:users,user_name",
-            "address" => "required",
-            "type" => "required",
+            // "address" => "required",
+            // "type" => "required",
             "gender" => "required",
-            "economic_status" => "required",
-            "socio_status" => "required",
-            "age" => "required",
+            // "economic_status" => "required",
+            // "socio_status" => "required",
+            // "age" => "required",
+            "dob" => "required",
             "device_id" => "required",
             "user_index" => "required"
         ];

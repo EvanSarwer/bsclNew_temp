@@ -105,6 +105,7 @@ Route::post('/overview/timespentgraph',[OverviewController::class,'timespentgrap
 
 /////////User Status/////////
 Route::post('/user/logs/all',[UserController::class,'alllogs'])->middleware('auth.admin');
+Route::post('/user/logs',[UserController::class,'logs'])->middleware('auth.admin');
 Route::post('/user/usertimespent',[UserController::class,'usertimespent'])->middleware('auth.admin');
 Route::post('/user/useralltimeview',[UserController::class,'userAllTimeView'])->middleware('auth.admin');
 Route::post('/user/userdaytimeviewlist',[UserController::class,'userDayTimeViewList'])->middleware('auth.admin');

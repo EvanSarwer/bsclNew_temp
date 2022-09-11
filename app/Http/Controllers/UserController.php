@@ -120,35 +120,44 @@ class UserController extends Controller
                 //     $from_time = $d->finished_watching_at;
                 // }
 
-                if(((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null ) )){
-                    $to_time = $startDateTime;
-                    $from_time = $finishDateTime;
-                }
-                else if(((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && ((strtotime($d->finished_watching_at)) <= (strtotime($finishDateTime)))){
-                    $to_time = $startDateTime;
-                    $from_time = $d->finished_watching_at;
+                // if(((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null ) )){
+                //     $to_time = $startDateTime;
+                //     $from_time = $finishDateTime;
+                // }
+                // else if(((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && ((strtotime($d->finished_watching_at)) <= (strtotime($finishDateTime)))){
+                //     $to_time = $startDateTime;
+                //     $from_time = $d->finished_watching_at;
 
-                }
-                else if(((strtotime($d->started_watching_at)) >= (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null ) )){
-                    $to_time = $d->started_watching_at;
-                    $from_time = $finishDateTime;
-                }
-                else{
-                    $to_time = $d->started_watching_at;
-                    $from_time = $d->finished_watching_at;
-                }
-
-
+                // }
+                // else if(((strtotime($d->started_watching_at)) >= (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null ) )){
+                //     $to_time = $d->started_watching_at;
+                //     $from_time = $finishDateTime;
+                // }
+                // else{
+                //     $to_time = $d->started_watching_at;
+                //     $from_time = $d->finished_watching_at;
+                // }
 
 
+
+
+
+                // $arr=array(
+                //     "log_id"=>$d->id,
+                //     "user_id"=>$d->user_id,
+                //     "channel_name"=>$d->channel->channel_name,
+                //     "started_watching_at"=>$to_time,
+                //     "finished_watching_at"=>$from_time,
+                //     "duration_sec"=>abs(strtotime($to_time)-strtotime($from_time))
+                // );
 
                 $arr=array(
                     "log_id"=>$d->id,
                     "user_id"=>$d->user_id,
                     "channel_name"=>$d->channel->channel_name,
-                    "started_watching_at"=>$to_time,
-                    "finished_watching_at"=>$from_time,
-                    "duration_sec"=>abs(strtotime($to_time)-strtotime($from_time))
+                    "started_watching_at"=>$d->started_watching_at,
+                    "finished_watching_at"=>$d->finished_watching_at,
+                    "duration_sec"=>abs(strtotime($d->started_watching_at)-strtotime($d->finished_watching_at))
                 );
                 array_push($ndata,$arr);
             }

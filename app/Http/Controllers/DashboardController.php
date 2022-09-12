@@ -214,7 +214,9 @@ public function reachpercentdashboard(){
   $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
   $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
-  $channels = Channel::all('id', 'channel_name');
+  $channels = Channel::whereNotIn('id', [888,39])
+    ->select('id', 'channel_name')
+    ->get();
   $total_user = User::count();
   $channel_info = [];
 
@@ -240,14 +242,9 @@ public function reachpercentdashboard(){
   array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
   $label =array();
   $value =array();
-  $k=0;
   for ($i = 0; $i<10;$i++){
-    if($channel_info[$i]['channel_name'] == "unknown"){
-      $k=1;
-    }
-    $n = $i + $k;
-    array_push($label,$channel_info[$n]['channel_name']);
-    array_push($value,$channel_info[$n]['users']);
+    array_push($label,$channel_info[$i]['channel_name']);
+    array_push($value,$channel_info[$i]['users']);
   }
   return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
 
@@ -261,7 +258,9 @@ public function reachuserdashboard(){
   $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
   $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
-  $channels = Channel::all('id', 'channel_name');
+  $channels = Channel::whereNotIn('id', [888,39])
+    ->select('id', 'channel_name')
+    ->get();
   $total_user = User::count();
   $channel_info = [];
 
@@ -287,15 +286,9 @@ public function reachuserdashboard(){
   array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
   $label =array();
   $value =array();
-  $k=0;
   for ($i = 0; $i<10;$i++){
-
-    if($channel_info[$i]['channel_name'] == "unknown"){
-      $k=1;
-    }
-    $n = $i + $k;
-    array_push($label,$channel_info[$n]['channel_name']);
-    array_push($value,$channel_info[$n]['users']);
+    array_push($label,$channel_info[$i]['channel_name']);
+    array_push($value,$channel_info[$i]['users']);
 
   }
   return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
@@ -326,7 +319,9 @@ public function tvrgraphdashboard(){
         
         //return response()->json([$di],200);
         //return response()->json(["tvr"=>$diff],200);
-        $channels=Channel::all('id','channel_name');
+        $channels = Channel::whereNotIn('id', [888,39])
+    ->select('id', 'channel_name')
+    ->get();
         
         //return response()->json([$channels],200);
         $users=User::all();
@@ -394,15 +389,10 @@ public function tvrgraphdashboard(){
             $label =array();
             $value =array();
             array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
-            $k=0;
             for ($i = 0; $i<10;$i++){
 
-              if($temp[$i]['label'] == "unknown"){
-                $k=1;
-              }
-              $n = $i + $k;
-              array_push($label,$temp[$n]['label']);
-              array_push($value,$temp[$n]['value']);
+              array_push($label,$temp[$i]['label']);
+              array_push($value,$temp[$i]['value']);
             }
             /*rsort($temptvr);
             $rlength=count($tvrs);
@@ -438,8 +428,9 @@ public function tvrgraphdashboard(){
         $start_range = strtotime($startDateTime);
         $finish_range = strtotime($finishDateTime);
         $diff=abs($start_range - $finish_range) / 60;
-        
-        $channels=Channel::all('id','channel_name');
+        $channels = Channel::whereNotIn('id', [888,39])
+    ->select('id', 'channel_name')
+    ->get();
         $users=User::all();
         $numOfUser=$users->count();
         
@@ -502,15 +493,11 @@ public function tvrgraphdashboard(){
             $label =array();
             $value =array();
             array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
-            $k=0;
+
             for ($i = 0; $i<10;$i++){
 
-              if($temp[$i]['label'] == "unknown"){
-                $k=1;
-              }
-              $n = $i + $k;
-              array_push($label,$temp[$n]['label']);
-              array_push($value,$temp[$n]['value']);
+              array_push($label,$temp[$i]['label']);
+              array_push($value,$temp[$i]['value']);
             }
       return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
       
@@ -536,7 +523,9 @@ public function tvrgraphdashboard(){
       $shares=array();
       $all_tvr =array();
 
-      $channels=Channel::all('id','channel_name');
+      $channels = Channel::whereNotIn('id', [888,39])
+    ->select('id', 'channel_name')
+    ->get();
       foreach ($channels as $c) {
           $tvr =0;
           $viewelogs = ViewLog::where('channel_id', $c->id)
@@ -599,14 +588,11 @@ public function tvrgraphdashboard(){
       $label =array();
       $value =array();
       array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
-      $k=0;
+
       for ($i = 0; $i<10;$i++){
-        if($temp[$i]['label'] == "unknown"){
-          $k=1;
-        }
-        $n = $i + $k;
-        array_push($label,$temp[$n]['label']);
-        array_push($value,$temp[$n]['value']);
+        
+        array_push($label,$temp[$i]['label']);
+        array_push($value,$temp[$i]['value']);
       }
       return response()->json(["value"=>$value,"label"=>$label,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
       
@@ -636,7 +622,9 @@ public function tvrgraphdashboard(){
     
     //return response()->json([$di],200);
     //return response()->json(["tvr"=>$diff],200);
-    $channels=Channel::all('id','channel_name');
+    $channels = Channel::whereNotIn('id', [888,39])
+    ->select('id', 'channel_name')
+    ->get();
     $users=User::all();
     $numOfUser=$users->count();
     //$all=array();
@@ -700,14 +688,11 @@ public function tvrgraphdashboard(){
         $label =array();
         $value =array();
         array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
-        $k=0;
+        
         for ($i = 0; $i<10;$i++){
-          if($temp[$i]['label'] == "unknown"){
-            $k=1;
-          }
-          $n = $i + $k;
-          array_push($label,$temp[$n]['label']);
-          array_push($value,$temp[$n]['value']);
+          
+          array_push($label,$temp[$i]['label']);
+          array_push($value,$temp[$i]['value']);
         }
         // $temptvr=$tvrs;
         // $ntvrs=array();

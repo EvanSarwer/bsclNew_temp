@@ -54,7 +54,9 @@ class DashboardController extends Controller
     $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
     $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
-    $channels = Channel::all('id', 'channel_name');
+    $channels = Channel::whereNotIn('id', [888,39])
+    ->select('id', 'channel_name')
+    ->get();
     $total_user = User::count();
     $channel_info = [];
 
@@ -78,9 +80,7 @@ class DashboardController extends Controller
       array_push($channel_info,$channel);      
     }
     array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
-    if($channel_info[0]['channel_name'] == "unknown"){
-      return response()->json(["top_reach"=>$channel_info[1]['channel_name']],200);
-    }
+    
     return response()->json(["top_reach"=>$channel_info[0]['channel_name']],200);
   }
 
@@ -102,7 +102,10 @@ class DashboardController extends Controller
 
     //return response()->json([$di],200);
     //return response()->json(["tvr"=>$diff],200);
-    $channels = Channel::all('id', 'channel_name');
+    $channels = Channel::whereNotIn('id', [888,39])
+    ->select('id', 'channel_name')
+    ->get();
+    //return response()->json(["top_tvr" => $channels], 200);
     $users = User::all();
     $numOfUser = $users->count();
     //$all=array();
@@ -153,9 +156,7 @@ class DashboardController extends Controller
       array_push($channelArray, $chnl);
     }
     array_multisort(array_column($channelArray, 'tvr'), SORT_DESC, $channelArray);
-    if($channelArray[0]['channel_name'] == "unknown"){
-      return response()->json(["top_tvr" => $channelArray[1]['channel_name']], 200);
-    }
+    
     return response()->json(["top_tvr" => $channelArray[0]['channel_name']], 200);
     //return response()->json(["tvr"=>$tvr],200);
   }

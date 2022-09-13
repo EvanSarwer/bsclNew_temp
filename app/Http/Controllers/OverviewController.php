@@ -29,6 +29,7 @@ class OverviewController extends Controller
         
         $number_of_user = [];
         $channel_label = [];
+        $channel_id = [];
     
         foreach ($channels as $c) {
             
@@ -61,11 +62,12 @@ class OverviewController extends Controller
             }
 
             array_push($channel_label,$c->channel_name);
+            array_push($channel_id,$c->id);
             array_push($number_of_user,$user_count);
             
         }
         
-        return response()->json(["reachsum"=>array_sum($number_of_user),"reach"=>$number_of_user,"channels"=>$channel_label],200);
+        return response()->json(["reachsum"=>array_sum($number_of_user),"reach"=>$number_of_user,"channels"=>$channel_label,"channel_ids"=>$channel_id],200);
   
 
     }
@@ -83,6 +85,7 @@ class OverviewController extends Controller
 
         $number_of_user = [];
         $channel_label = [];
+        $channel_id = [];
     
         foreach ($channels as $c) {
             $viewlogs = ViewLog::where('channel_id', $c->id)
@@ -115,11 +118,12 @@ class OverviewController extends Controller
             $user_count = ($user_count / $total_user) * 100 ;
             $user_count = round($user_count,1);
             array_push($channel_label,$c->channel_name);
+            array_push($channel_id,$c->id);
             array_push($number_of_user,$user_count);
             
         }
         
-        return response()->json(["reachsum"=>array_sum($number_of_user),"reach"=>$number_of_user,"channels"=>$channel_label],200);
+        return response()->json(["reachsum"=>array_sum($number_of_user),"reach"=>$number_of_user,"channels"=>$channel_label,"channel_ids"=>$channel_id],200);
   
     }
     // public function reachusergraph(Request $req){
@@ -163,6 +167,7 @@ class OverviewController extends Controller
 
     public function tvrgraphallchannelzero(Request $req){
         $channelArray = array();
+        $channel_id = [];
         $tvrs = array();
         $viewer = array();
         
@@ -230,15 +235,17 @@ class OverviewController extends Controller
             $viewer = array();
             array_push($channelArray, $c->channel_name);
             array_push($tvrs, $tvr);
+            array_push($channel_id,$c->id);
         }
         
-        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray], 200);
+        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray,"channel_ids"=>$channel_id], 200);
         //return response()->json(["tvr"=>$tvr],200);
   
     }
     public function tvrgraphallchannelpercent(Request $req)
     {
         $channelArray = array();
+        $channel_id = [];
         $tvrs = array();
         $viewer = array();
         
@@ -304,8 +311,9 @@ class OverviewController extends Controller
             $viewer = array();
             array_push($channelArray, $c->channel_name);
             array_push($tvrs, $tvr);
+            array_push($channel_id,$c->id);
         }
-        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray], 200);
+        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray,"channel_ids"=>$channel_id], 200);
     }
 
     public function tvrsharegraph(Request $req){
@@ -321,6 +329,7 @@ class OverviewController extends Controller
         $numOfUser=$users->count();
    
         $channelArray=array();
+        $channel_id = [];
         $shares=array();
         $all_tvr =array();
 
@@ -376,6 +385,7 @@ class OverviewController extends Controller
             
             array_push($all_tvr,$tvr);
             array_push($channelArray,$c->channel_name);
+            array_push($channel_id,$c->id);
 
         }
         $total_tvr = array_sum($all_tvr);
@@ -388,7 +398,7 @@ class OverviewController extends Controller
             array_push($shares,$s);
         }
         //return response()->json(["Total-tvr"=>$total_tvr,"all_tvr"=>$all_tvr,"total_share"=>$total_share,"share"=>$shares,"channels"=>$channelArray],200);
-        return response()->json(["share"=>$shares,"channels"=>$channelArray],200);
+        return response()->json(["share"=>$shares,"channels"=>$channelArray,"channel_ids"=>$channel_id],200);
     }
 
     public function timespentgraph(Request $req){
@@ -403,6 +413,7 @@ class OverviewController extends Controller
         $from_time = strtotime($finishDateTime);
 
         $channelArray=array();
+        $channel_id = [];
         $total_time =array();
         $total =0.00;
 
@@ -452,9 +463,10 @@ class OverviewController extends Controller
             
             array_push($total_time,$total_time_viewed);
             array_push($channelArray,$c->channel_name);
+            array_push($channel_id,$c->id);
 
         }
-        return response()->json(["totaltime"=>$total_time,"channels"=>$channelArray],200);
+        return response()->json(["totaltime"=>$total_time,"channels"=>$channelArray,"channel_ids"=>$channel_id],200);
     }
 
 

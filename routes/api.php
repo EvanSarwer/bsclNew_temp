@@ -170,6 +170,7 @@ Route::get('/appuser/get/{user_name}',[AppUserController::class,'get'])->middlew
 Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.user');
 
 Route::get('/receive',[RequestController::class,'receive']);
+Route::post('/receiveoutside',[RequestController::class,'receiveoutside']);
 
 //////////END/////////////////
 

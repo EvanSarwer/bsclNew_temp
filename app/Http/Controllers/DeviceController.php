@@ -194,7 +194,8 @@ class DeviceController extends Controller
             "device_name" => "required|unique:devices,device_name",
             "address" => "required",
             "type" => "required",
-            //"gender"=>"required",
+            "lat"=>"required",
+            "lng"=>"required",
             "economic_status" => "required",
             "socio_status" => "required",
             //"age"=>"required"

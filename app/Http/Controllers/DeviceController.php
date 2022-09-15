@@ -85,6 +85,8 @@ class DeviceController extends Controller
                 $d->economic_status = "Lower Class";
             } elseif ($d->economic_status == "b1") {
                 $d->economic_status = "Upper Class";
+            } elseif ($d->economic_status == "e1") {
+                $d->economic_status = "Middle Class";
             } elseif ($d->economic_status == "c1") {
                 $d->economic_status = "Upper Middle Class";
             } elseif ($d->economic_status == "d1") {

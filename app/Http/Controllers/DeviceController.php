@@ -27,7 +27,7 @@ class DeviceController extends Controller
             ->where('tvoff', 0)->select("id", "device_name", "last_request")->get();
         if ($devices) {
             foreach ($devices as $d) {
-                if (abs(strtotime($d->last_request) - strtotime($ldate)) <= 45) {
+                if (abs(strtotime($d->last_request) - strtotime($ldate)) <= 30) {
                     array_push($tvOff, $d);
                 }
             }
@@ -44,7 +44,7 @@ class DeviceController extends Controller
         //return response()->json(["data" => $user], 200);
         if ($devices) {
             foreach ($devices as $d) {
-                if (abs(strtotime($d->last_request) - strtotime($ldate)) > 45 || $d->last_request == null) {
+                if (abs(strtotime($d->last_request) - strtotime($ldate)) > 30 || $d->last_request == null) {
 
                     array_push($offdevice, $d);
                 }
@@ -61,7 +61,7 @@ class DeviceController extends Controller
             ->where('tvoff', 1)->select("id", "device_name", "last_request")->get();
         if ($devices) {
             foreach ($devices as $d) {
-                if (abs(strtotime($d->last_request) - strtotime($ldate)) < 40) {
+                if (abs(strtotime($d->last_request) - strtotime($ldate)) <= 27) {
                     array_push($cw, $d);
                 }
             }

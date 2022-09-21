@@ -10,8 +10,8 @@ use DateTime;
 use Illuminate\Http\Request;
 
 class ExcelController extends Controller
-{
-    public function adtrpv3reachp(Request $request)
+{ 
+    public function adtrpv3reach0(Request $request)
     {
         $values = [];
         foreach ($request->allrange as $com) {
@@ -19,10 +19,12 @@ class ExcelController extends Controller
             $user = [];
             foreach ($com['ranges'] as $req) {
                 //return response()->json(["value" => $req["start"]], 200);
-                $startDate = substr($req["start"], 0, 10);
-                $startTime = substr($req["start"], 11, 19);
-                $startDateTime = date($startDate) . " " . $startTime;
-                $finishDateTime = date('Y-m-d H:i:s',strtotime('+30 seconds',strtotime($startDate . " " . $startTime)));
+                //$startDate = substr($req["start"], 0, 10);
+                //$startTime = substr($req["start"], 11, 19);
+                
+                $startDateTime = date('Y-m-d H:i:s',strtotime($req["start"]));
+                //return response()->json(["value" => $startDateTime], 200);
+                $finishDateTime = date('Y-m-d H:i:s',strtotime('+'.$req["duration"].' seconds',strtotime($req["start"])));
 
 
                 $total_user = User::count();
@@ -45,9 +47,53 @@ class ExcelController extends Controller
                 
             }
 
-$user_count = count($user);
+$user_count = count(array_unique($user));
             //$user_count = ($user_count / $total_user) * 100 ;
             //$user_count = round($user_count,1);
+            array_push($values,$user_count);
+
+        }
+        return response()->json(["value" => $values], 200);
+    }
+    public function adtrpv3reachp(Request $request)
+    {
+        $values = [];
+        foreach ($request->allrange as $com) {
+            //return response()->json(["value" => $com], 200);
+            $user = [];
+            foreach ($com['ranges'] as $req) {
+                //return response()->json(["value" => $req["start"]], 200);
+                //$startDate = substr($req["start"], 0, 10);
+                //$startTime = substr($req["start"], 11, 19);
+                
+                $startDateTime = date('Y-m-d H:i:s',strtotime($req["start"]));
+                //return response()->json(["value" => $startDateTime], 200);
+                $finishDateTime = date('Y-m-d H:i:s',strtotime('+'.$req["duration"].' seconds',strtotime($req["start"])));
+
+
+                $total_user = User::count();
+                $channel = Channel::where('channel_name', $req["channel"])->first('id');
+                $id = $channel->id;
+                $viewlogs = ViewLog::where('channel_id', $id)
+                    ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                        $query->where('finished_watching_at', '>', $startDateTime)
+                            ->orWhereNull('finished_watching_at');
+                    })
+                    ->where('started_watching_at', '<', $finishDateTime)
+                    ->distinct()->get('user_id');
+                    $users=[];
+                    foreach($viewlogs as $vl){
+                        array_push($users,$vl->user_id);
+                    }
+                    //return response()->json(["value" => $viewlogs], 200);
+                $user = array_merge($user, $users);
+
+                
+            }
+
+$user_count = count(array_unique($user));
+            $user_count = ($user_count / $total_user) * 100 ;
+            $user_count = round($user_count,1);
             array_push($values,$user_count);
 
         }

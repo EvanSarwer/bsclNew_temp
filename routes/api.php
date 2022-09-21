@@ -90,6 +90,7 @@ Route::get('/reach/percent/dashboard', [DashboardController::class, 'reachpercen
 Route::get('/tvrgraph/dashboard', [DashboardController::class, 'tvrgraphdashboard'])->middleware('auth.admin.user');
 Route::get('/tvrgraphzero/dashboard', [DashboardController::class, 'tvrgraphzerodashboard'])->middleware('auth.admin.user');
 Route::get('/dashboard/timespentuni', [DashboardController::class, 'timeSpentUniverse'])->middleware('auth.admin.user');
+Route::get('/dashboard/notification', [DashboardController::class, 'notification']);
 
 Route::get('/sharegraph/dashboard', [DashboardController::class, 'sharegraphdashboard'])->middleware('auth.admin.user');
 /////////END////////////
@@ -114,7 +115,7 @@ Route::post('/user/LastTweentyFourViewsGraph',[UserController::class,'LastTweent
 Route::post('/user/last24WatchingData',[UserController::class,'last24WatchingData'])->middleware('auth.admin');
 Route::post('/user/last72WatchingData',[UserController::class,'last72WatchingData'])->middleware('auth.admin');
 Route::get('/getuserlist',[UserController::class,'getallList'])->middleware('auth.admin');
-Route::post('/user/deviceinfo',[UserController::class,'device_info'])->middleware('auth.admin');
+Route::post('/user/userinfo',[UserController::class,'user_info'])->middleware('auth.admin');
 //
 Route::post('/user/userdefined/usertimespent',[UserController::class,'usertimespent2'])->middleware('auth.admin');
 

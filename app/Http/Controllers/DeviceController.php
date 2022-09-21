@@ -326,7 +326,7 @@ class DeviceController extends Controller
     function userRules()
     {
         return [
-            "user_name" => "required|unique:users,user_name",
+            "user_name" => "required",
             // "address" => "required",
             // "type" => "required",
             "gender" => "required",

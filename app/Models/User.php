@@ -63,6 +63,6 @@ class User extends Authenticatable
         return $this->belongsTo(Operator::class);
     }
     public function device(){
-        return $this->belongsTo(Device::class);
+        return $this->belongsTo(Device::class,'device_id');
     }
 }

@@ -653,9 +653,18 @@ class UserController extends Controller
         return response()->json(["error"=> "Error"],200);
     }
 
-    function device_info(Request $req){
-        $device = User::where('id', $req->user)->first();
-        return response()->json(["device"=>$device],200);
+    function user_info(Request $req){
+        $user = User::where('id', $req->user)->first();
+        $user->device_name = $user->device->device_name;
+        $user->device_id = $user->device->id;
+
+        if ($user->gender == "m") {
+            $user->gender = "Male";
+        } elseif ($user->gender == "f") {
+            $user->gender = "Female";
+        }
+        
+        return response()->json(["user"=>$user],200);
     }
 
 

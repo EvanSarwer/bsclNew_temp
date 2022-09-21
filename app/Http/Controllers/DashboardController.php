@@ -736,12 +736,15 @@ class DashboardController extends Controller
   {
     $notifications = array();
     $datebefore = date('Y-m-d H:i:s', strtotime("-3 days"));
+    //return response()->json(["data" => $datebefore], 200);
+
     $devices = Device::where('type', "STB")
-      ->where('last_request', '<', $datebefore)->orWhereNull('last_request')->select("id", "device_name", "last_request")->get();
+      ->where('last_request', '<', $datebefore)->orWhereNull('last_request')->select("id", "device_name", "last_request","created_at")->get();
     if ($devices) {
       foreach ($devices as $d) {
 
         if ($d->last_request == null) {
+          $d->duration = Carbon::parse($d->created_at)->diffForHumans();
           $d->flag = 1;                                                     // Device has not made any requests yet
           array_push($notifications, $d);
         } else {

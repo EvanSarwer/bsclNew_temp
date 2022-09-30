@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\AppUser;
+use App\Models\DeployerInfo;
 use App\Models\Login;
 
 use Illuminate\Http\Request;
@@ -108,6 +109,44 @@ class AppUserController extends Controller
             "phone"=>"required"
         ];
     }
+
+
+
+    function addDeployer(Request $req){    
+        $validator = Validator::make($req->all(),$this->deployerRules());
+        if ($validator->fails()){
+            return response()->json($validator->errors(), 422);
+        }
+        $user = (object)$req->all();
+        $user->created_at = new Datetime();
+        DeployerInfo::create((array)$user);
+        return response()->json(["message"=>"Information Submitted Successfully"]);
+    }
+
+    function deployerRules(){
+        return[
+            "name"=>"required|unique:login,user_name",
+            "organization_name"=>"required",
+            "designation"=>"required",
+            "number"=>"required",
+            "doj"=>"required",
+            "dob"=>"required",
+            "nid"=>"required|unique:deployer_info,nid",
+            "employee_id"=>"required|unique:deployer_info,employee_id",
+            "house_name"=>"required",
+            "house_number"=>"required",
+            "road_number"=>"required",
+            "state_name"=>"required",
+            "district_name"=>"required",
+            "division_name"=>"required",
+        ];
+    }
+
+
+
+
+
+
     function messages(){
         return [
 

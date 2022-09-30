@@ -93,6 +93,8 @@ class RequestController extends Controller
             $rr->start = $req->start;
             $rr->finish = $req->finish;
             $rr->people = $req->people;
+            $rr->offline = $req->offline;
+            $rr->temp = $req->temp;
             $rr->error = $req->error;
             $rr->server_time = Carbon::now()->toDateTimeString();;
             $rr->save();

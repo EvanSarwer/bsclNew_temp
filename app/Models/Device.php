@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\DeselectPeriod;
+use App\Models\RawRequest;
 
 class Device extends Model
 {
@@ -22,6 +23,10 @@ class Device extends Model
 
     public function deselectPeriods(){
         return $this->hasMany(DeselectPeriod::class, 'device_id');
+    }
+
+    public function rawRequests(){
+        return $this->hasMany(RawRequest::class, 'device_id');
     }
 
 

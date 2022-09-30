@@ -6,9 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\ViewLog;
 use App\Models\Device;
 use App\Models\Channel;
+use App\Models\RawRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
+use DB;
 use Illuminate\Support\Facades\Http;
 
 class DashboardController extends Controller
@@ -739,7 +741,7 @@ class DashboardController extends Controller
     //return response()->json(["data" => $datebefore], 200);
 
     $devices = Device::where('type', "STB")
-      ->where('last_request', '<', $datebefore)->orWhereNull('last_request')->select("id", "device_name", "last_request","created_at")->get();
+      ->where('last_request', '<', $datebefore)->orWhereNull('last_request')->select("id", "device_name", "last_request", "created_at")->get();
     if ($devices) {
       foreach ($devices as $d) {
 
@@ -753,7 +755,23 @@ class DashboardController extends Controller
           array_push($notifications, $d);
         }
       }
-      return response()->json(["notifyNumber"=>count($notifications) ,"data" => $notifications], 200);
     }
+
+
+    
+    $activeDevices = Device::where('type', "STB")
+      ->whereBetween('last_request', [date('Y-m-d H:i:s'), date('Y-m-d H:i:s', strtotime("+27 minutes"))])->select("id", "device_name", "last_request")->get();
+
+    foreach ($activeDevices as $ad) {
+      $temp = RawRequest::where('device_id', $ad->id)->select("temp")->get()->last();
+      if ($temp && (substr($temp, 0, -2)) > 70) {
+        $ad->duration = Carbon::parse($ad->last_request)->diffForHumans();
+        $ad->temp = $temp->temp;
+        $ad->flag = 3;                                                         //Active Device Temperature is above 70'C
+        array_push($notifications, $ad);
+      }
+    }
+
+    return response()->json(["notifyNumber" => count($notifications), "data" => $notifications], 200);
   }
 }

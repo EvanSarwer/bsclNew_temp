@@ -17,28 +17,29 @@ class RequestController extends Controller
 {
     public function receiveoutside(Request $request)
     {
-        //return response()->json(["value" => $request[1]['user']], 200);
-        foreach($request->data as $req){
-        $user = User::where('user_name','like','%'.$req['user'].'%')->first();
-        //return response()->json(["value" => $user->id], 200);
-        $viewlogp=Viewlog::where('started_watching_at',$req['start'])
-        ->where('finished_watching_at',$req['finish'])
-        ->where('channel_id',$req['channel_id'])
-        ->where('user_id',$user->id)
-        ->first();
-        if(!$viewlogp){
-            $var = new ViewLog;
-            //$var->id=5010;
-            $var->user_id = $user->id;
-            $var->channel_id = $req['channel_id'];
-            $var->started_watching_at = $req['start'];
-            $var->finished_watching_at = $req['finish'];
-            $var->duration_minute = abs(strtotime($req['start']) - strtotime($req['finish'])) / 60;
-            $var->save();
 
-            $user->tvoff = 1;
-            $user->save();
-        }
+        //return response()->json(["value" => $request[1]['user']], 200);
+        foreach ($request->data as $req) {
+            $user = User::where('user_name', 'like', '%' . $req['user'] . '%')->first();
+            //return response()->json(["value" => $user->id], 200);
+            $viewlogp = Viewlog::where('started_watching_at', $req['start'])
+                ->where('finished_watching_at', $req['finish'])
+                ->where('channel_id', $req['channel_id'])
+                ->where('user_id', $user->id)
+                ->first();
+            if (!$viewlogp) {
+                $var = new ViewLog;
+                //$var->id=5010;
+                $var->user_id = $user->id;
+                $var->channel_id = $req['channel_id'];
+                $var->started_watching_at = $req['start'];
+                $var->finished_watching_at = $req['finish'];
+                $var->duration_minute = abs(strtotime($req['start']) - strtotime($req['finish'])) / 60;
+                $var->save();
+
+                $user->tvoff = 1;
+                $user->save();
+            }
         }
         return response()->json(["response" => "done"], 200);
     }
@@ -99,8 +100,8 @@ class RequestController extends Controller
             $rr->server_time = Carbon::now()->toDateTimeString();;
             $rr->save();
         }
-        
-        
+
+
         if ($req->channel_name >= 40 && $req->channel_name <= 100) {
             $req->channel_name = 888;
         }
@@ -117,7 +118,7 @@ class RequestController extends Controller
                 if ($req->channel_name != 999) {
                     $hasDevice->tvoff = 1;
                     $hasDevice->save();
-                }else{
+                } else {
                     $hasDevice->tvoff = 0;
                     $hasDevice->save();
                 }
@@ -152,16 +153,15 @@ class RequestController extends Controller
                 //return response()->json([$users],200);
             }
         }
-
     }
 
-    
+
 
 
 
     public function receiver($request)
     {
-        
+
         $channel_id = $request->channel_name;
         $user_id = $request->user_id;
         //$last_req_time = Carbon::now()->toDateTimeString();
@@ -172,7 +172,7 @@ class RequestController extends Controller
         //     $this->updateUserWatchingLastReq($user_id, $started_watching_at);
         //     return;
         // }
-        
+
 
         $deselect_user = DeselectPeriod::where('device_id', $request->device_id)->whereNotNull('start_date')->whereNull('end_date')->first();
         if ($deselect_user) {
@@ -370,15 +370,13 @@ class RequestController extends Controller
         $ot = "<table border=1><tr><td>channel_id</td><td>device_id</td><td>start</td><td>finish</td><td>people</td><td>offline</td><td>temp</td><td>error</td><td>server_time</td></tr>";
         foreach ($data as $d) {
             $ot .= "<tr><td>" . $d->channel_id . "</td><td>" . $d->device_id . "</td><td>" . $d->start . "</td><td>" . $d->finish . "</td><td>" . $d->people . "</td><td>" . $d->offline . "</td><td>" . $d->temp . "</td><td>" . $d->error . "</td><td>" . $d->server_time . "</td></tr>";
-
         }
 
         $ot .= "</table>";
 
         return $ot;
-
     }
-    
+
     public function logs($id)
     {
         $data = ViewLog::where('user_id', $id)->orderBy('id', 'DESC')->get();

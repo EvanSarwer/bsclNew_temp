@@ -101,7 +101,7 @@ class AppUserController extends Controller
     }
     function rules(){
         return[
-            "user_name"=>"required|unique:login,user_name",
+            "user_name"=>"required|unique:login,user_name|unique:app_users,user_name",
             "email"=>"required",
             "password"=>"required",
             "c_password"=>"same:password",
@@ -118,16 +118,22 @@ class AppUserController extends Controller
             return response()->json($validator->errors(), 422);
         }
         $user = (object)$req->all();
+        $user->password =md5($req->password);
         $user->created_at = new Datetime();
         DeployerInfo::create((array)$user);
+        $user->role = "deployer";
+        Login::create((array)$user);
         return response()->json(["message"=>"Information Submitted Successfully"]);
     }
 
     function deployerRules(){
         return[
-            "name"=>"required|unique:login,user_name",
+            "user_name"=>"required|unique:login,user_name|unique:deployer_info,user_name|unique:app_user,user_name",
             "organization_name"=>"required",
             "designation"=>"required",
+            "email"=>"required",
+            "password"=>"required",
+            "c_password"=>"same:password",
             "number"=>"required",
             "doj"=>"required",
             "dob"=>"required",

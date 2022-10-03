@@ -169,7 +169,7 @@ Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp
 Route::post('/appuser/changepass', [AppUserController::class, 'changepass'])->middleware('auth.admin.user');
 Route::post('/deployer/create',[AppUserController::class,'addDeployer']);
 //Tanvir APIs//
-Route::post('/appuser/create',[AppUserController::class,'store'])->middleware('auth.admin');
+Route::post('/appuser/create',[AppUserController::class,'store']);
 Route::post('/appuser/edit',[AppUserController::class,'edit'])->middleware('auth.admin');
 Route::post('/appuser/delete',[AppUserController::class,'delete'])->middleware('auth.admin');
 Route::any('/appuser/activate',[AppUserController::class,'activateDeactivate'])->middleware('auth.admin');

@@ -9,5 +9,5 @@ class Login extends Model
 {
     use HasFactory;
     protected $table="login";
-    protected $fillable =['user_name', 'email','password','created_by'];
+    protected $fillable =['user_name', 'email','password','role','created_by'];
 }

@@ -41,6 +41,7 @@ Route::post('/auth/forgetPass-Validation', [AuthController::class, 'forgetPassTo
 Route::post('/auth/newPassSubmit', [AuthController::class, 'forgetPassSubmit']);
 Route::post('/auth/sign-up', [AuthController::class, 'signUp']);
 Route::get('/auth/current-user', [AuthController::class, 'currentUser']);
+Route::post('/auth/deployerCheck', [AuthController::class, 'deployerCheck']);
 //=========Auth End==========//
 
 

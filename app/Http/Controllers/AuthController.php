@@ -151,4 +151,23 @@ class AuthController extends Controller
         return response()->json(["msg"=>"Logged Out"],200);
 
     }
+
+
+    public function deployerCheck(Request $req){
+        
+        if ($req->code == 1122){
+
+            return response()->json(["msg" =>"Matched", "error" => null], 201);
+        }
+        else{
+            return response()->json(["data" => null, "error" => "Not Matched"], 401);
+        }
+    }
+
+
+
+
+
+
+
 }

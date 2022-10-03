@@ -763,12 +763,15 @@ class DashboardController extends Controller
       ->whereBetween('last_request', [date('Y-m-d H:i:s'), date('Y-m-d H:i:s', strtotime("+27 minutes"))])->select("id", "device_name", "last_request")->get();
 
     foreach ($activeDevices as $ad) {
-      $temp = RawRequest::where('device_id', $ad->id)->select("temp")->get()->last();
-      if ($temp && (substr($temp, 0, -2)) > 70) {
-        $ad->duration = Carbon::parse($ad->last_request)->diffForHumans();
-        $ad->temp = $temp->temp;
-        $ad->flag = 3;                                                         //Active Device Temperature is above 70'C
-        array_push($notifications, $ad);
+      $temp = RawRequest::where('device_id', $ad->id)->select("temp")->latest('id')->first();
+      if ($temp) {
+        if($temp->temp && (substr($temp->temp, 0, -2)) > 80){
+          $ad->duration = Carbon::parse($ad->last_request)->diffForHumans();
+          $ad->temp = $temp->temp;
+          $ad->flag = 3;                                                         //Active Device Temperature is above 70'C
+          array_push($notifications, $ad);
+        }
+        
       }
     }
 

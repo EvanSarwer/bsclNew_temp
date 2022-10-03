@@ -122,16 +122,17 @@ class AppUserController extends Controller
         $user->created_at = new Datetime();
         DeployerInfo::create((array)$user);
         $user->role = "deployer";
+        $user->created_by="deployer";
         Login::create((array)$user);
         return response()->json(["message"=>"Information Submitted Successfully"]);
     }
 
     function deployerRules(){
         return[
-            "user_name"=>"required|unique:login,user_name|unique:deployer_info,user_name|unique:app_user,user_name",
+            "user_name"=>"required|unique:login,user_name|unique:deployer_info,user_name|unique:app_users,user_name",
             "organization_name"=>"required",
             "designation"=>"required",
-            "email"=>"required",
+            "email"=>"required|unique:deployer_info,email|unique:login,email|unique:app_users,email",
             "password"=>"required",
             "c_password"=>"same:password",
             "number"=>"required",

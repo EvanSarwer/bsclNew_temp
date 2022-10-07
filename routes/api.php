@@ -66,23 +66,23 @@ Route::post('/adtrpv3/reach0', [ExcelController::class, 'adtrpv3reach0']);//->mi
 ////////////////Excel//////////////
 
 ////////////////Device User//////////////
-Route::get('/device/list',[DeviceController::class,'deviceList']);
-Route::post('/device/create',[DeviceController::class,'addDevice']);
-Route::post('/device/delete',[DeviceController::class,'deleteDevice']);
-Route::get('/device/get/{device_id}',[DeviceController::class,'getDevice']);
-Route::post('/device/edit',[DeviceController::class,'editDevice']);
-Route::post('/device/deselect',[DeviceController::class,'deselectDevice']);
+Route::get('/device/list',[DeviceController::class,'deviceList'])->middleware('auth.admin.deployer');
+Route::post('/device/create',[DeviceController::class,'addDevice'])->middleware('auth.admin.deployer');
+Route::post('/device/delete',[DeviceController::class,'deleteDevice'])->middleware('auth.admin');
+Route::get('/device/get/{device_id}',[DeviceController::class,'getDevice'])->middleware('auth.admin.deployer');
+Route::post('/device/edit',[DeviceController::class,'editDevice'])->middleware('auth.admin');
+Route::post('/device/deselect',[DeviceController::class,'deselectDevice'])->middleware('auth.admin');
 
 
 Route::get('/device/tvoff', [DeviceController::class, 'tvoff'])->middleware('auth.admin');
-Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff']);
+Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff'])->middleware('auth.admin');
 Route::get('/device/currentlywatching', [DeviceController::class, 'currentlyWatching'])->middleware('auth.admin');
 
 // Device User
-Route::post('/deviceuser/create',[DeviceController::class,'addDeviceUser']);
-Route::post('/deviceuser/delete',[DeviceController::class,'deleteDeviceUser']);
-Route::get('/deviceuser/get/{user_id}',[DeviceController::class,'getDeviceUser'])->middleware('auth.admin');
-Route::post('/deviceuser/edit',[DeviceController::class,'editDeviceUser']);
+Route::post('/deviceuser/create',[DeviceController::class,'addDeviceUser'])->middleware('auth.admin.deployer');
+Route::post('/deviceuser/delete',[DeviceController::class,'deleteDeviceUser'])->middleware('auth.admin');
+Route::get('/deviceuser/get/{user_id}',[DeviceController::class,'getDeviceUser'])->middleware('auth.admin.deployer');
+Route::post('/deviceuser/edit',[DeviceController::class,'editDeviceUser'])->middleware('auth.admin.deployer');
 ////////////////Device//////////////
 
 

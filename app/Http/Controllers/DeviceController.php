@@ -82,15 +82,15 @@ class DeviceController extends Controller
             }
 
             if ($d->economic_status == "a1") {
-                $d->economic_status = "Lower Class";
+                $d->economic_status = "Income below 10,000 Taka";
             } elseif ($d->economic_status == "b1") {
-                $d->economic_status = "Upper Class";
-            } elseif ($d->economic_status == "e1") {
-                $d->economic_status = "Middle Class";
+                $d->economic_status = "Income 10,000 to 39,999 Taka";
             } elseif ($d->economic_status == "c1") {
-                $d->economic_status = "Upper Middle Class";
+                $d->economic_status = "Income 40,000 to 69,999 Taka";
             } elseif ($d->economic_status == "d1") {
-                $d->economic_status = "Lower Middle Class";
+                $d->economic_status = "Income 70,000 to 99,999 Taka";
+            } elseif ($d->economic_status == "e1") {
+                $d->economic_status = "Income above 1,00,000 Taka";
             }
 
             if ($d->socio_status == "u") {
@@ -110,10 +110,13 @@ class DeviceController extends Controller
         }
 
         $device = (object)$req->all();
+        $device->type = "STB";
+        $device->survey_date= date('Y-m-d H:i:s');
+        $device->installation_date= date('Y-m-d H:i:s');
         //return response()->json(["message"=>$user->user_name]);
-        Device::create((array)$device);
+        $d= Device::create((array)$device);
 
-        return response()->json(["message" => "Device Created Successfully"]);
+        return response()->json(["device_id"=>$d->id, "message" => "Device Created Successfully"],200);
     }
 
     public function editDevice(Request $req)
@@ -154,15 +157,15 @@ class DeviceController extends Controller
             }
 
             if ($du->economic_status == "a1") {
-                $du->economic_status = "Lower Class";
+                $du->economic_status = "Income below 10,000 Taka";
             } elseif ($du->economic_status == "b1") {
-                $du->economic_status = "Upper Class";
-            } elseif ($du->economic_status == "e1") {
-                $du->economic_status = "Middle Class";
+                $du->economic_status = "Income 10,000 to 39,999 Taka";
             } elseif ($du->economic_status == "c1") {
-                $du->economic_status = "Upper Middle Class";
+                $du->economic_status = "Income 40,000 to 69,999 Taka";
             } elseif ($du->economic_status == "d1") {
-                $du->economic_status = "Lower Middle Class";
+                $du->economic_status = "Income 70,000 to 99,999 Taka";
+            } elseif ($du->economic_status == "e1") {
+                $du->economic_status = "Income above 1,00,000 Taka";
             }
 
             $du->age = Carbon::parse($du->dob)->diff(Carbon::now())->y;
@@ -194,12 +197,34 @@ class DeviceController extends Controller
     {
         return [
             "device_name" => "required|unique:devices,device_name",
-            "address" => "required",
-            "type" => "required",
             "lat"=>"required",
             "lng"=>"required",
             "economic_status" => "required",
             "socio_status" => "required",
+            "contact_person" => "required",
+            "contact_email" => "required",
+            "contact_number" => "required",
+            "payment_type" => "required",
+            "payment_number" => "required",
+            "house_name" => "required",
+            "house_number" => "required",
+            "road_number" => "required",
+            "state_name" => "required",
+            "ward_no" => "required",
+            "zone_thana" => "required",
+            "zip_code" => "required",
+            "installer_name" => "required",
+            "district" => "required",
+            "household_condition" => "required",
+            "tv_type" => "required",
+            "tv_brand" => "required",
+            "tv_placement" => "required",
+            "gsm_signal_strength" => "required",
+            "wifi" => "required",
+            //"wifi_signal_strength" => "required",
+            "stb_provider_name" => "required",
+            "stb_subscription_type" => "required",
+            "stb_subscription_charge" => "required",
             //"age"=>"required"
         ];
     }

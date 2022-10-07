@@ -155,7 +155,7 @@ class AuthController extends Controller
 
     public function deployerCheck(Request $req){
         
-        if ($req->code == 1122){
+        if ($req->code == "k1z2E9-11A22b"){
 
             return response()->json(["msg" =>"Matched", "error" => null], 201);
         }

@@ -12,9 +12,8 @@ class Device extends Model
 {
     use HasFactory;
     protected $table = 'devices';
-    public $timestamps = false;
     protected $fillable = [
-        'device_name','address','lat','lng', 'type', 'economic_status', 'socio_status'
+        'device_name','lat','lng', 'type', 'economic_status', 'socio_status', 'contact_person', 'contact_number', 'contact_email', 'alt_number','payment_type','payment_number', 'other_payment_type', 'other_payment_number', 'house_name', 'house_number', 'road_number', 'state_name', 'ward_no', 'zone_thana', 'city_corporation', 'city_name', 'zip_code', 'district', 'household_condition', 'installer_name', 'servery_date', 'installation_date', 'description', 'tv_type', 'tv_brand', 'tv_placement', 'gsm_signal_strength', 'wifi', 'wifi_signal_strength', 'stb_provider_name', 'stb_subscription_type', 'stb_subscription_charge'
     ];
 
     public function users(){

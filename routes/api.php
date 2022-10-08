@@ -167,7 +167,7 @@ Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp
 //////////////trend////////////////////
 
 
-Route::post('/appuser/changepass', [AppUserController::class, 'changepass'])->middleware('auth.admin.user');
+Route::post('/appuser/changepass', [AppUserController::class, 'changepass'])->middleware('auth.admin.user.deployer');
 Route::post('/deployer/create',[AppUserController::class,'addDeployer']);
 //Tanvir APIs//
 Route::post('/appuser/create',[AppUserController::class,'store']);
@@ -176,7 +176,7 @@ Route::post('/appuser/delete',[AppUserController::class,'delete'])->middleware('
 Route::any('/appuser/activate',[AppUserController::class,'activateDeactivate'])->middleware('auth.admin');
 Route::get('/appuser/list',[AppUserController::class,'list'])->middleware('auth.admin');
 Route::get('/appuser/get/{user_name}',[AppUserController::class,'get'])->middleware('auth.admin');
-Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.user');
+Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.user.deployer');
 
 Route::get('/receive',[RequestController::class,'receive']);
 Route::post('/receiveoutside',[RequestController::class,'receiveoutside']);

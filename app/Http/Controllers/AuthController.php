@@ -12,6 +12,7 @@ use DateTime;
 use App\Models\Login;
 use App\Models\PasswordReset;
 use App\Mail\SendMail;
+use App\Models\EmailVerification;
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -157,12 +158,38 @@ class AuthController extends Controller
         
         if ($req->code == "k1z2E9-11A22b"){
 
-            return response()->json(["msg" =>"Matched", "error" => null], 201);
+            $tokenGen = bin2hex(random_bytes(37));
+            $token = new EmailVerification();
+            $token->value = md5($tokenGen);
+            $token->token = $tokenGen;
+            $token->created_at = date('Y-m-d H:i:s');
+            $token->save();
+
+            return response()->json(["token"=>$tokenGen ,"msg" =>"Matched", "error" => null], 201);
         }
         else{
             return response()->json(["data" => null, "error" => "Not Matched"], 401);
         }
     }
+
+    public function deployerReg(Request $req){
+        $token= EmailVerification::where('value',md5($req->token))->first();
+        if($token){
+            $CurrentTime = date("Y-m-d H:i:s");
+            $min = 20;
+            $newtimestamp = strtotime("{$token->created_at} + {$min} minute");
+            $ValidTime = date('Y-m-d H:i:s', $newtimestamp);
+
+            if( (strtotime($CurrentTime)) <= (strtotime($ValidTime)) ){
+                return response()->json(["msg" =>"ok"], 200);
+            }
+            return response()->json(["err" =>"Time Out"], 401);
+        }
+        return response()->json(["err" =>"Invalid"], 401);
+
+    }
+
+
 
 
 

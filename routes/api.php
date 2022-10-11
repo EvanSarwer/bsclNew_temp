@@ -54,10 +54,10 @@ Route::post('/excel/reach0', [ExcelController::class, 'reach0'])->middleware('au
 Route::post('/excel/tvr0', [ExcelController::class, 'tvr0'])->middleware('auth.admin.user');
 Route::post('/excel/tvrp', [ExcelController::class, 'tvrp'])->middleware('auth.admin.user');
 
-Route::post('/adtrp/reachp', [ExcelController::class, 'adtrpreachp'])->middleware('auth.admin.user');
-Route::post('/adtrp/reach0', [ExcelController::class, 'adtrpreach0'])->middleware('auth.admin.user');
-Route::post('/adtrp/tvr0', [ExcelController::class, 'adtrptvr0'])->middleware('auth.admin.user');
-Route::post('/adtrp/tvrp', [ExcelController::class, 'adtrptvrp'])->middleware('auth.admin.user');
+Route::post('/adtrp/reachp', [ExcelController::class, 'adtrpreachp']);//->middleware('auth.admin.user');
+Route::post('/adtrp/reach0', [ExcelController::class, 'adtrpreach0']);//->middleware('auth.admin.user');
+Route::post('/adtrp/tvr0', [ExcelController::class, 'adtrptvr0']);//->middleware('auth.admin.user');
+Route::post('/adtrp/tvrp', [ExcelController::class, 'adtrptvrp']);//->middleware('auth.admin.user');
 
 Route::post('/adtrpv3/reachp', [ExcelController::class, 'adtrpv3reachp']);//->middleware('auth.admin.user');
 Route::post('/adtrpv3/reach0', [ExcelController::class, 'adtrpv3reach0']);//->middleware('auth.admin.user');

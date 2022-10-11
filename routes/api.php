@@ -185,3 +185,4 @@ Route::post('/receiveoutside',[RequestController::class,'receiveoutside']);
 //////////END/////////////////
 
 Route::get("/test",[UserController::class,'demo_test']);
+Route::get("/git_id",[AuthController::class,'git_id']);

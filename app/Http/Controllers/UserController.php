@@ -671,9 +671,18 @@ class UserController extends Controller
 
     function demo_test(){
         
-        $channel = Channel::where('channel_name', "Shomoy TV")->first('id');
-        $id=$channel->id;
-                return response()->json(["device"=>$id],200);
+        $path = base_path('.git/');
+
+    if (! file_exists($path)) {
+        return null;
+    }
+
+    $head = trim(substr(file_get_contents($path . 'HEAD'), 4));
+
+    $hash = trim(file_get_contents(sprintf($path . $head)));
+
+    //return $hash;
+                return response()->json(["git_id"=>$hash],200);
     }
 
 

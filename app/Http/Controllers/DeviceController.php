@@ -110,7 +110,6 @@ class DeviceController extends Controller
         }
 
         $device = (object)$req->all();
-        $device->type = "STB";
         $device->survey_date= date('Y-m-d H:i:s');
         $device->installation_date= date('Y-m-d H:i:s');
         //return response()->json(["message"=>$user->user_name]);
@@ -148,10 +147,10 @@ class DeviceController extends Controller
 
 
 
-        $device->update(["type" => "STB","contact_person" => $req->contact_person, "contact_email" => $req->contact_email, "contact_number" => $req->contact_number, "alt_number" => $req->alt_number, "payment_type" => $req->payment_type, "payment_number" => $req->payment_number, "other_payment_type" => $req->other_payment_type, "other_payment_number" => $req->other_payment_number,
+        $device->update(["type" => $req->type, "contact_person" => $req->contact_person, "contact_email" => $req->contact_email, "contact_number" => $req->contact_number, "alt_number" => $req->alt_number, "payment_type" => $req->payment_type, "payment_number" => $req->payment_number, "other_payment_type" => $req->other_payment_type, "other_payment_number" => $req->other_payment_number,
                          "house_name" => $req->house_name, "house_number" => $req->house_number, "road_number" => $req->road_number, "state_name" => $req->state_name, "ward_no" => $req->ward_no, "zone_thana" => $req->zone_thana, "city_corporation" => $req->city_corporation, "city_name" => $req->city_name, "zip_code" => $req->zip_code, "district" => $req->district, "lat" => $req->lat, "lng" => $req->lng,
                          "household_condition" => $req->household_condition, "description" => $req->description, "tv_type" => $req->tv_type, "tv_brand" => $req->tv_brand, "tv_placement" => $req->tv_placement, "gsm_signal_strength" => $req->gsm_signal_strength, "wifi" => $req->wifi, "wifi_signal_strength" => $req->wifi_signal_strength, "stb_provider_name" => $req->stb_provider_name, "stb_subscription_type" => $req->stb_subscription_type, "stb_subscription_charge" => $req->stb_subscription_charge, 
-                         "socio_status" => $req->socio_status, "economic_status" => $req->economic_status, "installer_name" => $req->installer_name, "survey_date" => new Datetime(), "installation_date"=> new Datetime(),  "updated_at" => new Datetime()]);
+                         "socio_status" => $req->socio_status, "monthly_income" => $req->monthly_income, "installer_name" => $req->installer_name, "survey_date" => new Datetime(), "installation_date"=> new Datetime(),  "updated_at" => new Datetime()]);
 
         return response()->json(["message" => "Device Updated Successfully"]);
     }
@@ -181,6 +180,18 @@ class DeviceController extends Controller
                 $du->economic_status = "Income 70,000 to 99,999 Taka";
             } elseif ($du->economic_status == "e1") {
                 $du->economic_status = "Income above 1,00,000 Taka";
+            }
+
+            if ($du->monthly_income == "a") {
+                $du->monthly_income = "Income below 10,000 Taka";
+            } elseif ($du->monthly_income == "b") {
+                $du->monthly_income = "Income 10,000 to 39,999 Taka";
+            } elseif ($du->monthly_income == "c") {
+                $du->monthly_income = "Income 40,000 to 69,999 Taka";
+            } elseif ($du->monthly_income == "d") {
+                $du->monthly_income = "Income 70,000 to 99,999 Taka";
+            } elseif ($du->monthly_income == "e") {
+                $du->monthly_income = "Income above 1,00,000 Taka";
             }
 
             $du->age = Carbon::parse($du->dob)->diff(Carbon::now())->y;
@@ -214,7 +225,7 @@ class DeviceController extends Controller
             "device_name" => "required|unique:devices,device_name",
             "lat"=>"required",
             "lng"=>"required",
-            "economic_status" => "required",
+            "monthly_income" => "required",
             "socio_status" => "required",
             "contact_person" => "required",
             "contact_email" => "required",
@@ -240,6 +251,7 @@ class DeviceController extends Controller
             "stb_provider_name" => "required",
             "stb_subscription_type" => "required",
             "stb_subscription_charge" => "required",
+            "type" => "required",
             //"age"=>"required"
         ];
     }

@@ -663,6 +663,8 @@ class UserController extends Controller
         } elseif ($user->gender == "f") {
             $user->gender = "Female";
         }
+
+        $user->age = Carbon::parse($user->dob)->diff(Carbon::now())->y;
         
         return response()->json(["user"=>$user],200);
     }

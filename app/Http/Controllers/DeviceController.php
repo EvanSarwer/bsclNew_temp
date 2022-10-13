@@ -81,16 +81,16 @@ class DeviceController extends Controller
                 $d->deselect = "";
             }
 
-            if ($d->economic_status == "a1") {
-                $d->economic_status = "Income below 10,000 Taka";
-            } elseif ($d->economic_status == "b1") {
-                $d->economic_status = "Income 10,000 to 39,999 Taka";
-            } elseif ($d->economic_status == "c1") {
-                $d->economic_status = "Income 40,000 to 69,999 Taka";
-            } elseif ($d->economic_status == "d1") {
-                $d->economic_status = "Income 70,000 to 99,999 Taka";
-            } elseif ($d->economic_status == "e1") {
-                $d->economic_status = "Income above 1,00,000 Taka";
+            if ($d->economic_status == "a") {
+                $d->economic_status = "Poorest";
+            } elseif ($d->economic_status == "b") {
+                $d->economic_status = "Poorer";
+            } elseif ($d->economic_status == "c") {
+                $d->economic_status = "Middle";
+            } elseif ($d->economic_status == "d") {
+                $d->economic_status = "Richer";
+            } elseif ($d->economic_status == "e") {
+                $d->economic_status = "Richest";
             }
 
             if ($d->socio_status == "u") {
@@ -120,7 +120,6 @@ class DeviceController extends Controller
 
     public function editDevice(Request $req)
     {
-
         $rules = array_diff_key($this->rules(), array_flip((array) ['device_name']));
         $validator = Validator::make($req->all(), $rules);
         if ($validator->fails()) {
@@ -146,11 +145,96 @@ class DeviceController extends Controller
         }
 
 
+        if($req->socio_status == "u"){
+            if($req->household_condition == "Flat owner / Flat in apartment" ){
+                if($req->monthly_income == "a"){
+                    $req->economic_status = "b";
+                }else if($req->monthly_income == "b"){
+                    $req->economic_status = "c";
+                }else if($req->monthly_income == "c"){
+                    $req->economic_status = "d";
+                }else if($req->monthly_income == "d"){
+                    $req->economic_status = "d";
+                }else if($req->monthly_income == "e"){
+                    $req->economic_status = "e";
+                }
+
+            }else if($req->household_condition == "Rented flat / Non-Flat apartment where there is no security guard and parking" ){
+                if($req->monthly_income == "a"){
+                    $req->economic_status = "a";
+                }else if($req->monthly_income == "b"){
+                    $req->economic_status = "b";
+                }else if($req->monthly_income == "c"){
+                    $req->economic_status = "c";
+                }else if($req->monthly_income == "d"){
+                    $req->economic_status = "d";
+                }else if($req->monthly_income == "e"){
+                    $req->economic_status = "d";
+                }
+            }else if($req->household_condition == "Lower tier house" ){
+                if($req->monthly_income == "a"){
+                    $req->economic_status = "a";
+                }else if($req->monthly_income == "b"){
+                    $req->economic_status = "a";
+                }else if($req->monthly_income == "c"){
+                    $req->economic_status = "b";
+                }else if($req->monthly_income == "d"){
+                    $req->economic_status = "c";
+                }else if($req->monthly_income == "e"){
+                    $req->economic_status = "d";
+                }
+            }
+
+        }else if($req->socio_status == "r"){
+            if($req->household_condition == "Full Concrete house (wall, floor and roof)" ){
+                if($req->monthly_income == "a"){
+                    $req->economic_status = "b";
+                }else if($req->monthly_income == "b"){
+                    $req->economic_status = "c";
+                }else if($req->monthly_income == "c"){
+                    $req->economic_status = "d";
+                }else if($req->monthly_income == "d"){
+                    $req->economic_status = "d";
+                }else if($req->monthly_income == "e"){
+                    $req->economic_status = "e";
+                }
+
+            }else if($req->household_condition == "Semi Concrete house (wall and floor concrete but the roof is made by Tin)" ){
+                if($req->monthly_income == "a"){
+                    $req->economic_status = "a";
+                }else if($req->monthly_income == "b"){
+                    $req->economic_status = "b";
+                }else if($req->monthly_income == "c"){
+                    $req->economic_status = "c";
+                }else if($req->monthly_income == "d"){
+                    $req->economic_status = "d";
+                }else if($req->monthly_income == "e"){
+                    $req->economic_status = "d";
+                }
+            }else if($req->household_condition == "Non-Concrete (Made by Tin/Wood/Bamboo etc.)" ){
+                if($req->monthly_income == "a"){
+                    $req->economic_status = "a";
+                }else if($req->monthly_income == "b"){
+                    $req->economic_status = "a";
+                }else if($req->monthly_income == "c"){
+                    $req->economic_status = "b";
+                }else if($req->monthly_income == "d"){
+                    $req->economic_status = "c";
+                }else if($req->monthly_income == "e"){
+                    $req->economic_status = "d";
+                }
+            }
+        }
+
+
+
+
+
 
         $device->update(["type" => $req->type, "contact_person" => $req->contact_person, "contact_email" => $req->contact_email, "contact_number" => $req->contact_number, "alt_number" => $req->alt_number, "payment_type" => $req->payment_type, "payment_number" => $req->payment_number, "other_payment_type" => $req->other_payment_type, "other_payment_number" => $req->other_payment_number,
                          "house_name" => $req->house_name, "house_number" => $req->house_number, "road_number" => $req->road_number, "state_name" => $req->state_name, "ward_no" => $req->ward_no, "zone_thana" => $req->zone_thana, "city_corporation" => $req->city_corporation, "city_name" => $req->city_name, "zip_code" => $req->zip_code, "district" => $req->district, "lat" => $req->lat, "lng" => $req->lng,
                          "household_condition" => $req->household_condition, "description" => $req->description, "tv_type" => $req->tv_type, "tv_brand" => $req->tv_brand, "tv_placement" => $req->tv_placement, "gsm_signal_strength" => $req->gsm_signal_strength, "wifi" => $req->wifi, "wifi_signal_strength" => $req->wifi_signal_strength, "stb_provider_name" => $req->stb_provider_name, "stb_subscription_type" => $req->stb_subscription_type, "stb_subscription_charge" => $req->stb_subscription_charge, 
-                         "socio_status" => $req->socio_status, "monthly_income" => $req->monthly_income, "installer_name" => $req->installer_name, "survey_date" => new Datetime(), "installation_date"=> new Datetime(),  "updated_at" => new Datetime()]);
+                         "socio_status" => $req->socio_status,"economic_status" => $req->economic_status, "monthly_income" => $req->monthly_income, "installer_name" => $req->installer_name, "survey_date" => new Datetime(), "installation_date"=> new Datetime(),  "updated_at" => new Datetime()]);
 
         return response()->json(["message" => "Device Updated Successfully"]);
     }
@@ -170,16 +254,16 @@ class DeviceController extends Controller
                 $du->gender = "Female";
             }
 
-            if ($du->economic_status == "a1") {
-                $du->economic_status = "Income below 10,000 Taka";
-            } elseif ($du->economic_status == "b1") {
-                $du->economic_status = "Income 10,000 to 39,999 Taka";
-            } elseif ($du->economic_status == "c1") {
-                $du->economic_status = "Income 40,000 to 69,999 Taka";
-            } elseif ($du->economic_status == "d1") {
-                $du->economic_status = "Income 70,000 to 99,999 Taka";
-            } elseif ($du->economic_status == "e1") {
-                $du->economic_status = "Income above 1,00,000 Taka";
+            if ($du->economic_status == "a") {
+                $du->economic_status = "Poorest";
+            } elseif ($du->economic_status == "b") {
+                $du->economic_status = "Poorer";
+            } elseif ($du->economic_status == "c") {
+                $du->economic_status = "Middle";
+            } elseif ($du->economic_status == "d") {
+                $du->economic_status = "Richer";
+            } elseif ($du->economic_status == "e") {
+                $du->economic_status = "Richest";
             }
 
             if ($du->monthly_income == "a") {

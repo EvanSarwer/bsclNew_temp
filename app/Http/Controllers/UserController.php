@@ -664,6 +664,19 @@ class UserController extends Controller
             $user->gender = "Female";
         }
 
+        if ($user->device->economic_status == "a") {
+            $user->economic_status = "Poorest";
+        } elseif ($user->device->economic_status == "b") {
+            $user->economic_status = "Poorer";
+        } elseif ($user->device->economic_status == "c") {
+            $user->economic_status = "Middle";
+        } elseif ($user->device->economic_status == "d") {
+            $user->economic_status = "Richer";
+        } elseif ($user->device->economic_status == "e") {
+            $user->economic_status = "Richest";
+        }
+
+
         $user->age = Carbon::parse($user->dob)->diff(Carbon::now())->y;
         
         return response()->json(["user"=>$user],200);

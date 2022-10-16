@@ -15,6 +15,8 @@ use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\TrendController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\PlayoutController
+;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -32,6 +34,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
+//////////////Playout////////////////////
+Route::post('playout/receive', [PlayoutController::class, 'receive']);
+//////////////Playout////////////////////
+//////////////Adtrp////////////////////
+//////////////Adtrp////////////////////
 
 
 //=========Auth Start=========//

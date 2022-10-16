@@ -6,8 +6,11 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use App\Models\Notification;
+use App\Models\Package;
+use App\Models\Channel;
 use App\Models\Device;
+use App\Models\Operator;
 
 class User extends Authenticatable
 {
@@ -64,5 +67,9 @@ class User extends Authenticatable
     }
     public function device(){
         return $this->belongsTo(Device::class,'device_id');
+    }
+
+    public function notifications(){
+        return $this->hasMany(Notification::class);
     }
 }

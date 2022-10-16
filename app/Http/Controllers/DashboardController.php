@@ -734,8 +734,7 @@ class DashboardController extends Controller
   }
 
 
-  public function notification()
-  {
+  public function notification(){
     $notifications = array();
     $datebefore = date('Y-m-d H:i:s', strtotime("-3 days"));
     //return response()->json(["data" => $datebefore], 200);
@@ -757,7 +756,6 @@ class DashboardController extends Controller
       }
     }
 
-
     
     $activeDevices = Device::where('type', "STB")
       ->whereBetween('last_request', [date('Y-m-d H:i:s'), date('Y-m-d H:i:s', strtotime("+27 minutes"))])->select("id", "device_name", "last_request")->get();
@@ -777,4 +775,21 @@ class DashboardController extends Controller
 
     return response()->json(["notifyNumber" => count($notifications), "data" => $notifications], 200);
   }
+
+  public function notification1(Request $req){
+    $notifications = array();
+
+    $user = user::where('user_name', $req->user_name)->first();
+
+    $unseen_notification = $user->notifications->where('seen', 0)->get();
+
+    $seen_notification = $user->notifications->where('seen', 1)->get();
+
+
+
+
+
+
+  }
+
 }

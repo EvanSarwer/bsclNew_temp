@@ -48,10 +48,18 @@ class AppUserController extends Controller
         $user->password =md5($req->password);
         $user->created_by="admin";
         $user->created_at = new Datetime();
-        AppUser::create((array)$user);
+        if($user->role == "deployer"){
+            $user->number = $user->phone;
+            $user->state_name = $user->address;
+            DeployerInfo::create((array)$user);
+        }else{
+            AppUser::create((array)$user);
+        }
+        
         Login::create((array)$user);
         return response()->json(["message"=>"User Created Successfully"]);
     }
+
     function edit(Request $req){
         
         $rules = array_diff_key($this->rules(), array_flip((array) ['user_name','password','c_password']));
@@ -97,6 +105,7 @@ class AppUserController extends Controller
     }
     function get($user_name){
         $user = AppUser::where('deleted_by',null)->where('user_name',$user_name)->first();
+        //$user->role = $user->login->role;
         return response()->json($user);
     }
     function rules(){
@@ -106,7 +115,9 @@ class AppUserController extends Controller
             "password"=>"required",
             "c_password"=>"same:password",
             "address"=>"required",
-            "phone"=>"required"
+            "phone"=>"required",
+            "role"=>"required",
+
         ];
     }
 

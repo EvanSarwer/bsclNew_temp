@@ -12,11 +12,17 @@ use App\Models\Channel;
 use App\Models\DeselectPeriod;
 use App\Models\DeselectLog;
 use App\Models\RawRequest;
+use App\Models\TempData;
 
 class RequestController extends Controller
 {
     public function receiveoutside(Request $request)
     {
+        $td = new TempData();
+        $data = $request->data;
+        $td->data = json_encode($data);
+        $td->time = Carbon::now()->toDateTimeString();;
+        $td->save();
 
         //return response()->json(["value" => $request[1]['user']], 200);
         foreach ($request->data as $req) {

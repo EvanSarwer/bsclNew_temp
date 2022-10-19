@@ -13,6 +13,6 @@ class Login extends Model
     protected $fillable =['user_name', 'email','password','role','created_by'];
 
     public function appUser(){
-        return $this->belongsTo(AppUser::class,'user_name');
+        return $this->belongsTo(AppUser::class,'user_name','user_name');
     }
 }

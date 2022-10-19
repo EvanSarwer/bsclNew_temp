@@ -14,6 +14,6 @@ class AppUser extends Model
 
     public function login()
     {
-        return $this->hasOne(Login::class, 'user_name');
+        return $this->hasOne(Login::class, 'user_name', 'user_name');
     }
 }

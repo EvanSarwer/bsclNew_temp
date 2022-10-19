@@ -25,6 +25,15 @@ class Channel extends Model
     public function viewLogs(){
         return $this->hasMany(ViewLog::class);
     }
+    public function playoutLogs(){
+        return $this->hasMany(PlayoutLog::class, 'channel_id');
+    }
+    public function playoutFile(){
+        return $this->hasMany(PlayoutFile::class, 'channel_id');
+    }
+    public function adTrp(){
+        return $this->hasMany(AdTrp::class, 'channel_id');
+    }
 
     public function deselectLogs(){
         return $this->hasMany(DeselctLog::class, 'channel_id');

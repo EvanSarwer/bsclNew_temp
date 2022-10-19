@@ -11,6 +11,7 @@ class PlayoutController extends Controller
 {
     public function receive(Request $req)
     {
+        $ids=array();
         $id=$req->id;
         
         $file=new PlayoutFile();
@@ -32,9 +33,15 @@ class PlayoutController extends Controller
             $log->duration=abs(strtotime($log->start)-strtotime($log->finish));
             $log->playout_id=$file->id;
             $log->save();
+            array_push($ids,$log->id);
             
             //return response()->json(["values" => $logs->duration], 200);
         }
-        return response()->json(["values" => "done"], 200);
+        if(count($req->data)!=count($ids)){
+            PlayoutLog::whereIn('id', $ids)->delete();
+            PlayoutFile::where('id', $file->id)->delete();
+            return response()->json(["error" =>"Faulty Data" ], 422);
+        }
+        return response()->json(["status" => "done"], 200);
     }
 }

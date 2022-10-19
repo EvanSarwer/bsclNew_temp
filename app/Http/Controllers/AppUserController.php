@@ -11,12 +11,7 @@ use Datetime;
 
 class AppUserController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('auth.admin');
-    // }
-
-    //
+    
     function changepass(Request $req){
         
         // $rules = array_diff_key($this->rules(), array_flip((array) ['user_name','password','c_password']));
@@ -61,8 +56,8 @@ class AppUserController extends Controller
     }
 
     function edit(Request $req){
-        
         $rules = array_diff_key($this->rules(), array_flip((array) ['user_name','password','c_password']));
+        $rules["email"] = 'required|unique:login,email,'.$req->user_id;
         $validator = Validator::make($req->all(),$rules);
         if ($validator->fails()){
             return response()->json($validator->errors(), 422);
@@ -70,7 +65,7 @@ class AppUserController extends Controller
         $user= AppUser::where('user_name',$req->user_name)->first();
         $user->update(["address"=>$req->address,"email"=>$req->email,"phone"=>$req->phone,"updated_at"=>new Datetime()]);
         $user = Login::where('user_name',$req->user_name)->first();
-        $user->update(["email"=>$req->email,"updated_at"=>new Datetime(),"updated_by"=>"admin"]);
+        $user->update(["email"=>$req->email,"role"=>$req->role,"updated_at"=>new Datetime(),"updated_by"=>"admin"]);
         return response()->json(["message"=>"User Updated Successfully"]);
     }
     function delete(Request $req){
@@ -105,13 +100,13 @@ class AppUserController extends Controller
     }
     function get($user_name){
         $user = AppUser::where('deleted_by',null)->where('user_name',$user_name)->first();
-        //$user->role = $user->login->role;
+        $user->role = $user->login->role;
         return response()->json($user);
     }
     function rules(){
         return[
-            "user_name"=>"required|unique:login,user_name|unique:app_users,user_name",
-            "email"=>"required",
+            "user_name"=>"required|alpha_dash|unique:login,user_name|unique:app_users,user_name",
+            "email"=>"required|unique:login,email",
             "password"=>"required",
             "c_password"=>"same:password",
             "address"=>"required",
@@ -140,7 +135,7 @@ class AppUserController extends Controller
 
     function deployerRules(){
         return[
-            "user_name"=>"required|unique:login,user_name|unique:deployer_info,user_name|unique:app_users,user_name",
+            "user_name"=>"required|alpha_dash|unique:login,user_name|unique:deployer_info,user_name|unique:app_users,user_name",
             "organization_name"=>"required",
             "designation"=>"required",
             "email"=>"required|unique:deployer_info,email|unique:login,email|unique:app_users,email",
@@ -163,11 +158,4 @@ class AppUserController extends Controller
 
 
 
-
-
-    function messages(){
-        return [
-
-        ];
-    }
 }

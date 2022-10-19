@@ -179,7 +179,7 @@ Route::post('/appuser/changepass', [AppUserController::class, 'changepass'])->mi
 Route::post('/deployer/create',[AppUserController::class,'addDeployer']);
 //Tanvir APIs//
 Route::post('/appuser/create',[AppUserController::class,'store']);
-Route::post('/appuser/edit',[AppUserController::class,'edit'])->middleware('auth.admin');
+Route::post('/appuser/edit',[AppUserController::class,'edit']);
 Route::post('/appuser/delete',[AppUserController::class,'delete'])->middleware('auth.admin');
 Route::any('/appuser/activate',[AppUserController::class,'activateDeactivate'])->middleware('auth.admin');
 Route::get('/appuser/list',[AppUserController::class,'list'])->middleware('auth.admin');

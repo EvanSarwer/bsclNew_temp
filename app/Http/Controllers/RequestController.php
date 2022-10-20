@@ -189,7 +189,8 @@ class RequestController extends Controller
             $Deselect_log = DeselectLog::where('user_id', $user_id)
                 ->where('finished_watching_at', NULL)->first();
             if (($Deselect_log && $this->wrongDetect($channel_id, $last_watching_time, $user_id)) || ($Deselect_log && $channel_id == $Deselect_log->channel_id)) return;
-            if ($Deselect_log && (strtotime($Deselect_log->started_watching_at) < strtotime($last_watching_time) )) {
+            if($Deselect_log && (strtotime($Deselect_log->started_watching_at) > strtotime($last_watching_time) )) return;
+            if ($Deselect_log) {
                 $Deselect_log->finished_watching_at = $last_watching_time;
                 $Deselect_log->duration_minute = abs(strtotime($Deselect_log->started_watching_at) - strtotime($Deselect_log->finished_watching_at)) / 60;
                 $Deselect_log->save();
@@ -202,7 +203,8 @@ class RequestController extends Controller
             $log = ViewLog::where('user_id', $user_id)
                 ->where('finished_watching_at', NULL)->first();
             if (($log && $this->wrongDetect($channel_id, $last_watching_time, $user_id)) || ($log && $channel_id == $log->channel_id)) return;
-            if ($log && (strtotime($log->started_watching_at) < strtotime($last_watching_time) )) {
+            if($log && (strtotime($log->started_watching_at) > strtotime($last_watching_time) )) return;
+            if ($log) {
                 $log->finished_watching_at = $last_watching_time;
                 $log->duration_minute = abs(strtotime($log->started_watching_at) - strtotime($log->finished_watching_at)) / 60;
                 $log->save();

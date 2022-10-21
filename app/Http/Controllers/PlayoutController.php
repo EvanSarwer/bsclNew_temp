@@ -31,7 +31,7 @@ class PlayoutController extends Controller
             $finish= date("Y-m-d H:i:s",strtotime("+" . $logs->duration . " seconds", strtotime($logs->start)));
             $log->finish=$finish;
             $log->duration=abs(strtotime($log->start)-strtotime($log->finish));
-            $log->playout_id=$file->id;
+            $log->file_id=$file->id;
             $log->save();
             array_push($ids,$log->id);
             

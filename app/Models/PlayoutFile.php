@@ -12,4 +12,10 @@ class PlayoutFile extends Model
     public $timestamps = false;
     protected $fillable = ['channel_id','date'];
 
+    public function playoutLogs(){
+        return $this->hasMany(PlayoutLog::class, 'playout_id','id');
+    }
+    public function channel(){
+        return $this->belongsTo(Channel::class, 'channel_id');
+    }
 }

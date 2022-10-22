@@ -11,4 +11,8 @@ class AdTrp extends Model
     protected $table="adtrps";
     public $timestamps = false;
     protected $fillable = ['commercial_name', 'program','channel_id','date','start','finish','timewatched','duration','tvrp','tvr0','reach0','reachp'];
+
+    public function channel(){
+        return $this->belongsTo(Channel::class, 'channel_id');
+    }
 }

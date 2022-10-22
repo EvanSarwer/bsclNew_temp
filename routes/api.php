@@ -15,7 +15,8 @@ use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\TrendController;
 use App\Http\Controllers\DeviceController;
-use App\Http\Controllers\PlayoutController
+use App\Http\Controllers\PlayoutController;
+use App\Http\Controllers\AdTrpController;
 ;
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +39,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('playout/receive', [PlayoutController::class, 'receive']);
 //////////////Playout////////////////////
 //////////////Adtrp////////////////////
+
+Route::get('testadtrp', [AdTrpController::class, 'adtrpall']);
 //////////////Adtrp////////////////////
 
 

@@ -40,6 +40,7 @@ Route::post('playout/receive', [PlayoutController::class, 'receive']);
 //////////////Playout////////////////////
 //////////////Adtrp////////////////////
 
+Route::post('frequency', [AdTrpController::class, 'frequency']);
 Route::get('testadtrp', [AdTrpController::class, 'adtrpall']);
 Route::post('dailyadtrp', [AdTrpController::class, 'dailyadtrp']);
 //////////////Adtrp////////////////////

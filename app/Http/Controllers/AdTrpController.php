@@ -101,12 +101,72 @@ class AdTrpController extends Controller
     }
     public function dailyadtrp(Request $req)
     {
-        if($req->date==""){
-        $date = date('Y-m-d', strtotime("-1 days"));
-        $adtrps = AdTrp::where('date', $date)
-            ->get();
+        if ($req->date == "") {
+            $date = date('Y-m-d', strtotime("-1 days"));
+            $adtrps = AdTrp::where('date', $date)
+                ->get();
         }
         return response()->json(["value" => $adtrps], 200);
+    }
+    public function frequency(Request $req)
+    {
+        $start=date('Y-m-d H:i:s', strtotime($req->start));
+        //$finish=date('Y-m-d H:i:s', strtotime($req->finish));
+        $c1 = 0;
+        $c2 = 0;
+        $c3 = 0;
+        $c4 = 0;
+        $c5 = 0;
+        $arr=array();
+        $viewlogs = ViewLog::where('channel_id', (int)$req->channel_id)
+                    ->where(function ($query) use ($start) {
+                        $query->where('finished_watching_at', '>', $start)
+                            ->orWhereNull('finished_watching_at');
+                    })
+                    ->where('started_watching_at', '<', $req->finish)
+                    ->pluck('user_id');
+foreach($viewlogs as $v){
+    array_push($arr,$v);
+}
+                    //return response()->json(["value" => $arr], 200);
+        //$array = array(1,2,'v', 'v1', 'v2', 'v2', 'v3', 'v3', 'v3', 'val4', 'val4', 'val4', 'val4', 'val5', 'val5', 'val5', 'val5', 'val5');
+        
+        //return response()->json(["value" => $viewlogs,"value1" => $array], 200);
+        $array=$arr;
+        //$array=$viewlogs;
+        $cnt = array_count_values($array);
+        foreach ($cnt as $c) {
+            switch ($c) {
+                case 5:
+                    $c5++;
+                    $c4++;
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 4:
+                    $c4++;
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 3:
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 2:
+                    $c2++;
+                    $c1++;
+                    break;
+                case 1:
+                    $c1++;
+                    break;
+            }
+        }
+        $count = array("1s" => $c1, "2s" => $c2, "3s" => $c3, "4s" => $c4, "5s" => $c5);
+        
+        return $count;
     }
     public function adtrptvrp(Request $request)
     {

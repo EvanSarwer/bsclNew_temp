@@ -415,9 +415,10 @@ class DeviceController extends Controller
         }
 
         $user = (object)$req->all();
-        //return response()->json(["message"=>$user->user_name]);
+        $user->type = "STB";
+        //return response()->json(["message"=>$user]);
         User::create((array)$user);
-
+       
         return response()->json(["message" => "Device User Created Successfully"]);
     }
 
@@ -439,7 +440,7 @@ class DeviceController extends Controller
         //     $user->update(["address"=>$req->address,"type"=>$req->type,"age"=>$req->age,"gender"=>$req->gender,"socio_status"=>$req->socio_status,"economic_status"=>$req->economic_status,"updated_at"=>new Datetime()]);
         // }
 
-        $user->update(["dob" => $req->dob, "gender" => $req->gender, "updated_at" => new Datetime()]);
+        $user->update(["type" => "STB", "dob" => $req->dob, "gender" => $req->gender, "updated_at" => new Datetime()]);
 
 
         return response()->json(["message" => "Device User Updated Successfully"]);

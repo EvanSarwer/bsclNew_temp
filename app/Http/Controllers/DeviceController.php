@@ -110,12 +110,12 @@ class DeviceController extends Controller
         }
 
         $device = (object)$req->all();
-        $device->survey_date= date('Y-m-d H:i:s');
-        $device->installation_date= date('Y-m-d H:i:s');
+        $device->survey_date = date('Y-m-d H:i:s');
+        $device->installation_date = date('Y-m-d H:i:s');
         //return response()->json(["message"=>$user->user_name]);
-        $d= Device::create((array)$device);
+        $d = Device::create((array)$device);
 
-        return response()->json(["device_id"=>$d->id, "message" => "Device Created Successfully"],200);
+        return response()->json(["device_id" => $d->id, "message" => "Device Created Successfully"], 200);
     }
 
     public function editDevice(Request $req)
@@ -135,106 +135,115 @@ class DeviceController extends Controller
         //     $user->update(["address"=>$req->address,"type"=>$req->type,"age"=>$req->age,"gender"=>$req->gender,"socio_status"=>$req->socio_status,"economic_status"=>$req->economic_status,"updated_at"=>new Datetime()]);
         // }
 
-        if($req->socio_status == "r"){
+        if ($req->socio_status == "r") {
             $req->city_corporation = "";
             $req->city_name = "";
         }
 
-        if($req->wifi == "n"){
+        if ($req->wifi == "n") {
             $req->wifi_signal_strength = "";
         }
 
 
-        if($req->socio_status == "u"){
-            if($req->household_condition == "Flat owner / Flat in apartment" ){
-                if($req->monthly_income == "a"){
+        if ($req->socio_status == "u") {
+            if ($req->household_condition == "Flat owner / Flat in apartment") {
+                if ($req->monthly_income == "a") {
                     $req->economic_status = "b";
-                }else if($req->monthly_income == "b"){
+                } else if ($req->monthly_income == "b") {
                     $req->economic_status = "c";
-                }else if($req->monthly_income == "c"){
+                } else if ($req->monthly_income == "c") {
                     $req->economic_status = "d";
-                }else if($req->monthly_income == "d"){
+                } else if ($req->monthly_income == "d") {
                     $req->economic_status = "d";
-                }else if($req->monthly_income == "e"){
+                } else if ($req->monthly_income == "e") {
                     $req->economic_status = "e";
                 }
-
-            }else if($req->household_condition == "Rented flat / Non-Flat apartment where there is no security guard and parking" ){
-                if($req->monthly_income == "a"){
+            } else if ($req->household_condition == "Rented flat / Non-Flat apartment where there is no security guard and parking") {
+                if ($req->monthly_income == "a") {
                     $req->economic_status = "a";
-                }else if($req->monthly_income == "b"){
+                } else if ($req->monthly_income == "b") {
                     $req->economic_status = "b";
-                }else if($req->monthly_income == "c"){
+                } else if ($req->monthly_income == "c") {
                     $req->economic_status = "c";
-                }else if($req->monthly_income == "d"){
+                } else if ($req->monthly_income == "d") {
                     $req->economic_status = "d";
-                }else if($req->monthly_income == "e"){
+                } else if ($req->monthly_income == "e") {
                     $req->economic_status = "d";
                 }
-            }else if($req->household_condition == "Lower tier house" ){
-                if($req->monthly_income == "a"){
+            } else if ($req->household_condition == "Lower tier house") {
+                if ($req->monthly_income == "a") {
                     $req->economic_status = "a";
-                }else if($req->monthly_income == "b"){
+                } else if ($req->monthly_income == "b") {
                     $req->economic_status = "a";
-                }else if($req->monthly_income == "c"){
+                } else if ($req->monthly_income == "c") {
                     $req->economic_status = "b";
-                }else if($req->monthly_income == "d"){
+                } else if ($req->monthly_income == "d") {
                     $req->economic_status = "c";
-                }else if($req->monthly_income == "e"){
+                } else if ($req->monthly_income == "e") {
                     $req->economic_status = "d";
                 }
             }
-
-        }else if($req->socio_status == "r"){
-            if($req->household_condition == "Full Concrete house (wall, floor and roof)" ){
-                if($req->monthly_income == "a"){
+        } else if ($req->socio_status == "r") {
+            if ($req->household_condition == "Full Concrete house (wall, floor and roof)") {
+                if ($req->monthly_income == "a") {
                     $req->economic_status = "b";
-                }else if($req->monthly_income == "b"){
+                } else if ($req->monthly_income == "b") {
                     $req->economic_status = "c";
-                }else if($req->monthly_income == "c"){
+                } else if ($req->monthly_income == "c") {
                     $req->economic_status = "d";
-                }else if($req->monthly_income == "d"){
+                } else if ($req->monthly_income == "d") {
                     $req->economic_status = "d";
-                }else if($req->monthly_income == "e"){
+                } else if ($req->monthly_income == "e") {
                     $req->economic_status = "e";
                 }
-
-            }else if($req->household_condition == "Semi Concrete house (wall and floor concrete but the roof is made by Tin)" ){
-                if($req->monthly_income == "a"){
+            } else if ($req->household_condition == "Semi Concrete house (wall and floor concrete but the roof is made by Tin)") {
+                if ($req->monthly_income == "a") {
                     $req->economic_status = "a";
-                }else if($req->monthly_income == "b"){
+                } else if ($req->monthly_income == "b") {
                     $req->economic_status = "b";
-                }else if($req->monthly_income == "c"){
+                } else if ($req->monthly_income == "c") {
                     $req->economic_status = "c";
-                }else if($req->monthly_income == "d"){
+                } else if ($req->monthly_income == "d") {
                     $req->economic_status = "d";
-                }else if($req->monthly_income == "e"){
+                } else if ($req->monthly_income == "e") {
                     $req->economic_status = "d";
                 }
-            }else if($req->household_condition == "Non-Concrete (Made by Tin/Wood/Bamboo etc.)" ){
-                if($req->monthly_income == "a"){
+            } else if ($req->household_condition == "Non-Concrete (Made by Tin/Wood/Bamboo etc.)") {
+                if ($req->monthly_income == "a") {
                     $req->economic_status = "a";
-                }else if($req->monthly_income == "b"){
+                } else if ($req->monthly_income == "b") {
                     $req->economic_status = "a";
-                }else if($req->monthly_income == "c"){
+                } else if ($req->monthly_income == "c") {
                     $req->economic_status = "b";
-                }else if($req->monthly_income == "d"){
+                } else if ($req->monthly_income == "d") {
                     $req->economic_status = "c";
-                }else if($req->monthly_income == "e"){
+                } else if ($req->monthly_income == "e") {
                     $req->economic_status = "d";
                 }
             }
         }
 
 
+        $device->update([
+            "type" => $req->type, "contact_person" => $req->contact_person, "contact_email" => $req->contact_email, "contact_number" => $req->contact_number, "alt_number" => $req->alt_number, "payment_type" => $req->payment_type, "payment_number" => $req->payment_number, "other_payment_type" => $req->other_payment_type, "other_payment_number" => $req->other_payment_number,
+            "house_name" => $req->house_name, "house_number" => $req->house_number, "road_number" => $req->road_number, "state_name" => $req->state_name, "ward_no" => $req->ward_no, "zone_thana" => $req->zone_thana, "city_corporation" => $req->city_corporation, "city_name" => $req->city_name, "zip_code" => $req->zip_code, "district" => $req->district, "lat" => $req->lat, "lng" => $req->lng,
+            "household_condition" => $req->household_condition, "description" => $req->description, "tv_type" => $req->tv_type, "tv_brand" => $req->tv_brand, "tv_placement" => $req->tv_placement, "gsm_signal_strength" => $req->gsm_signal_strength, "wifi" => $req->wifi, "wifi_signal_strength" => $req->wifi_signal_strength, "stb_provider_name" => $req->stb_provider_name, "stb_subscription_type" => $req->stb_subscription_type, "stb_subscription_charge" => $req->stb_subscription_charge,
+            "socio_status" => $req->socio_status, "economic_status" => $req->economic_status, "monthly_income" => $req->monthly_income, "installer_name" => $req->installer_name, "survey_date" => new Datetime(), "installation_date" => new Datetime(),  "updated_at" => new Datetime()
+        ]);
 
 
 
 
-        $device->update(["type" => $req->type, "contact_person" => $req->contact_person, "contact_email" => $req->contact_email, "contact_number" => $req->contact_number, "alt_number" => $req->alt_number, "payment_type" => $req->payment_type, "payment_number" => $req->payment_number, "other_payment_type" => $req->other_payment_type, "other_payment_number" => $req->other_payment_number,
-                         "house_name" => $req->house_name, "house_number" => $req->house_number, "road_number" => $req->road_number, "state_name" => $req->state_name, "ward_no" => $req->ward_no, "zone_thana" => $req->zone_thana, "city_corporation" => $req->city_corporation, "city_name" => $req->city_name, "zip_code" => $req->zip_code, "district" => $req->district, "lat" => $req->lat, "lng" => $req->lng,
-                         "household_condition" => $req->household_condition, "description" => $req->description, "tv_type" => $req->tv_type, "tv_brand" => $req->tv_brand, "tv_placement" => $req->tv_placement, "gsm_signal_strength" => $req->gsm_signal_strength, "wifi" => $req->wifi, "wifi_signal_strength" => $req->wifi_signal_strength, "stb_provider_name" => $req->stb_provider_name, "stb_subscription_type" => $req->stb_subscription_type, "stb_subscription_charge" => $req->stb_subscription_charge, 
-                         "socio_status" => $req->socio_status,"economic_status" => $req->economic_status, "monthly_income" => $req->monthly_income, "installer_name" => $req->installer_name, "survey_date" => new Datetime(), "installation_date"=> new Datetime(),  "updated_at" => new Datetime()]);
+
+        $users = User::where('device_id', $device->id)->get();
+        if (count($users) > 0) {
+            foreach ($users as $u) {
+                $u->address = $device->district;
+                $u->socio_status = $device->socio_status;
+                $u->economic_status = $device->economic_status;
+                $u->save();
+            }
+        }
 
         return response()->json(["message" => "Device Updated Successfully"]);
     }
@@ -288,7 +297,7 @@ class DeviceController extends Controller
                 $du->socio_status = "Rural";
             }
 
-            array_push($deviceUser,$du);
+            array_push($deviceUser, $du);
         }
         array_multisort(array_column($deviceUser, 'user_index'), SORT_ASC, $deviceUser);
 
@@ -307,8 +316,8 @@ class DeviceController extends Controller
     {
         return [
             "device_name" => "required|unique:devices,device_name",
-            "lat"=>"required",
-            "lng"=>"required",
+            "lat" => "required",
+            "lng" => "required",
             "monthly_income" => "required",
             "socio_status" => "required",
             "contact_person" => "required",
@@ -414,11 +423,18 @@ class DeviceController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        $device = Device::where('id', $req->device_id)->first();
+
         $user = (object)$req->all();
+        if ($device) {
+            $device->district ? $user->address = $device->district : '';
+            $device->socio_status ? $user->socio_status = $device->socio_status : '';
+            $device->economic_status ? $user->economic_status = $device->economic_status : '';
+        }
         $user->type = "STB";
         //return response()->json(["message"=>$user]);
         User::create((array)$user);
-       
+
         return response()->json(["message" => "Device User Created Successfully"]);
     }
 

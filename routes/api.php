@@ -92,7 +92,7 @@ Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff'])->middlew
 Route::get('/device/currentlywatching', [DeviceController::class, 'currentlyWatching'])->middleware('auth.admin');
 
 // Device User
-Route::post('/deviceuser/create',[DeviceController::class,'addDeviceUser'])->middleware('auth.admin.deployer');
+Route::post('/deviceuser/create',[DeviceController::class,'addDeviceUser']); //->middleware('auth.admin.deployer')
 Route::post('/deviceuser/delete',[DeviceController::class,'deleteDeviceUser'])->middleware('auth.admin');
 Route::get('/deviceuser/get/{user_id}',[DeviceController::class,'getDeviceUser'])->middleware('auth.admin.deployer');
 Route::post('/deviceuser/edit',[DeviceController::class,'editDeviceUser'])->middleware('auth.admin.deployer');

@@ -103,9 +103,13 @@ class AdTrpController extends Controller
     {
         if ($req->date == "") {
             $date = date('Y-m-d', strtotime("-1 days"));
+}
+else{
+$date = date('Y-m-d', strtotime($req->date));
+}
             $adtrps = AdTrp::where('date', $date)
                 ->get();
-        }
+        
         return response()->json(["value" => $adtrps], 200);
     }
     public function frequency(Request $req)

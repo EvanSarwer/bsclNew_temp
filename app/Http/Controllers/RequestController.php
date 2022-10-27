@@ -45,8 +45,8 @@ class RequestController extends Controller
                 $var->duration_minute = abs(strtotime($req['start']) - strtotime($req['finish'])) / 60;
                 $var->save();
 
-                $user->tvoff = 1;
-                $user->save();
+                //$user->tvoff = 1;
+                //$user->save();
             //}
         }
         return response()->json(["response" => "done"], 200);

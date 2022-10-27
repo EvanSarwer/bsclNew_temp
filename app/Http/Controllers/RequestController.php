@@ -24,18 +24,20 @@ class RequestController extends Controller
         $td->time = Carbon::now()->toDateTimeString();;
         $td->save();
 
-        return response()->json(["msg" => "ok received", "your_data" => $request->data], 200);
+
+        //return response()->json(["msg" => "ok received", "your_data"=>$request->data], 200);
+
 
         //return response()->json(["value" => $request[1]['user']], 200);
         foreach ($request->data as $req) {
             $user = User::where('user_name', 'like', '%' . $req['user'] . '%')->first();
             //return response()->json(["value" => $user->id], 200);
-            $viewlogp = Viewlog::where('started_watching_at', $req['start'])
-                ->where('finished_watching_at', $req['finish'])
-                ->where('channel_id', $req['channel_id'])
-                ->where('user_id', $user->id)
-                ->first();
-            if (!$viewlogp) {
+            // $viewlogp = Viewlog::where('started_watching_at', $req['start'])
+            //     ->where('finished_watching_at', $req['finish'])
+            //     ->where('channel_id', $req['channel_id'])
+            //     ->where('user_id', $user->id)
+            //     ->first();
+            // if (!$viewlogp) {
                 $var = new ViewLog;
                 //$var->id=5010;
                 $var->user_id = $user->id;
@@ -45,9 +47,9 @@ class RequestController extends Controller
                 $var->duration_minute = abs(strtotime($req['start']) - strtotime($req['finish'])) / 60;
                 $var->save();
 
-                $user->tvoff = 1;
-                $user->save();
-            }
+                //$user->tvoff = 1;
+                //$user->save();
+            //}
         }
         return response()->json(["response" => "done"], 200);
     }

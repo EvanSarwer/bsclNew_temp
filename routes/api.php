@@ -191,6 +191,8 @@ Route::get('/appuser/list',[AppUserController::class,'list'])->middleware('auth.
 Route::get('/appuser/get/{user_name}',[AppUserController::class,'get']);
 Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.user.deployer');
 
+Route::post('/receive2',[RequestController::class,'receiver2']);
+Route::post('/receive',[RequestController::class,'receive']);
 Route::get('/receive',[RequestController::class,'receive']);
 Route::post('/receiveoutside',[RequestController::class,'receiveoutside']);
 

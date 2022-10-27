@@ -30,12 +30,12 @@ class RequestController extends Controller
         foreach ($request->data as $req) {
             $user = User::where('user_name', 'like', '%' . $req['user'] . '%')->first();
             //return response()->json(["value" => $user->id], 200);
-            $viewlogp = Viewlog::where('started_watching_at', $req['start'])
-                ->where('finished_watching_at', $req['finish'])
-                ->where('channel_id', $req['channel_id'])
-                ->where('user_id', $user->id)
-                ->first();
-            if (!$viewlogp) {
+            // $viewlogp = Viewlog::where('started_watching_at', $req['start'])
+            //     ->where('finished_watching_at', $req['finish'])
+            //     ->where('channel_id', $req['channel_id'])
+            //     ->where('user_id', $user->id)
+            //     ->first();
+            // if (!$viewlogp) {
                 $var = new ViewLog;
                 //$var->id=5010;
                 $var->user_id = $user->id;
@@ -47,7 +47,7 @@ class RequestController extends Controller
 
                 $user->tvoff = 1;
                 $user->save();
-            }
+            //}
         }
         return response()->json(["response" => "done"], 200);
     }

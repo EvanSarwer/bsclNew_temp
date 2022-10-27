@@ -24,7 +24,7 @@ class RequestController extends Controller
         $td->time = Carbon::now()->toDateTimeString();;
         $td->save();
 
-        return response()->json(["msg" => "ok received", "your_data"=>$request->data], 200);
+        //return response()->json(["msg" => "ok received", "your_data"=>$request->data], 200);
 
         //return response()->json(["value" => $request[1]['user']], 200);
         foreach ($request->data as $req) {

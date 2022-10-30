@@ -39,7 +39,7 @@ class LiveChannelController extends Controller
                                 ->first();
                         if($user){
                             $user_count = $user_count + 1;
-                            $uu = array("id"=>$user->id, "title"=>$user->user_name, "lat"=>$user->lat, "lng"=>$user->lng);
+                            $uu = array("id"=>$user->device->id, "title"=>$user->device->device_name, "lat"=>$user->device->lat, "lng"=>$user->device->lng);
                             array_push($points,$uu);
                             
                         }

@@ -544,9 +544,10 @@ class ChannelController extends Controller
   {
     $channelslist = array();
     //$demo=array("id"=>"name"=>);
-    $channels = Channel::all('id', 'channel_name');
+    $channels = Channel::whereNotIn('id', [24,888,39])
+    ->get();
     foreach ($channels as $c) {
-      $demo = array("id" => $c->id, "name" => $c->channel_name);
+      $demo = array("id" => $c->id, "name" => $c->channel_name, "logo" => $c->logo);
       array_push($channelslist, $demo);
     }
 

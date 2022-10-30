@@ -148,7 +148,7 @@ Route::post('/livechannel/activechannellistgraph',[LiveChannelController::class,
 ///////////END////////////////
 
 //////////Channels////////////
-Route::get('trend/channels', [ChannelController::class, 'trendchannel'])->middleware('auth.admin.user');
+Route::get('trend/channels', [ChannelController::class, 'trendchannel']);//->middleware('auth.admin.user');
 Route::post('trend/reach/zero', [ChannelController::class, 'reachtrend'])->middleware('auth.admin.user');
 Route::post('trend/reach/percent', [ChannelController::class, 'reachpercenttrend'])->middleware('auth.admin.user');
 Route::post('trend/tvr/percent', [ChannelController::class, 'tvrtrend'])->middleware('auth.admin.user');

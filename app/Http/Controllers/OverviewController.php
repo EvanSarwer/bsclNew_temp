@@ -55,9 +55,12 @@ class OverviewController extends Controller
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
                         ->whereBetween('age', [$req->age1, $req->age2])
                         ->first();
-                } else {
+                } else if($req->userType == "OTT"){
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
+                        ->first();
+                }else {
+                    $user = User::where('id', $v->user_id)
                         ->first();
                 }
 
@@ -124,9 +127,12 @@ class OverviewController extends Controller
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
                         ->whereBetween('age', [$req->age1, $req->age2])
                         ->first();
-                } else {
+                } else if($req->userType == "OTT"){
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
+                        ->first();
+                }else {
+                    $user = User::where('id', $v->user_id)
                         ->first();
                 }
 
@@ -235,9 +241,12 @@ class OverviewController extends Controller
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
                         ->whereBetween('age', [$req->age1, $req->age2])
                         ->first();
-                } else {
+                } else if($req->userType == "OTT"){
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
+                        ->first();
+                }else {
+                    $user = User::where('id', $v->user_id)
                         ->first();
                 }
 
@@ -325,9 +334,12 @@ class OverviewController extends Controller
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
                         ->whereBetween('age', [$req->age1, $req->age2])
                         ->first();
-                } else {
+                } else if($req->userType == "OTT"){
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
+                        ->first();
+                }else {
+                    $user = User::where('id', $v->user_id)
                         ->first();
                 }
 
@@ -410,9 +422,12 @@ class OverviewController extends Controller
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
                         ->whereBetween('age', [$req->age1, $req->age2])
                         ->first();
-                } else {
+                } else if($req->userType == "OTT"){
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
+                        ->first();
+                }else {
+                    $user = User::where('id', $v->user_id)
                         ->first();
                 }
 
@@ -501,9 +516,12 @@ class OverviewController extends Controller
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
                         ->whereBetween('age', [$req->age1, $req->age2])
                         ->first();
-                } else {
+                } else if($req->userType == "OTT"){
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
+                        ->first();
+                }else {
+                    $user = User::where('id', $v->user_id)
                         ->first();
                 }
 

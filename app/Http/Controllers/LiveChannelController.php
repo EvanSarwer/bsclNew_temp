@@ -29,14 +29,32 @@ class LiveChannelController extends Controller
                 $user_count = 0;
                 // if(count($viewlogs) > 0){
                     foreach($viewlogs as $v){
-                        $user= User::where('id',$v->user_id)
-                                ->where('type','like','%'.$req->userType.'%')
-                                ->where('address','like','%'.$req->region.'%')
-                                ->where('gender','like','%'.$req->gender.'%')
-                                ->where('economic_status','like','%'.$req->economic.'%')
-                                ->where('socio_status','like','%'.$req->socio.'%')
-                                ->whereBetween('age',[$req->age1,$req->age2])
+                        if ($req->userType == "STB") {
+                            $user = User::where('id', $v->user_id)
+                                ->where('type', $req->userType)
+                                ->where('address', 'like', '%' . $req->region . '%')
+                                ->where('gender', 'like', '%' . $req->gender . '%')
+                                ->where('economic_status', 'like', '%' . $req->economic . '%')
+                                ->where('socio_status', 'like', '%' . $req->socio . '%')
+                                ->whereBetween('age', [$req->age1, $req->age2])
                                 ->first();
+                        } else if($req->userType == "OTT"){
+                            $user = User::where('id', $v->user_id)
+                                ->where('type', $req->userType)
+                                ->first();
+                        }else {
+                            $user = User::where('id', $v->user_id)
+                                ->first();
+                        }
+                        
+                        // $user= User::where('id',$v->user_id)
+                        //         ->where('type','like','%'.$req->userType.'%')
+                        //         ->where('address','like','%'.$req->region.'%')
+                        //         ->where('gender','like','%'.$req->gender.'%')
+                        //         ->where('economic_status','like','%'.$req->economic.'%')
+                        //         ->where('socio_status','like','%'.$req->socio.'%')
+                        //         ->whereBetween('age',[$req->age1,$req->age2])
+                        //         ->first();
                         if($user){
                             $user_count = $user_count + 1;
                             $uu = array("id"=>$user->device->id, "title"=>$user->device->device_name, "lat"=>$user->device->lat, "lng"=>$user->device->lng);

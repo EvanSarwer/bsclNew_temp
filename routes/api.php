@@ -44,6 +44,9 @@ Route::post('frequency', [AdTrpController::class, 'frequency']);
 Route::get('testadtrp', [AdTrpController::class, 'adtrpall']);
 Route::post('channelwiseadtrp', [AdTrpController::class, 'channelwiseadtrp']);
 Route::post('dailyadtrp', [AdTrpController::class, 'dailyadtrp']);
+
+Route::get('/allkeyword', [AdTrpController::class, 'allkeyword']);//->middleware('auth.admin.user');
+Route::post('/keywordadtrp', [AdTrpController::class, 'keywordadtrp']);//->middleware('auth.admin.user');
 //////////////Adtrp////////////////////
 
 

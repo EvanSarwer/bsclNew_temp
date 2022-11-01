@@ -15,6 +15,11 @@ use Illuminate\Http\Request;
 class AdTrpController extends Controller
 {
     //
+    public function allkeyword()
+    {
+        $cname = AdTrp::distinct()->pluck('commercial_name')->toArray();
+        return response()->json(["value" => $cname], 200);
+    }
     public function adtrpall()
     {
 
@@ -111,8 +116,21 @@ class AdTrpController extends Controller
 
         return response()->json(["value" => $adtrps], 200);
     }
+    public function keywordadtrp(Request $req)
+    {
+        if ($req->date == "") {
+            $date = date('Y-m-d', strtotime("-1 days"));
+        } else {
+            $date = date('Y-m-d', strtotime($req->date));
+        }
+        $adtrps = AdTrp::where('date', $date)
+        ->wherein('commercial_name',$req->keywords)
+            ->get();
 
-    
+        return response()->json(["value" => $adtrps], 200);
+    }
+
+
     public function channelwiseadtrp(Request $req)
     {
         if ($req->date == "") {
@@ -121,7 +139,7 @@ class AdTrpController extends Controller
             $date = date('Y-m-d', strtotime($req->date));
         }
         $adtrps = AdTrp::where('date', $date)
-        ->where('channel_id', $req->id)
+            ->where('channel_id', $req->id)
             ->get();
 
         return response()->json(["value" => $adtrps], 200);

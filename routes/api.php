@@ -204,3 +204,8 @@ Route::post('/receiveoutside',[RequestController::class,'receiveoutside']);
 
 Route::get("/test",[UserController::class,'demo_test']);
 Route::get("/git_id",[AuthController::class,'git_id']);
+
+Route::post("/adtrp/keywords/add",[AdTrpController::class,'addKeyword'])->middleware('auth.admin');;
+Route::post("/adtrp/keywords/remove",[AdTrpController::class,'removeKeyword'])->middleware('auth.admin');;
+Route::get("/adtrp/keywords/get",[AdTrpController::class,'getKeywords'])->middleware('auth.admin');;
+Route::post("/adagency/adtrp",[AdTrpController::class,'getAdTrp'])->middleware('auth.admin');;

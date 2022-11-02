@@ -11,7 +11,8 @@ use App\Models\PlayoutFile;
 use App\Models\PlayoutLog;
 use App\Models\AdTrp;
 use Illuminate\Http\Request;
-
+use App\Models\Keyword;
+use App\Models\Token;
 class AdTrpController extends Controller
 {
     //
@@ -255,5 +256,40 @@ class AdTrpController extends Controller
             array_push($values, $tvr);
         }
         return response()->json(["value" => $values], 200);
+    }
+    public function getKeywords(Request $req){
+        $user = $this->getAuth($req);
+        $keywords = Keyword::where('agency_id',$user->user_name)->get();
+        return response($keywords,200);
+
+    }
+
+    public function addKeyword(Request $req){
+        $var = new Keyword();
+        $var->keyword = $req->keyword;
+        $var->agency_id= $this->getAuth($req)->user_name;
+        $var->save();
+        return response()->json(["msg"=>"stored"],200);
+
+    }
+    public function removeKeyword(Request $req){
+        $var = Keyword::where('id',$req->id)->delete();
+        return response()->json(["msg"=>"deleted"],200);
+    }
+    public function getAuth(Request $req){
+        $token = $req->header('Authorization');
+        $userToken = Token::where('token', $token)->first();
+        $user = $userToken->login;
+        return $user;
+    }
+    public function getAdTrp(Request $req){
+        $date = $req->date;
+        //$date = '2022-10-27';
+        $user = $this->getAuth($req);
+        $keywords = Keyword::where('agency_id',$user->user_name)->select('keyword')->get();
+        $adtrps = AdTrp::where('date', $date)
+        ->wherein('commercial_name',$keywords)
+        ->get();
+        return response()->json(["trps"=>$adtrps,"date"=>$date],200);
     }
 }

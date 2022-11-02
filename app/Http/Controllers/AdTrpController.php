@@ -13,6 +13,7 @@ use App\Models\AdTrp;
 use Illuminate\Http\Request;
 use App\Models\Keyword;
 use App\Models\Token;
+use Illuminate\Support\Facades\DB;
 class AdTrpController extends Controller
 {
     //
@@ -286,10 +287,14 @@ class AdTrpController extends Controller
         $date = $req->date;
         //$date = '2022-10-27';
         $user = $this->getAuth($req);
-        $keywords = Keyword::where('agency_id',$user->user_name)->select('keyword')->get();
-        $adtrps = AdTrp::where('date', $date)
-        ->wherein('commercial_name',$keywords)
-        ->get();
+        $keywords = Keyword::where('agency_id',$user->user_name)->pluck('keyword')->toArray();
+        $adtrps =DB::Table('adtrps')
+        ->select('*')                
+        ->Where(function ($query) use($keywords) {
+             for ($i = 0; $i < count($keywords); $i++){
+                $query->orwhere('commercial_name', 'like',  '%' . $keywords[$i] .'%');
+             }      
+        })->get();
         return response()->json(["trps"=>$adtrps,"date"=>$date],200);
     }
 }

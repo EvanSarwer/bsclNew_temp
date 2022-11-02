@@ -47,19 +47,23 @@ class OverviewController extends Controller
             foreach ($viewlogs as $v) {
 
                 if ($req->userType == "STB") {
+                    $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+                    $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+                    //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->where('address', 'like', '%' . $req->region . '%')
                         ->where('gender', 'like', '%' . $req->gender . '%')
                         ->where('economic_status', 'like', '%' . $req->economic . '%')
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
-                        ->whereBetween('age', [$req->age1, $req->age2])
+                        //->whereBetween('age', [$req->age1, $req->age2])
+                        ->whereBetween('dob', [$minDate, $maxDate])
                         ->first();
-                } else if($req->userType == "OTT"){
+                } else if ($req->userType == "OTT") {
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->first();
-                }else {
+                } else {
                     $user = User::where('id', $v->user_id)
                         ->first();
                 }
@@ -119,19 +123,23 @@ class OverviewController extends Controller
 
             foreach ($viewlogs as $v) {
                 if ($req->userType == "STB") {
+                    $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+                    $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+                    //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->where('address', 'like', '%' . $req->region . '%')
                         ->where('gender', 'like', '%' . $req->gender . '%')
                         ->where('economic_status', 'like', '%' . $req->economic . '%')
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
-                        ->whereBetween('age', [$req->age1, $req->age2])
+                        //->whereBetween('age', [$req->age1, $req->age2])
+                        ->whereBetween('dob', [$minDate, $maxDate])
                         ->first();
-                } else if($req->userType == "OTT"){
+                } else if ($req->userType == "OTT") {
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->first();
-                }else {
+                } else {
                     $user = User::where('id', $v->user_id)
                         ->first();
                 }
@@ -233,19 +241,23 @@ class OverviewController extends Controller
             foreach ($viewers as $v) {
 
                 if ($req->userType == "STB") {
+                    $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+                    $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+                    //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->where('address', 'like', '%' . $req->region . '%')
                         ->where('gender', 'like', '%' . $req->gender . '%')
                         ->where('economic_status', 'like', '%' . $req->economic . '%')
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
-                        ->whereBetween('age', [$req->age1, $req->age2])
+                        //->whereBetween('age', [$req->age1, $req->age2])
+                        ->whereBetween('dob', [$minDate, $maxDate])
                         ->first();
-                } else if($req->userType == "OTT"){
+                } else if ($req->userType == "OTT") {
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->first();
-                }else {
+                } else {
                     $user = User::where('id', $v->user_id)
                         ->first();
                 }
@@ -326,19 +338,23 @@ class OverviewController extends Controller
             foreach ($viewers as $v) {
 
                 if ($req->userType == "STB") {
+                    $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+                    $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+                    //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->where('address', 'like', '%' . $req->region . '%')
                         ->where('gender', 'like', '%' . $req->gender . '%')
                         ->where('economic_status', 'like', '%' . $req->economic . '%')
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
-                        ->whereBetween('age', [$req->age1, $req->age2])
+                        //->whereBetween('age', [$req->age1, $req->age2])
+                        ->whereBetween('dob', [$minDate, $maxDate])
                         ->first();
-                } else if($req->userType == "OTT"){
+                } else if ($req->userType == "OTT") {
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->first();
-                }else {
+                } else {
                     $user = User::where('id', $v->user_id)
                         ->first();
                 }
@@ -414,19 +430,23 @@ class OverviewController extends Controller
             foreach ($viewelogs as $v) {
 
                 if ($req->userType == "STB") {
+                    $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+                    $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+                    //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->where('address', 'like', '%' . $req->region . '%')
                         ->where('gender', 'like', '%' . $req->gender . '%')
                         ->where('economic_status', 'like', '%' . $req->economic . '%')
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
-                        ->whereBetween('age', [$req->age1, $req->age2])
+                        //->whereBetween('age', [$req->age1, $req->age2])
+                        ->whereBetween('dob', [$minDate, $maxDate])
                         ->first();
-                } else if($req->userType == "OTT"){
+                } else if ($req->userType == "OTT") {
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->first();
-                }else {
+                } else {
                     $user = User::where('id', $v->user_id)
                         ->first();
                 }
@@ -508,19 +528,23 @@ class OverviewController extends Controller
             foreach ($viewlogs as $v) {
 
                 if ($req->userType == "STB") {
+                    $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+                    $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+                    //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->where('address', 'like', '%' . $req->region . '%')
                         ->where('gender', 'like', '%' . $req->gender . '%')
                         ->where('economic_status', 'like', '%' . $req->economic . '%')
                         ->where('socio_status', 'like', '%' . $req->socio . '%')
-                        ->whereBetween('age', [$req->age1, $req->age2])
+                        //->whereBetween('age', [$req->age1, $req->age2])
+                        ->whereBetween('dob', [$minDate, $maxDate])
                         ->first();
-                } else if($req->userType == "OTT"){
+                } else if ($req->userType == "OTT") {
                     $user = User::where('id', $v->user_id)
                         ->where('type', $req->userType)
                         ->first();
-                }else {
+                } else {
                     $user = User::where('id', $v->user_id)
                         ->first();
                 }

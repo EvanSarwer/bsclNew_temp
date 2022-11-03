@@ -95,9 +95,33 @@ class AppUserController extends Controller
         return response()->json(["message"=>"User Status Updated Successfully"]);
     }
     function list(){
-        $users = AppUser::where('deleted_by',null)->get();
-        return response()->json($users);
+        $admins = Login::where('role','admin')->get();
+        $admin_users = [];
+        foreach($admins as $a){
+            $a = AppUser::where('user_name',$a->user_name)->where('deleted_by',null)->first();
+            array_push($admin_users,$a);
+        }
+
+        $channelUsers = Login::where('role','general')->get();
+        $channel_users = [];
+        foreach($channelUsers as $c){
+            $c = AppUser::where('user_name',$c->user_name)->where('deleted_by',null)->first();
+            array_push($channel_users,$c);
+        }
+
+        $addAgencies = Login::where('role','add-agency')->get();
+        $addAgency_users = [];
+        foreach($addAgencies as $ad){
+            $ad = AppUser::where('user_name',$ad->user_name)->where('deleted_by',null)->first();
+            array_push($addAgency_users,$a);
+        }
+        
+        //$admin_users = $admins->appUser;
+        return response()->json(["admin_users"=>$admin_users,"channel_users"=>$channel_users, "addAgency_users"=>$addAgency_users]);
     }
+
+
+
     function get($user_name){
         $user = AppUser::where('deleted_by',null)->where('user_name',$user_name)->first();
         $user->role = $user->login->role;

@@ -564,6 +564,8 @@ class ChannelController extends Controller
   }
   public function reachpercenttrend(Request $req)
   {
+    $userids=User::where('type', 'like', '%' . $req->type . '%')
+    ->pluck('id')->toArray();
     $fweek = false;
     $weekdays = array("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
     $time = array();
@@ -621,6 +623,7 @@ class ChannelController extends Controller
             ->orWhereNull('finished_watching_at');
         })
         ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i + 1])))
+        ->whereIn('user_id', $userids)
         ->get();
 
       foreach ($viewers as $v) {
@@ -644,6 +647,9 @@ class ChannelController extends Controller
   }
   public function reachtrend(Request $req)
   {
+    $userids=User::where('type', 'like', '%' . $req->type . '%')
+    ->pluck('id')->toArray();
+    //return response()->json(["users" =>$users,"count"=>count($users) ], 200);
     $fweek = false;
     $weekdays = array("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
     $time = array();
@@ -701,6 +707,7 @@ class ChannelController extends Controller
             ->orWhereNull('finished_watching_at');
         })
         ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i + 1])))
+        ->whereIn('user_id', $userids)
         ->get();
 
       foreach ($viewers as $v) {
@@ -724,6 +731,8 @@ class ChannelController extends Controller
   }
   public function tvrtrend(Request $req)
   {
+    $userids=User::where('type', 'like', '%' . $req->type . '%')
+    ->pluck('id')->toArray();
     $fweek = false;
     $weekdays = array("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
     $time = array();
@@ -792,6 +801,7 @@ class ChannelController extends Controller
             ->orWhereNull('finished_watching_at');
         })
         ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i + 1])))
+        ->whereIn('user_id', $userids)
         ->get();
 
       foreach ($viewers as $v) {
@@ -843,6 +853,8 @@ class ChannelController extends Controller
   public function tvrtrendzero(Request $req)
   {
 
+    $userids=User::where('type', 'like', '%' . $req->type . '%')
+    ->pluck('id')->toArray();
     $fweek = false;
     $weekdays = array("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
     $time = array();
@@ -911,6 +923,7 @@ class ChannelController extends Controller
             ->orWhereNull('finished_watching_at');
         })
         ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i + 1])))
+        ->whereIn('user_id', $userids)
         ->get();
 
       foreach ($viewers as $v) {

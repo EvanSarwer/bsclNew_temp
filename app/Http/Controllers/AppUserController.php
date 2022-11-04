@@ -113,7 +113,7 @@ class AppUserController extends Controller
         $addAgency_users = [];
         foreach($addAgencies as $ad){
             $ad = AppUser::where('user_name',$ad->user_name)->where('deleted_by',null)->first();
-            array_push($addAgency_users,$a);
+            array_push($addAgency_users,$ad);
         }
         
         //$admin_users = $admins->appUser;

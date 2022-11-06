@@ -17,6 +17,7 @@ use App\Http\Controllers\TrendController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\PlayoutController;
 use App\Http\Controllers\AdTrpController;
+use App\Http\Controllers\DayPartsController;
 ;
 /*
 |--------------------------------------------------------------------------
@@ -175,6 +176,7 @@ Route::post('trend/dayrangedreach0', [TrendController::class, 'dayrangedtrendrea
 Route::post('trend/dayrangedtvr0', [TrendController::class, 'dayrangedtrendtvr0']);
 Route::post('trend/dayrangedtvrp', [TrendController::class, 'dayrangedtrendtvrp']);
 Route::post('trend/dayrangedreachp', [TrendController::class, 'dayrangedtrendreachp']);
+Route::post('dayparts/all', [DayPartsController::class, 'dayrangedtrendall'])->middleware('auth.admin.user.deployer');
 Route::get('demov', [TrendController::class, 'views']);
 Route::get('demot', [TrendController::class, 'timeviewed']);
 Route::post('channel/rangedtrendreachp', [TrendController::class, 'rangedtrendreachp']);

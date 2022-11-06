@@ -490,7 +490,12 @@ class OverviewController extends Controller
 
         $total_share = 0;
         for ($i = 0; $i < count($all_tvr); $i++) {
-            $s = ($all_tvr[$i] / $total_tvr) * 100;
+            if($total_tvr != 0){
+                $s = ($all_tvr[$i] / $total_tvr) * 100;
+            }else{
+                $s=0;
+            }
+            //$s = ($all_tvr[$i] / $total_tvr) * 100;
             $total_share = $total_share + $s;
             array_push($shares, $s);
         }

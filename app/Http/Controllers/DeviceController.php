@@ -98,6 +98,8 @@ class DeviceController extends Controller
             } elseif ($d->socio_status == "r") {
                 $d->socio_status = "Rural";
             }
+
+            $d->users = $d->users;
         }
         return response()->json($data);
     }

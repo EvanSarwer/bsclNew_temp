@@ -294,7 +294,9 @@ class AdTrpController extends Controller
              for ($i = 0; $i < count($keywords); $i++){
                 $query->orwhere('commercial_name', 'like',  '%' . $keywords[$i] .'%');
              }      
-        })->get();
+        })
+        ->where('date', $date)
+        ->get();
         return response()->json(["trps"=>$adtrps,"date"=>$date],200);
     }
 }

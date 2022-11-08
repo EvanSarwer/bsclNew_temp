@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         
         $schedule->command('shutdown:device')->everyMinute();
-        $schedule->command('adtrp:calculate')->dailyAt('03:00');
+        $schedule->command('adtrp:calculate')->dailyAt('00:10');
     }
 
     /**

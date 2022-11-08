@@ -288,7 +288,8 @@ class AdTrpController extends Controller
         //$date = '2022-10-27';
         $user = $this->getAuth($req);
         $keywords = Keyword::where('agency_id',$user->user_name)->pluck('keyword')->toArray();
-        $adtrps =DB::Table('adtrps')
+        if(count($keywords)==0){ return response()->json(["trps"=>[],"date"=>$date],200);}
+$adtrps =DB::Table('adtrps')
         ->select('*')                
         ->Where(function ($query) use($keywords) {
              for ($i = 0; $i < count($keywords); $i++){

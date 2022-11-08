@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Models\Keyword;
 use App\Models\Token;
 use Illuminate\Support\Facades\DB;
+
 class AdTrpController extends Controller
 {
     //
@@ -32,77 +33,80 @@ class AdTrpController extends Controller
         $numOfUser = $users->count();
         $date = date('Y-m-d', strtotime("-1 days"));
         $logs = PlayoutLog::where('date', $date)
+        ->where('done', 0)
             ->get();
         //return response()->json(["value" => $logs], 200);
         foreach ($logs as $log) {
-            //if (((int)$log->done) == 0) {
-            //return response()->json(["value" => $log->channel->channel_name], 200);
-            $start = $log->start;
-            $finish = $log->finish;
-            $fromTime = strtotime($log->start);
-            $toTime = strtotime($log->finish);
-            $diff = abs($fromTime - $toTime) / 60;
-
-
-            $viewlogs = ViewLog::where('channel_id', $log->channel_id)
-                ->where(function ($query) use ($start) {
-                    $query->where('finished_watching_at', '>', $start)
-                        ->orWhereNull('finished_watching_at');
-                })
-                ->where('started_watching_at', '<', $finish)
-                ->distinct()->get('user_id');
-
-            $user_count = $viewlogs->count();
-            $reach0 = $user_count;
-            $user_count = ($user_count / $numOfUser) * 100;
-            $reachp = $user_count;
-
-            $viewers = ViewLog::where('channel_id', $log->channel_id)
-                ->where(function ($query) use ($start) {
-                    $query->where('finished_watching_at', '>', $start)
-                        ->orWhereNull('finished_watching_at');
-                })
-                ->where('started_watching_at', '<', $finish)
-                ->get();
-
-            foreach ($viewers as $v) {
-                if (((strtotime($v->started_watching_at)) < ($fromTime)) && (((strtotime($v->finished_watching_at)) > ($toTime)) || (($v->finished_watching_at) == Null))) {
-                    $watched_sec = abs($fromTime - $toTime);
-                } else if (((strtotime($v->started_watching_at)) < ($fromTime)) && ((strtotime($v->finished_watching_at)) <= ($toTime))) {
-                    $watched_sec = abs($fromTime - strtotime($v->finished_watching_at));
-                } else if (((strtotime($v->started_watching_at)) >= ($fromTime)) && (((strtotime($v->finished_watching_at)) > ($toTime)) || (($v->finished_watching_at) == Null))) {
-                    $watched_sec = abs(strtotime($v->started_watching_at) - $toTime);
-                } else {
-                    $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+                //return response()->json(["value" => $log->channel->channel_name], 200);
+                $start = $log->start;
+                $finish = $log->finish;
+                $fromTime = strtotime($log->start);
+                $toTime = strtotime($log->finish);
+                $diff = abs($fromTime - $toTime) / 60;
+                if($diff==0){
+                    continue;
                 }
-                //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-                //$watched_sec = $watched_sec / 60;
-                array_push($viewer, $watched_sec);
-            }
-            //return response()->json([$viewer],200);
-            $timewatched = array_sum($viewer);
-            $tvr = $timewatched / $numOfUser; ///$numOfUser;
-            $tvr = $tvr / 60;
-            $tvr = $tvr / $diff;
-            $tvr0 = $tvr;
-            $tvr = $tvr * 100;
-            $tvrp = $tvr;
-            unset($viewer);
-            $viewer = array();
-            $adtrparr = [
-                "commercial_name" => $log->commercial_name, "program" => $log->program, "channel_id" => $log->channel_id, "channel_name" => $log->channel->channel_name, "date" => $log->date,
-                "start" => $log->start, "finish" => $log->finish, "timewatched" => $timewatched, "duration" => $log->duration, "tvrp" => $tvrp, "tvr0" => $tvr0, "reach0" => $reach0, "reachp" => $reachp, "playlog_id" => $log->id
-            ];
-            //return response()->json(["value" => $adtrparr,"log"=>$log], 200);
-            if (AdTrp::create($adtrparr)) {
-                $log->done = 1;
-                $log->save();
-            }
-            $num++;
 
-            //array_push($values, $tvr);  
-            //return response()->json(["value" => $log->channel_id], 200);
-            //}
+
+                $viewlogs = ViewLog::where('channel_id', $log->channel_id)
+                    ->where(function ($query) use ($start) {
+                        $query->where('finished_watching_at', '>', $start)
+                            ->orWhereNull('finished_watching_at');
+                    })
+                    ->where('started_watching_at', '<', $finish)
+                    ->distinct()->get('user_id');
+
+                $user_count = $viewlogs->count();
+                $reach0 = $user_count;
+                $user_count = ($user_count / $numOfUser) * 100;
+                $reachp = $user_count;
+
+                $viewers = ViewLog::where('channel_id', $log->channel_id)
+                    ->where(function ($query) use ($start) {
+                        $query->where('finished_watching_at', '>', $start)
+                            ->orWhereNull('finished_watching_at');
+                    })
+                    ->where('started_watching_at', '<', $finish)
+                    ->get();
+
+                foreach ($viewers as $v) {
+                    if (((strtotime($v->started_watching_at)) < ($fromTime)) && (((strtotime($v->finished_watching_at)) > ($toTime)) || (($v->finished_watching_at) == Null))) {
+                        $watched_sec = abs($fromTime - $toTime);
+                    } else if (((strtotime($v->started_watching_at)) < ($fromTime)) && ((strtotime($v->finished_watching_at)) <= ($toTime))) {
+                        $watched_sec = abs($fromTime - strtotime($v->finished_watching_at));
+                    } else if (((strtotime($v->started_watching_at)) >= ($fromTime)) && (((strtotime($v->finished_watching_at)) > ($toTime)) || (($v->finished_watching_at) == Null))) {
+                        $watched_sec = abs(strtotime($v->started_watching_at) - $toTime);
+                    } else {
+                        $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+                    }
+                    //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    //$watched_sec = $watched_sec / 60;
+                    array_push($viewer, $watched_sec);
+                }
+                //return response()->json([$viewer],200);
+                $timewatched = array_sum($viewer);
+                $tvr = $timewatched / $numOfUser; ///$numOfUser;
+                $tvr = $tvr / 60;
+                $tvr = $tvr / $diff;
+                $tvr0 = $tvr;
+                $tvr = $tvr * 100;
+                $tvrp = $tvr;
+                unset($viewer);
+                $viewer = array();
+                $adtrparr = [
+                    "commercial_name" => $log->commercial_name, "program" => $log->program, "channel_id" => $log->channel_id, "channel_name" => $log->channel->channel_name, "date" => $log->date,
+                    "start" => $log->start, "finish" => $log->finish, "timewatched" => $timewatched, "duration" => $log->duration, "tvrp" => $tvrp, "tvr0" => $tvr0, "reach0" => $reach0, "reachp" => $reachp, "playlog_id" => $log->id
+                ];
+                //return response()->json(["value" => $adtrparr,"log"=>$log], 200);
+                if (AdTrp::create($adtrparr)) {
+                    $log->done = 1;
+                    $log->save();
+                }
+                $num++;
+
+                //array_push($values, $tvr);  
+                //return response()->json(["value" => $log->channel_id], 200);
+            
         }
         return response()->json(["num" => $num, "value" => "done"], 200);
     }
@@ -126,7 +130,7 @@ class AdTrpController extends Controller
             $date = date('Y-m-d', strtotime($req->date));
         }
         $adtrps = AdTrp::where('date', $date)
-        ->wherein('commercial_name',$req->keywords)
+            ->wherein('commercial_name', $req->keywords)
             ->get();
 
         return response()->json(["value" => $adtrps], 200);
@@ -258,46 +262,51 @@ class AdTrpController extends Controller
         }
         return response()->json(["value" => $values], 200);
     }
-    public function getKeywords(Request $req){
+    public function getKeywords(Request $req)
+    {
         $user = $this->getAuth($req);
-        $keywords = Keyword::where('agency_id',$user->user_name)->get();
-        return response($keywords,200);
-
+        $keywords = Keyword::where('agency_id', $user->user_name)->get();
+        return response($keywords, 200);
     }
 
-    public function addKeyword(Request $req){
+    public function addKeyword(Request $req)
+    {
         $var = new Keyword();
         $var->keyword = $req->keyword;
-        $var->agency_id= $this->getAuth($req)->user_name;
+        $var->agency_id = $this->getAuth($req)->user_name;
         $var->save();
-        return response()->json(["msg"=>"stored"],200);
-
+        return response()->json(["msg" => "stored"], 200);
     }
-    public function removeKeyword(Request $req){
-        $var = Keyword::where('id',$req->id)->delete();
-        return response()->json(["msg"=>"deleted"],200);
+    public function removeKeyword(Request $req)
+    {
+        $var = Keyword::where('id', $req->id)->delete();
+        return response()->json(["msg" => "deleted"], 200);
     }
-    public function getAuth(Request $req){
+    public function getAuth(Request $req)
+    {
         $token = $req->header('Authorization');
         $userToken = Token::where('token', $token)->first();
         $user = $userToken->login;
         return $user;
     }
-    public function getAdTrp(Request $req){
+    public function getAdTrp(Request $req)
+    {
         $date = $req->date;
         //$date = '2022-10-27';
         $user = $this->getAuth($req);
-        $keywords = Keyword::where('agency_id',$user->user_name)->pluck('keyword')->toArray();
-        if(count($keywords)==0){ return response()->json(["trps"=>[],"date"=>$date],200);}
-$adtrps =DB::Table('adtrps')
-        ->select('*')                
-        ->Where(function ($query) use($keywords) {
-             for ($i = 0; $i < count($keywords); $i++){
-                $query->orwhere('commercial_name', 'like',  '%' . $keywords[$i] .'%');
-             }      
-        })
-        ->where('date', $date)
-        ->get();
-        return response()->json(["trps"=>$adtrps,"date"=>$date],200);
+        $keywords = Keyword::where('agency_id', $user->user_name)->pluck('keyword')->toArray();
+        if (count($keywords) == 0) {
+            return response()->json(["trps" => [], "date" => $date], 200);
+        }
+        $adtrps = DB::Table('adtrps')
+            ->select('*')
+            ->Where(function ($query) use ($keywords) {
+                for ($i = 0; $i < count($keywords); $i++) {
+                    $query->orwhere('commercial_name', 'like',  '%' . $keywords[$i] . '%');
+                }
+            })
+            ->where('date', $date)
+            ->get();
+        return response()->json(["trps" => $adtrps, "date" => $date], 200);
     }
 }

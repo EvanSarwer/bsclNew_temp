@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Console\Commands;
+
 use App\Models\ViewLog;
 use App\Models\Channel;
 use App\Models\User;
@@ -46,7 +47,6 @@ class AdTrpCalculate extends Command
     {
         //echo "adtrp calculating";
         $this->adtrpall();
-
     }
     public function adtrpall()
     {
@@ -58,16 +58,19 @@ class AdTrpCalculate extends Command
         $numOfUser = $users->count();
         $date = date('Y-m-d', strtotime("-1 days"));
         $logs = PlayoutLog::where('date', $date)
+        ->where('done', 0)
             ->get();
         //return response()->json(["value" => $logs], 200);
         foreach ($logs as $log) {
-            if (((int)$log->done) == 0) {
                 //return response()->json(["value" => $log->channel->channel_name], 200);
                 $start = $log->start;
                 $finish = $log->finish;
                 $fromTime = strtotime($log->start);
                 $toTime = strtotime($log->finish);
                 $diff = abs($fromTime - $toTime) / 60;
+                if($diff==0){
+                    continue;
+                }
 
 
                 $viewlogs = ViewLog::where('channel_id', $log->channel_id)
@@ -128,7 +131,7 @@ class AdTrpCalculate extends Command
 
                 //array_push($values, $tvr);  
                 //return response()->json(["value" => $log->channel_id], 200);
-            }
+            
         }
         //return response()->json(["num" => $num, "value" => "done"], 200);
     }

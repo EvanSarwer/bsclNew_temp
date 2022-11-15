@@ -150,8 +150,122 @@ class AdTrpController extends Controller
 
         return response()->json(["value" => $adtrps], 200);
     }
-
     public function frequency(Request $req)
+    {
+        //$start = date('Y-m-d H:i:s', strtotime($req->start));
+        $start = $req->start;
+        //$finish=date('Y-m-d H:i:s', strtotime($req->finish));
+        $c1 = 0;
+        $c2 = 0;
+        $c3 = 0;
+        $c4 = 0;
+        $c5 = 0;
+        $c6 = 0;
+        $c7 = 0;
+        $c8 = 0;
+        $c9 = 0;
+        $c10 = 0;
+        $arr = array();
+        $viewlogs = ViewLog::where('channel_id', (int)$req->channel_id)
+            ->where(function ($query) use ($start) {
+                $query->where('finished_watching_at', '>', $start)
+                    ->orWhereNull('finished_watching_at');
+            })
+            ->where('started_watching_at', '<', $req->finish)
+            ->pluck('user_id')->toArray();
+            $arr=$viewlogs;
+        //return response()->json(["value" => $arr], 200);
+        //$array = array(1,2,'v', 'v1', 'v2', 'v2', 'v3', 'v3', 'v3', 'val4', 'val4', 'val4', 'val4', 'val5', 'val5', 'val5', 'val5', 'val5');
+
+        //return response()->json(["value" => $viewlogs,"value1" => $array], 200);
+        $array = $arr;
+        //$array=$viewlogs;
+        $cnt = array_count_values($array);
+        //return response()->json(["value" => $cnt], 200);
+        foreach ($cnt as $c) {
+            switch ($c) {
+                case 10:
+                    $c10++;
+                    $c9++;
+                    $c8++;
+                    $c7++;
+                    $c6++;
+                    $c5++;
+                    $c4++;
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 9:
+                    $c9++;
+                    $c8++;
+                    $c7++;
+                    $c6++;
+                    $c5++;
+                    $c4++;
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 8:
+                    $c8++;
+                    $c7++;
+                    $c6++;
+                    $c5++;
+                    $c4++;
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 7:
+                    $c7++;
+                    $c6++;
+                    $c5++;
+                    $c4++;
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 6:
+                    $c6++;
+                    $c5++;
+                    $c4++;
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 5:
+                    $c5++;
+                    $c4++;
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 4:
+                    $c4++;
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 3:
+                    $c3++;
+                    $c2++;
+                    $c1++;
+                    break;
+                case 2:
+                    $c2++;
+                    $c1++;
+                    break;
+                case 1:
+                    $c1++;
+                    break;
+            }
+        }
+        $count = (object)array("c1s" => $c1, "c2s" => $c2, "c3s" => $c3, "c4s" => $c4, "c5s" => $c5,"c6s" => $c6, "c7s" => $c7, "c8s" => $c8, "c9s" => $c9, "c10s" => $c10);
+
+        return $count;
+    }
+    public function frequencyapi(Request $req)
     {
         $start = date('Y-m-d H:i:s', strtotime($req->start));
         //$finish=date('Y-m-d H:i:s', strtotime($req->finish));

@@ -160,6 +160,8 @@ class AppUserController extends Controller
     function deployerRules(){
         return[
             "user_name"=>"required|alpha_dash|unique:login,user_name|unique:deployer_info,user_name|unique:app_users,user_name",
+            "education"=>"required",
+            "occupation"=>"required",
             "organization_name"=>"required",
             "designation"=>"required",
             "email"=>"required|unique:deployer_info,email|unique:login,email|unique:app_users,email",

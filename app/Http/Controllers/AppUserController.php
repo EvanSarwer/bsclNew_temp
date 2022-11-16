@@ -94,30 +94,42 @@ class AppUserController extends Controller
         $user->save();
         return response()->json(["message"=>"User Status Updated Successfully"]);
     }
+    
     function list(){
-        $admins = Login::where('role','admin')->get();
+        $admins = Login::where('role','admin')->where('deleted_by',null)->get();
         $admin_users = [];
         foreach($admins as $a){
-            $a = AppUser::where('user_name',$a->user_name)->where('deleted_by',null)->first();
-            array_push($admin_users,$a);
+            $admn = AppUser::where('user_name',$a->user_name)->first();
+            $admn->active = $a->active;
+            array_push($admin_users,$admn);
         }
 
-        $channelUsers = Login::where('role','general')->get();
+        $channelUsers = Login::where('role','general')->where('deleted_by',null)->get();
         $channel_users = [];
         foreach($channelUsers as $c){
-            $c = AppUser::where('user_name',$c->user_name)->where('deleted_by',null)->first();
-            array_push($channel_users,$c);
+            $chnl = AppUser::where('user_name',$c->user_name)->first();
+            $chnl->active = $c->active;
+            array_push($channel_users,$chnl);
         }
 
-        $addAgencies = Login::where('role','add-agency')->get();
+        $addAgencies = Login::where('role','add-agency')->where('deleted_by',null)->get();
         $addAgency_users = [];
         foreach($addAgencies as $ad){
-            $ad = AppUser::where('user_name',$ad->user_name)->where('deleted_by',null)->first();
-            array_push($addAgency_users,$ad);
+            $agency = AppUser::where('user_name',$ad->user_name)->first();
+            $agency->active = $ad->active;
+            array_push($addAgency_users,$agency);
+        }
+
+        $deployers = Login::where('role','deployer')->where('deleted_by',null)->get();
+        $deployer_users = [];
+        foreach($deployers as $d){
+            $dep = DeployerInfo::where('user_name',$d->user_name)->first();
+            $dep->active = $d->active;
+            array_push($deployer_users,$dep);
         }
         
         //$admin_users = $admins->appUser;
-        return response()->json(["admin_users"=>$admin_users,"channel_users"=>$channel_users, "addAgency_users"=>$addAgency_users]);
+        return response()->json(["admin_users"=>$admin_users,"channel_users"=>$channel_users, "addAgency_users"=>$addAgency_users, "deployer_users"=>$deployer_users]);
     }
 
 

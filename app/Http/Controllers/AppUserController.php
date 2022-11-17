@@ -41,7 +41,6 @@ class AppUserController extends Controller
         }
         $user = (object)$req->all();
         $user->password =md5($req->password);
-        $user->created_by="admin";
         $user->created_at = new Datetime();
         if($user->role == "deployer"){
             $user->number = $user->phone;
@@ -62,18 +61,25 @@ class AppUserController extends Controller
         if ($validator->fails()){
             return response()->json($validator->errors(), 422);
         }
-        $user= AppUser::where('user_name',$req->user_name)->first();
-        $user->update(["address"=>$req->address,"email"=>$req->email,"phone"=>$req->phone,"updated_at"=>new Datetime()]);
+
+        if($req->role == "deployer"){
+            $user= DeployerInfo::where('user_name',$req->user_name)->first();
+            $user->update(["state_name"=>$req->address,"email"=>$req->email,"number"=>$req->phone]);
+        }else{
+            $user= AppUser::where('user_name',$req->user_name)->first();
+            $user->update(["address"=>$req->address,"email"=>$req->email,"phone"=>$req->phone,"updated_at"=>new Datetime()]);
+        }
+
         $user = Login::where('user_name',$req->user_name)->first();
         $user->update(["email"=>$req->email,"role"=>$req->role,"updated_at"=>new Datetime(),"updated_by"=>"admin"]);
         return response()->json(["message"=>"User Updated Successfully"]);
     }
     function delete(Request $req){
-        $user= AppUser::where('user_name',$req->user_name)->first();
-        $user->active=0;
-        $user->deleted_by="admin";
-        $user->deleted_at=new Datetime();
-        $user->save();
+        // $user= AppUser::where('user_name',$req->user_name)->first();
+        // $user->active=0;
+        // $user->deleted_by="admin";
+        // $user->deleted_at=new Datetime();
+        // $user->save();
         $user= Login::where('user_name',$req->user_name)->first();
         $user->active=0;
         $user->deleted_by="admin";
@@ -82,11 +88,11 @@ class AppUserController extends Controller
         return response()->json(["message"=>"User Deleted Successfully"]);
     }
     function activateDeactivate(Request $req){
-        $user= AppUser::where('user_name',$req->user_name)->first();
-        $user->active=$req->flag;
-        $user->updated_by="admin";
-        $user->updated_at=new Datetime();
-        $user->save();
+        // $user= AppUser::where('user_name',$req->user_name)->first();
+        // $user->active=$req->flag;
+        // $user->updated_by="admin";
+        // $user->updated_at=new Datetime();
+        // $user->save();
         $user= Login::where('user_name',$req->user_name)->first();
         $user->active=$req->flag;
         $user->updated_by="admin";
@@ -135,8 +141,19 @@ class AppUserController extends Controller
 
 
     function get($user_name){
-        $user = AppUser::where('deleted_by',null)->where('user_name',$user_name)->first();
-        $user->role = $user->login->role;
+        // $user = AppUser::where('deleted_by',null)->where('user_name',$user_name)->first();
+        // $user->role = $user->login->role;
+        
+
+        $user = Login::where('user_name',$user_name)->where('deleted_by',null)->first();
+        if($user->role == "deployer"){
+            $user->address = $user->deployerUser->state_name;
+            $user->phone = $user->deployerUser->number;
+        }else{
+            $user->address = $user->appUser->address;
+            $user->phone = $user->appUser->phone;
+        }
+        
         return response()->json($user);
     }
     function rules(){

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\AppUser;
+use App\Models\DeployerInfo;
 
 class Login extends Model
 {
@@ -14,5 +15,9 @@ class Login extends Model
 
     public function appUser(){
         return $this->belongsTo(AppUser::class,'user_name','user_name');
+    }
+
+    public function deployerUser(){
+        return $this->belongsTo(DeployerInfo::class,'user_name','user_name');
     }
 }

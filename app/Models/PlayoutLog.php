@@ -10,7 +10,7 @@ class PlayoutLog extends Model
     use HasFactory;
     protected $table="playout_logs";
     public $timestamps = false;
-    protected $fillable = ['channel_id','commercial_name', 'program','date','start','finish','duration','file_id'];
+    protected $fillable = ['channel_id','commercial_name','date','start','finish','duration','file_id'];
     public function playoutFile(){
         return $this->belongsTo(PlayoutFile::class, 'file_id');
     }

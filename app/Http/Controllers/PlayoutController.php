@@ -25,7 +25,6 @@ class PlayoutController extends Controller
             $log=new PlayoutLog();
             $log->channel_id=$id;
             $log->commercial_name=$logs->commercial_name;
-            $log->program=$logs->program;
             $log->date=date("Y-m-d");
             $log->start=date("Y-m-d H:i:s",strtotime($logs->start));
             $finish= date("Y-m-d H:i:s",strtotime("+" . $logs->duration . " seconds", strtotime($logs->start)));

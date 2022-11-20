@@ -93,9 +93,12 @@ class AdTrpController extends Controller
                 $tvrp = $tvr;
                 unset($viewer);
                 $viewer = array();
+                $freq=$this->frequency((object)array("channel_id"=>$log->channel_id,"start"=>$start,"finish"=>$finish));
                 $adtrparr = [
-                    "commercial_name" => $log->commercial_name, "program" => $log->program, "channel_id" => $log->channel_id, "channel_name" => $log->channel->channel_name, "date" => $log->date,
-                    "start" => $log->start, "finish" => $log->finish, "timewatched" => $timewatched, "duration" => $log->duration, "tvrp" => $tvrp, "tvr0" => $tvr0, "reach0" => $reach0, "reachp" => $reachp, "playlog_id" => $log->id
+                    "commercial_name" => $log->commercial_name,  "channel_id" => $log->channel_id, "channel_name" => $log->channel->channel_name, "date" => $log->date,
+                    "start" => $log->start, "finish" => $log->finish, "timewatched" => $timewatched, "duration" => $log->duration, "tvrp" => $tvrp, "tvr0" => $tvr0, "reach0" => $reach0, "reachp" => $reachp,
+                    "c1"=>$freq->c1,"c2"=>$freq->c2,"c3"=>$freq->c3,"c4"=>$freq->c4,
+                    "c5"=>$freq->c5,"c6"=>$freq->c6,"c7"=>$freq->c7,"c8"=>$freq->c8,"c9"=>$freq->c9,"c10"=>$freq->c10, "playlog_id" => $log->id
                 ];
                 //return response()->json(["value" => $adtrparr,"log"=>$log], 200);
                 if (AdTrp::create($adtrparr)) {
@@ -150,7 +153,7 @@ class AdTrpController extends Controller
 
         return response()->json(["value" => $adtrps], 200);
     }
-    public function frequency(Request $req)
+    public function frequency($req)
     {
         //$start = date('Y-m-d H:i:s', strtotime($req->start));
         $start = $req->start;
@@ -261,7 +264,7 @@ class AdTrpController extends Controller
                     break;
             }
         }
-        $count = (object)array("c1s" => $c1, "c2s" => $c2, "c3s" => $c3, "c4s" => $c4, "c5s" => $c5,"c6s" => $c6, "c7s" => $c7, "c8s" => $c8, "c9s" => $c9, "c10s" => $c10);
+        $count = (object)array("c1" => $c1, "c2" => $c2, "c3" => $c3, "c4" => $c4, "c5" => $c5,"c6" => $c6, "c7" => $c7, "c8" => $c8, "c9" => $c9, "c10" => $c10);
 
         return $count;
     }

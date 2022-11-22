@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\ViewLog;
 use App\Models\Device;
 use App\Models\Channel;
+use App\Models\DashboardTempData;
 use App\Models\RawRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use DB;
 use Illuminate\Support\Facades\Http;
+use stdClass;
 
 class DashboardController extends Controller
 {
@@ -252,7 +254,12 @@ class DashboardController extends Controller
       array_push($label, $channel_info[$i]['channel_name']);
       array_push($value, $channel_info[$i]['users']);
     }
-    return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+
+    //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+    $t_data = new stdClass;
+    $t_data->reach_channel = $label;
+    $t_data->reach_value = $value;
+    return $t_data;
   }
 
   public function reachuserdashboard()
@@ -296,7 +303,12 @@ class DashboardController extends Controller
       array_push($label, $channel_info[$i]['channel_name']);
       array_push($value, $channel_info[$i]['users']);
     }
-    return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+
+    //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+    $t_data = new stdClass;
+    $t_data->reachzero_channel = $label;
+    $t_data->reachzero_value = $value;
+    return $t_data;
   }
 
 
@@ -403,12 +415,17 @@ class DashboardController extends Controller
             $cc++;
               }
             }*/
-    return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+
+    //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+    $t_data = new stdClass;
+    $t_data->tvr_channel = $label;
+    $t_data->tvr_value = $value;
+    return $t_data;
   }
 
 
 
-  public function tvrgraphzerodashboard(Request $req)
+  public function tvrgraphzerodashboard()
   {
 
 
@@ -492,11 +509,17 @@ class DashboardController extends Controller
       array_push($label, $temp[$i]['label']);
       array_push($value, $temp[$i]['value']);
     }
-    return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+
+    //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+    $t_data = new stdClass;
+    $t_data->tvrzero_channel = $label;
+    $t_data->tvrzero_value = $value;
+    return $t_data;
+
   }
 
 
-  public function sharegraphdashboard(Request $req)
+  public function sharegraphdashboard()
   {
     $yesterday = date("Y-m-d");
     $finishDateTime = $yesterday . " 00:00:00";
@@ -581,9 +604,15 @@ class DashboardController extends Controller
       array_push($label, $temp[$i]['label']);
       array_push($value, $temp[$i]['value']);
     }
-    return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
-
+    //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
     //return response()->json(["share"=>$shares,"channels"=>$channelArray],200);
+    $t_data = new stdClass;
+    $t_data->share_channel = $label;
+    $t_data->share_value = $value;
+    return $t_data;
+
+
+
   }
 
   public function timeSpentUniverse()
@@ -689,8 +718,76 @@ class DashboardController extends Controller
     // $cc++;
     //   }
     // }
-    return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+
+
+    //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+    $t_data = new stdClass;
+    $t_data->timeSpent_channel = $label;
+    $t_data->timeSpent_value = $value;
+    return $t_data;
+    
   }
+
+
+
+
+  public function allgraphdashboard(){
+    //$all_graph = [];
+    $yesterday = date("Y-m-d", strtotime( '-1 days' ) );
+    $startDateTime = $yesterday . " 00:00:00";
+    $finishDateTime = $yesterday . " 23:59:59";
+
+    $y_data = DashboardTempData::where('date',$yesterday)->first(); 
+    if($y_data){
+
+      $all_graph = json_decode($y_data->data);
+
+    }else{
+      $reach = $this->reachpercentdashboard();
+      $reachZero = $this->reachuserdashboard();
+      $tvr = $this->tvrgraphdashboard();
+      $tvrZero = $this->tvrgraphzerodashboard();
+      $share =  $this->sharegraphdashboard();
+      $timeSpent = $this->timeSpentUniverse();
+      
+      $all_graph = [
+        "reach_channel" => $reach->reach_channel,
+        "reach_value" => $reach->reach_value,
+        "reachZero_channel" => $reachZero->reachzero_channel,
+        "reachZero_value" => $reachZero->reachzero_value,
+        "tvr_channel" => $tvr->tvr_channel,
+        "tvr_value" => $tvr->tvr_value,
+        "tvrZero_channel" => $tvrZero->tvrzero_channel,
+        "tvrZero_value" => $tvrZero->tvrzero_value,
+        "share_channel" => $share->share_channel,
+        "share_value" => $share->share_value,
+        "timeSpent_channel" => $timeSpent->timeSpent_channel,
+        "timeSpent_value" => $timeSpent->timeSpent_value,
+        "start"=> $startDateTime,
+        "finish" => $finishDateTime
+      ];
+
+      $td = new DashboardTempData();
+      $td->data = json_encode($all_graph);
+      $td->date = $yesterday;
+      $td->save();
+
+      //$all_graph = json_encode($y_data->data);
+
+    }
+
+    return $all_graph;
+
+  }
+
+
+
+  
+
+
+
+
+
 
 
   public function activechannellistget()
@@ -784,9 +881,6 @@ class DashboardController extends Controller
     $unseen_notification = $user->notifications->where('seen', 0)->get();
 
     $seen_notification = $user->notifications->where('seen', 1)->get();
-
-
-
 
 
 

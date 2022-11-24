@@ -51,7 +51,16 @@ class DashboardController extends Controller
 
     $ott_active = $active_user - $stb_active;
 
-    return response()->json(["total_user" => $total_user, "stb_total" => $stb_total, "ott_total" => $ott_total, "stb_active" => $stb_active, "ott_active" => $ott_active, "active_user" => $active_user, "active_percent" => $active_percent], 200);
+    //return response()->json(["total_user" => $total_user, "stb_total" => $stb_total, "ott_total" => $ott_total, "stb_active" => $stb_active, "ott_active" => $ott_active, "active_user" => $active_user, "active_percent" => $active_percent], 200);
+    $t_data = new stdClass;
+    $t_data->total_user = $total_user;
+    $t_data->stb_total = $stb_total;
+    $t_data->ott_total = $ott_total;
+    $t_data->stb_active = $stb_active;
+    $t_data->ott_active = $ott_active;
+    $t_data->active_user = $active_user;
+    $t_data->active_percent = $active_percent;
+    return $t_data;
   }
 
   public function CurrentStatusTopReach()
@@ -88,7 +97,8 @@ class DashboardController extends Controller
     }
     array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
 
-    return response()->json(["top_reach" => $channel_info[0]['channel_name']], 200);
+    //return response()->json(["top_reach" => $channel_info[0]['channel_name']], 200);
+    return $channel_info[0]['channel_name'];
   }
 
   public function CurrentStatusTopTvr()
@@ -164,8 +174,20 @@ class DashboardController extends Controller
     }
     array_multisort(array_column($channelArray, 'tvr'), SORT_DESC, $channelArray);
 
-    return response()->json(["top_tvr" => $channelArray[0]['channel_name']], 200);
     //return response()->json(["tvr"=>$tvr],200);
+    //return response()->json(["top_tvr" => $channelArray[0]['channel_name']], 200);
+
+    return $channelArray[0]['channel_name'];
+  }
+
+  public function CurrentStatusTopTvrReach()
+  {
+
+    $topReach = $this->CurrentStatusTopReach();
+    $topTVR = $this->CurrentStatusTopTvr();
+    //return response()->json(["top_reach" => $channel_info[0]['channel_name']], 200);
+    //return response()->json(["top_tvr" => $channelArray[0]['channel_name']], 200);
+    return response()->json(["top_reach" => $topReach, "top_tvr" => $topTVR], 200);
   }
 
 
@@ -515,7 +537,6 @@ class DashboardController extends Controller
     $t_data->tvrzero_channel = $label;
     $t_data->tvrzero_value = $value;
     return $t_data;
-
   }
 
 
@@ -610,9 +631,6 @@ class DashboardController extends Controller
     $t_data->share_channel = $label;
     $t_data->share_value = $value;
     return $t_data;
-
-
-
   }
 
   public function timeSpentUniverse()
@@ -725,31 +743,30 @@ class DashboardController extends Controller
     $t_data->timeSpent_channel = $label;
     $t_data->timeSpent_value = $value;
     return $t_data;
-    
   }
 
 
 
 
-  public function allgraphdashboard(){
+  public function allgraphdashboard()
+  {
     //$all_graph = [];
-    $yesterday = date("Y-m-d", strtotime( '-1 days' ) );
+    $yesterday = date("Y-m-d", strtotime('-1 days'));
     $startDateTime = $yesterday . " 00:00:00";
     $finishDateTime = $yesterday . " 23:59:59";
 
-    $y_data = DashboardTempData::where('date',$yesterday)->first(); 
-    if($y_data){
+    $y_data = DashboardTempData::where('date', $yesterday)->first();
+    if ($y_data) {
 
       $all_graph = json_decode($y_data->data);
-
-    }else{
+    } else {
       $reach = $this->reachpercentdashboard();
       $reachZero = $this->reachuserdashboard();
       $tvr = $this->tvrgraphdashboard();
       $tvrZero = $this->tvrgraphzerodashboard();
       $share =  $this->sharegraphdashboard();
       $timeSpent = $this->timeSpentUniverse();
-      
+
       $all_graph = [
         "reach_channel" => $reach->reach_channel,
         "reach_value" => $reach->reach_value,
@@ -763,7 +780,7 @@ class DashboardController extends Controller
         "share_value" => $share->share_value,
         "timeSpent_channel" => $timeSpent->timeSpent_channel,
         "timeSpent_value" => $timeSpent->timeSpent_value,
-        "start"=> $startDateTime,
+        "start" => $startDateTime,
         "finish" => $finishDateTime
       ];
 
@@ -777,12 +794,11 @@ class DashboardController extends Controller
     }
 
     return $all_graph;
-
   }
 
 
 
-  
+
 
 
 
@@ -818,6 +834,7 @@ class DashboardController extends Controller
 
   public function activeuserlistget()
   {
+    $activeChannels = [];
     $actives = ViewLog::where('finished_watching_at', null)
       ->with(['channel', 'user'])
       ->orderBy('started_watching_at', 'ASC')->get();
@@ -826,12 +843,28 @@ class DashboardController extends Controller
       $a->totaltime = Carbon::parse($a->started_watching_at)->diffForHumans();
       $a->device_name = $a->user->device->device_name;
       $a->device_id = $a->user->device->id;
+      array_push($activeChannels, $a->channel_id);
     }
-    return response()->json($actives, 200);
+    $countChannels = array_count_values($activeChannels);
+    $allChnlList = [];
+    foreach ($countChannels as $key => $val) {
+      $chnl = Channel::where('id', $key)->first();
+      $chnl->user_count = $val;
+
+
+      array_push($allChnlList, $chnl);
+    }
+
+$currentStatusUser = $this->CurrentStatusUser();
+
+
+    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "ott_active" => $currentStatusUser->ott_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
+    //return response()->json($actives, 200);
   }
 
 
-  public function notification(){
+  public function notification()
+  {
     $notifications = array();
     $datebefore = date('Y-m-d H:i:s', strtotime("-3 days"));
     //return response()->json(["data" => $datebefore], 200);
@@ -853,27 +886,27 @@ class DashboardController extends Controller
       }
     }
 
-    
+
     $activeDevices = Device::where('type', "STB")
       ->whereBetween('last_request', [date('Y-m-d H:i:s'), date('Y-m-d H:i:s', strtotime("+27 minutes"))])->select("id", "device_name", "last_request")->get();
 
     foreach ($activeDevices as $ad) {
       $temp = RawRequest::where('device_id', $ad->id)->select("temp")->latest('id')->first();
       if ($temp) {
-        if($temp->temp && (substr($temp->temp, 0, -2)) > 80){
+        if ($temp->temp && (substr($temp->temp, 0, -2)) > 80) {
           $ad->duration = Carbon::parse($ad->last_request)->diffForHumans();
           $ad->temp = $temp->temp;
           $ad->flag = 3;                                                         //Active Device Temperature is above 70'C
           array_push($notifications, $ad);
         }
-        
       }
     }
 
     return response()->json(["notifyNumber" => count($notifications), "data" => $notifications], 200);
   }
 
-  public function notification1(Request $req){
+  public function notification1(Request $req)
+  {
     $notifications = array();
 
     $user = user::where('user_name', $req->user_name)->first();
@@ -881,9 +914,5 @@ class DashboardController extends Controller
     $unseen_notification = $user->notifications->where('seen', 0)->get();
 
     $seen_notification = $user->notifications->where('seen', 1)->get();
-
-
-
   }
-
 }

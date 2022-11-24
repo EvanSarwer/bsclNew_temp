@@ -17,6 +17,8 @@ class DayPartsController extends Controller
     {
         $channel = Channel::where('id', $req->id)
             ->first();
+        $userids=User::where('type', 'like', '%' . $req->type . '%')
+            ->pluck('id')->toArray();
         //return response()->json(["time" => $channel->channel_name], 200);
         $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];
         $users = User::all();
@@ -54,7 +56,7 @@ class DayPartsController extends Controller
                 // $viewers = $this->views($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
                 // $watchtime = $this->timeviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
                 
-                $timeandviewers = $this->timeandviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
+                $timeandviewers = $this->timeandviewed($req->id,$userids, $tt[$i]["start"], $tt[$i]["finish"]);
                 $viewers = $timeandviewers->view;
                 $watchtime = $timeandviewers->time;
                 //return response()->json(["ok"=>"ss","time" => $viewers ], 200);
@@ -143,10 +145,11 @@ class DayPartsController extends Controller
     }
 
 
-    public function timeandviewed($id, $start, $finish)
+    public function timeandviewed($id,$userids, $start, $finish)
     {
         //$id=36;$start="2022-08-12 00:00:00" ;$finish="2022-08-12 00:30:00";
         $time = array();
+
         $view = array();
         $viewers = ViewLog::where('channel_id', $id)
             ->where(function ($query) use ($start) {
@@ -154,6 +157,7 @@ class DayPartsController extends Controller
                     ->orWhereNull('finished_watching_at');
             })
             ->where('started_watching_at', '<', $finish)
+            ->whereIn('user_id', $userids)
             ->get();
 
         foreach ($viewers as $v) {

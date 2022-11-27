@@ -84,7 +84,7 @@ Route::post('/adtrpv3/reach0', [ExcelController::class, 'adtrpv3reach0']);//->mi
 ////////////////Excel//////////////
 
 ////////////////Device User//////////////
-Route::get('/device/list',[DeviceController::class,'deviceList']); //->middleware('auth.admin.deployer')
+Route::get('/device/list',[DeviceController::class,'deviceList'])->middleware('auth.admin.deployer'); //->middleware('auth.admin.deployer')
 Route::post('/device/create',[DeviceController::class,'addDevice'])->middleware('auth.admin');
 Route::post('/device/delete',[DeviceController::class,'deleteDevice'])->middleware('auth.admin');
 Route::get('/device/get/{device_id}',[DeviceController::class,'getDevice'])->middleware('auth.admin.deployer');

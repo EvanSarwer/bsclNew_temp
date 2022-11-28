@@ -149,7 +149,8 @@ Route::post('/user/userdefined/usertimespent',[UserController::class,'usertimesp
 ///////////END//////////////
 
 //////////Live Channels/////////
-Route::post('/livechannel/activechannellistgraph',[LiveChannelController::class,'activechannellistgraph']); //->middleware('auth.admin.user')
+Route::post('/livechannel/activechannellistgraph',[LiveChannelController::class,'activechannellistgraph']); 
+Route::post('/livechannel/activechannellistgraphfast',[LiveChannelController::class,'activechannellistgraphfast']); //->middleware('auth.admin.user')
 
 ///////////END////////////////
 

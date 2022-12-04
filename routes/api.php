@@ -18,6 +18,7 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\PlayoutController;
 use App\Http\Controllers\AdTrpController;
 use App\Http\Controllers\DayPartsController;
+use App\Http\Controllers\DayRangedController;
 ;
 /*
 |--------------------------------------------------------------------------
@@ -166,6 +167,7 @@ Route::post('channel/definedtrendreachp', [ChannelController::class, 'definedtre
 Route::post('channel/definedtrendreach0', [ChannelController::class, 'definedtrendreach0'])->middleware('auth.admin.user');
 Route::post('channel/definedtrendtvrp', [ChannelController::class, 'definedtrendtvrp'])->middleware('auth.admin.user');
 Route::post('channel/definedtrendtvr0', [ChannelController::class, 'definedtrendtvr0'])->middleware('auth.admin.user');
+Route::post('dayrangedall', [DayRangedController::class, 'dayrangedall'])->middleware('auth.admin.user');
 //////////END/////////////////
 
 

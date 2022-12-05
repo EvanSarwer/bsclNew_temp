@@ -24,17 +24,32 @@ class DashboardController extends Controller
 
   public function CurrentStatusUser()
   {
-    $total_user = User::all()->count();
-    $stb_total = User::where('type', 'STB')->get()->count();
-    $ott_total = $total_user - $stb_total;
-    $active_user = ViewLog::whereNull('finished_watching_at')->distinct('user_id')->count();
-    $active_percent = ($active_user * 100) / $total_user;
-    $active_percent = round($active_percent, 2);
-    //$stb_active=ViewLog::where('type','STB')->whereNull('finished_watching_at')->distinct('user_id')->count();
+    //$total_user = User::all()->count();
+    $stb_total = Device::whereNotNull('contact_email')->whereNotNull('household_condition')->whereNotNull('monthly_income')
+                ->get()->count();
+    $total_user = User::whereNotNull('devices.contact_email')->whereNotNull('devices.household_condition')->whereNotNull('devices.monthly_income')
+            ->join('devices', 'devices.id', '=', 'users.device_id')
+            ->get()->count();
 
-    $stb_active = User::whereHas('viewLogs', function ($query) {
-      $query->where('finished_watching_at', null);
-    })->get()->count();
+
+
+
+    //$stb_total = User::where('type', 'STB')->get()->count();
+    $ott_total = User::where('type', 'OTT')->get()->count();
+
+    $active = ViewLog::select('user_id')->whereNull('finished_watching_at')->distinct('user_id')->get();
+    $active_user = count($active);
+    $stb_active = Device::whereIn('users.id', $active)
+    ->join('users', 'devices.id', '=', 'users.device_id')
+    ->distinct('devices.id')->count();
+    $active_percent = ($stb_active * 100) / $stb_total;
+    $active_percent = round($active_percent, 2);
+
+    // $stb_active = User::whereHas('viewLogs', function ($query) {
+    //   $query->where('finished_watching_at', null);
+    // })->get()->count();
+
+
     // $stb_user = User::where('type','STB')->select("id","user_name","last_request")->get();
     // $stb_active = 0;
     // $cw=array();
@@ -49,7 +64,7 @@ class DashboardController extends Controller
     //     $stb_active = count($cw);
     // }
 
-    $ott_active = $active_user - $stb_active;
+    //$ott_active = $active_user - $stb_active;
 
     //return response()->json(["total_user" => $total_user, "stb_total" => $stb_total, "ott_total" => $ott_total, "stb_active" => $stb_active, "ott_active" => $ott_active, "active_user" => $active_user, "active_percent" => $active_percent], 200);
     $t_data = new stdClass;
@@ -57,7 +72,7 @@ class DashboardController extends Controller
     $t_data->stb_total = $stb_total;
     $t_data->ott_total = $ott_total;
     $t_data->stb_active = $stb_active;
-    $t_data->ott_active = $ott_active;
+    //$t_data->ott_active = $ott_active;
     $t_data->active_user = $active_user;
     $t_data->active_percent = $active_percent;
     return $t_data;
@@ -858,7 +873,9 @@ class DashboardController extends Controller
 $currentStatusUser = $this->CurrentStatusUser();
 
 
-    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "ott_active" => $currentStatusUser->ott_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
+    //return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "ott_active" => $currentStatusUser->ott_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
+    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
+
     //return response()->json($actives, 200);
   }
 

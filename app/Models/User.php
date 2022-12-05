@@ -10,6 +10,7 @@ use App\Models\Notification;
 use App\Models\Package;
 use App\Models\Channel;
 use App\Models\Device;
+use App\Models\ViewLog;
 use App\Models\Operator;
 
 class User extends Authenticatable
@@ -55,7 +56,7 @@ class User extends Authenticatable
     }
 
     public function viewLogs(){
-        return $this->hasMany(ViewLog::class);
+        return $this->hasMany(ViewLog::class, 'user_id');
     }
 
     public function deselectLogs(){

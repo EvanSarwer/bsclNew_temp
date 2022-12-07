@@ -883,7 +883,7 @@ $currentStatusUser = $this->CurrentStatusUser();
   public function notification()
   {
     $notifications = array();
-    $datebefore = date('Y-m-d H:i:s', strtotime("-3 days"));
+    $datebefore = date('Y-m-d H:i:s', strtotime("-5 days"));
     //return response()->json(["data" => $datebefore], 200);
 
     $devices = Device::where('type', "STB")

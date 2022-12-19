@@ -117,7 +117,10 @@ Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserli
 //Route::get('/tvrgraphzero/dashboard', [DashboardController::class, 'tvrgraphzerodashboard'])->middleware('auth.admin.user');
 //Route::get('/dashboard/timespentuni', [DashboardController::class, 'timeSpentUniverse'])->middleware('auth.admin.user');
 //Route::get('/sharegraph/dashboard', [DashboardController::class, 'sharegraphdashboard'])->middleware('auth.admin.user');
-Route::get('/dashboard/notification', [DashboardController::class, 'notification']);//->middleware('auth.admin.user');
+//Route::get('/dashboard/notification', [DashboardController::class, 'notification']);//->middleware('auth.admin.user');
+Route::get('/notification', [DashboardController::class, 'generate_notification']);//->middleware('auth.admin.user');
+Route::get('/dashboard/notification', [DashboardController::class, 'get_notification']);//->middleware('auth.admin.user');
+Route::get('/dashboard/seennotification', [DashboardController::class, 'seen_notification']);//->middleware('auth.admin.user');
 
 Route::get('/dashboard/CurrentStatusTopTvrReach', [DashboardController::class, 'CurrentStatusTopTvrReach'])->middleware('auth.admin.user');
 Route::get('/allgraph/dashboard', [DashboardController::class, 'allgraphdashboard'])->middleware('auth.admin.user')->middleware('auth.admin.user');     //->middleware('auth.admin.user')

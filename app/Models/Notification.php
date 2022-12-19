@@ -4,16 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
+use App\Models\AppUser;
 
 class Notification extends Model
 {
     use HasFactory;
-    protected $table = "notification";
+    protected $table = "notifications";
     public $timestamps = false;
 
 
     public function user(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(AppUser::class, 'user_id');
     }
 }

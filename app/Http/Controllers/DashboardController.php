@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppUser;
 use Illuminate\Http\Request;
 use App\Models\ViewLog;
 use App\Models\Device;
 use App\Models\Channel;
 use App\Models\DashboardTempData;
+use App\Models\Notification;
 use App\Models\RawRequest;
+use App\Models\Token;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use DB;
 use Illuminate\Support\Facades\Http;
+use PhpParser\Node\Stmt\Continue_;
 use stdClass;
 
 class DashboardController extends Controller
@@ -26,10 +30,10 @@ class DashboardController extends Controller
   {
     //$total_user = User::all()->count();
     $stb_total = Device::whereNotNull('contact_email')->whereNotNull('household_condition')->whereNotNull('monthly_income')
-                ->get()->count();
+      ->get()->count();
     $total_user = User::whereNotNull('devices.contact_email')->whereNotNull('devices.household_condition')->whereNotNull('devices.monthly_income')
-            ->join('devices', 'devices.id', '=', 'users.device_id')
-            ->get()->count();
+      ->join('devices', 'devices.id', '=', 'users.device_id')
+      ->get()->count();
 
 
 
@@ -40,8 +44,8 @@ class DashboardController extends Controller
     $active = ViewLog::select('user_id')->whereNull('finished_watching_at')->distinct('user_id')->get();
     $active_user = count($active);
     $stb_active = Device::whereIn('users.id', $active)
-    ->join('users', 'devices.id', '=', 'users.device_id')
-    ->distinct('devices.id')->count();
+      ->join('users', 'devices.id', '=', 'users.device_id')
+      ->distinct('devices.id')->count();
     $active_percent = ($stb_active * 100) / $stb_total;
     $active_percent = round($active_percent, 2);
 
@@ -870,11 +874,11 @@ class DashboardController extends Controller
       array_push($allChnlList, $chnl);
     }
 
-$currentStatusUser = $this->CurrentStatusUser();
+    $currentStatusUser = $this->CurrentStatusUser();
 
 
     //return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "ott_active" => $currentStatusUser->ott_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
-    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
+    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent], 200);
 
     //return response()->json($actives, 200);
   }
@@ -922,14 +926,147 @@ $currentStatusUser = $this->CurrentStatusUser();
     return response()->json(["notifyNumber" => count($notifications), "data" => $notifications], 200);
   }
 
-  public function notification1(Request $req)
+  public function generate_notification()
   {
-    $notifications = array();
+    $day5Before = date('Y-m-d H:i:s', strtotime("-5 days"));
+    $day10Before = date('Y-m-d H:i:s', strtotime("-10 days"));
+    $today = date('Y-m-d H:i:s');
 
-    $user = user::where('user_name', $req->user_name)->first();
+    $appUser = AppUser::select('app_users.id')->where('login.role', 'admin')
+      ->join('login', 'login.user_name', '=', 'app_users.user_name')
+      ->get();
 
-    $unseen_notification = $user->notifications->where('seen', 0)->get();
 
-    $seen_notification = $user->notifications->where('seen', 1)->get();
+
+    $devices = Device::where('type', "STB")
+      ->where('last_request', '<', $day5Before)->orWhereNull('last_request')->select("id", "device_name", "last_request", "created_at")->get();
+    if ($devices) {
+      foreach ($devices as $d) {
+        if ($d->last_request == null) {
+          $check_noti = Notification::where('flag', 1)->where('du_id', $d->id)->where('created_at', '>', $day10Before)->orWhere('created_at', $day10Before)->first();    //
+          //return response()->json(["data" => $check_noti], 200);
+          if (!$check_noti) {
+            Notification::where('flag', 1)->where('du_id', $d->id)->where('created_at', '<', $day10Before)->delete();
+            foreach ($appUser as $au) {
+              $noti = new Notification();
+              $noti->user_id = $au->id;
+              $noti->flag = 1;                 // Device has not made any requests yet
+              $noti->status = 'unseen';
+              $noti->du_id = $d->id;
+              $noti->du_name = $d->device_name;
+              $noti->details = " has not made any requests yet.";
+              $noti->created_at = new Datetime();
+              $noti->save();
+            }
+          }
+        } else {
+
+          $check_noti = Notification::where('flag', 2)->where('du_id', $d->id)->where('created_at', '>', $day10Before)->orWhere('created_at', $day10Before)->first();    //
+          //return response()->json(["data" => $check_noti], 200);
+          if (!$check_noti) {
+            Notification::where('flag', 2)->where('du_id', $d->id)->where('created_at', '<', $day10Before)->delete();
+            foreach ($appUser as $au) {
+              $noti = new Notification();
+              $noti->user_id = $au->id;
+              $noti->flag = 2;                  // Device offline for more than 5 days
+              $noti->status = 'unseen';
+              $noti->du_id = $d->id;
+              $noti->du_name = $d->device_name;
+              $noti->details = " has been offline for more than 5 days.";
+              $noti->created_at = new Datetime();
+              $noti->save();
+            }
+          }
+        }
+      }
+    }
+
+
+    $allDevices = Device::where('type', "STB")->select("id", "device_name", "last_request")->get();
+
+    foreach ($allDevices as $ad) {
+      $devicePeople = RawRequest::where('device_id', $ad->id)->whereBetween('server_time', [$ad->last_request, date($ad->last_request, strtotime("-6 days"))])->select("people")->latest('id')->get();
+      //return response()->json(["data" => $devicePeople], 200);
+      if (count($devicePeople) <= 0) {
+        continue;
+      }
+      $people_value = $devicePeople[0]->people;
+      $peopleChangeCount = 0;
+      foreach ($devicePeople as $dp) {
+
+        if ($dp->people == $people_value) {
+          continue;
+        } else {
+          $peopleChangeCount = $peopleChangeCount + 1;
+          break;
+        }
+      }
+
+      if ($peopleChangeCount == 0) {
+        $check_noti = Notification::where('flag', 4)->where('du_id', $ad->id)->where('created_at', '>', $day10Before)->orWhere('created_at', $day10Before)->first();
+        //return response()->json(["data" => $check_noti], 200);
+        if (!$check_noti) {
+          Notification::where('flag', 4)->where('du_id', $ad->id)->where('created_at', '<', $day10Before)->delete();
+          foreach ($appUser as $au) {
+            $noti = new Notification();
+            $noti->user_id = $au->id;
+            $noti->flag = 4;                  // Device button number in People meter not changed for last 5 days.
+            $noti->status = 'unseen';
+            $noti->du_id = $ad->id;
+            $noti->du_name = $ad->device_name;
+            $noti->details = " button number in People meter not changed for last 5 days.";
+            $noti->created_at = new Datetime();
+            $noti->save();
+          }
+        }
+      }
+    }
   }
+
+  public function get_notification(Request $req)
+  {
+
+    $token = $req->header('Authorization');
+    $userToken = Token::where('token', $token)->first();
+    $user_id = $userToken->login->appUser->id;
+
+
+    $unseen_noti = Notification::where('user_id', $user_id)->where('status', "unseen")->get();
+    $seen_noti = Notification::where('user_id', $user_id)->where('status', "seen")->get();
+    $merged_noti = $unseen_noti->merge($seen_noti);
+
+    if (count($merged_noti) > 0) {
+      foreach ($merged_noti as $mn) {
+        $mn->created_at = Carbon::parse($mn->created_at)->diffForHumans();
+        // if($mn->message != null){
+        //     $mm->message = json_decode($mm->message);
+        // }
+      }
+    }
+
+    return response()->json(["notifyNumber" => count($unseen_noti), "data" => $merged_noti], 200);
+  }
+
+  public function seen_notification(Request $req)
+  {
+    $token = $req->header('Authorization');
+    $userToken = Token::where('token', $token)->first();
+    $user_id = $userToken->login->appUser->id;
+
+    $unseen_noti = Notification::where('user_id', $user_id)->where('status', "unseen")->update(['status' => 'seen']);
+    // foreach ($unseen_noti as $un) {
+    //   $un->status = "seen";
+    //   $un->update();
+    // }
+  }
+
+
+
+
+
+
+
+
+
+
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppUser;
 use App\Models\ViewLog;
 use Illuminate\Http\Request;
 use DateTime;
@@ -11,6 +12,7 @@ use App\Models\Device;
 use App\Models\Channel;
 use App\Models\DeselectPeriod;
 use App\Models\DeselectLog;
+use App\Models\Notification;
 use App\Models\RawRequest;
 use App\Models\TempData;
 
@@ -38,17 +40,17 @@ class RequestController extends Controller
             //     ->where('user_id', $user->id)
             //     ->first();
             // if (!$viewlogp) {
-                $var = new ViewLog;
-                //$var->id=5010;
-                $var->user_id = $user->id;
-                $var->channel_id = $req['channel_id'];
-                $var->started_watching_at = $req['start'];
-                $var->finished_watching_at = $req['finish'];
-                $var->duration_minute = abs(strtotime($req['start']) - strtotime($req['finish'])) / 60;
-                $var->save();
+            $var = new ViewLog;
+            //$var->id=5010;
+            $var->user_id = $user->id;
+            $var->channel_id = $req['channel_id'];
+            $var->started_watching_at = $req['start'];
+            $var->finished_watching_at = $req['finish'];
+            $var->duration_minute = abs(strtotime($req['start']) - strtotime($req['finish'])) / 60;
+            $var->save();
 
-                //$user->tvoff = 1;
-                //$user->save();
+            //$user->tvoff = 1;
+            //$user->save();
             //}
         }
         return response()->json(["response" => "done"], 200);
@@ -89,7 +91,6 @@ class RequestController extends Controller
 
     public function receive(Request $req)
     {
-        
         //return response()->json(["values" => "kk1"], 200);
         if ($req->time_stamp != null) {
             $rr = new RawRequest();
@@ -124,7 +125,7 @@ class RequestController extends Controller
             $last_req_time = Carbon::now()->toDateTimeString();
             $this->updateDeviceLastReq($req->device_id, $last_req_time);
 
-//            return response()->json(["values" => "kk1"], 200);
+            //            return response()->json(["values" => "kk1"], 200);
             $hasChannel = Channel::where('id', $req->channel_name)->first();
             if (($hasChannel || $req->channel_name == 999) && ((strtotime($req->start)) <= (strtotime($req->finish)))) {
 
@@ -138,16 +139,16 @@ class RequestController extends Controller
 
                 //$users = array();
                 if ($req->people != null) {
-  
-//                    return response()->json(["values" => "kk1"], 200);
+
+                    //                    return response()->json(["values" => "kk1"], 200);
                     for ($i = 0; $i < strlen($req->people); $i++) {
                         $index = User::where('device_id', $req->device_id)->where('user_index', $i)->first();
                         //array_push($arr,$index);
                         //return response()->json(["ranges" => $index], 200);
                         if ($index) {
                             if ($req->people[$i] === '1') {
-                                
-            //return response()->json(["values" => "kl1"], 200);
+
+                                //return response()->json(["values" => "kl1"], 200);
                                 //$ob = array("device_id" => $req->device_id, "user_id" => $index->id, "channel_id" => $req->channel_name, "start" => $req->start, "finish" => $req->finish, "error_msg" => $req->error);
                                 //$this->receiver1((object)$ob);
                                 //array_push($users, (object)$ob);
@@ -171,16 +172,46 @@ class RequestController extends Controller
                 }
                 //return response()->json([$users],200);
             }
+
+
+
+            if ($req->temp && (substr($req->temp, 0, -2)) > 80) {
+                $this->check_temperature($req->device_id, $hasDevice->device_name, $req->temp);
+            }
+
         }
+
+
+        
     }
 
+    public function check_temperature($d_id, $d_name, $d_temp)
+    {
+        $appUser = AppUser::select('app_users.id')->where('login.role', 'admin')
+            ->join('login', 'login.user_name', '=', 'app_users.user_name')
+            ->get();
 
+        
+            Notification::where('flag', 3)->where('du_id', $d_id)->delete();
+            foreach ($appUser as $au) {
+                $noti = new Notification();
+                $noti->user_id = $au->id;
+                $noti->flag = 3;                                   //    Device Temperature is above 80'C
+                $noti->status = 'unseen';
+                $noti->du_id = $d_id;
+                $noti->du_name = $d_name;
+                $noti->details = " temperature is Now ".$d_temp;                       //" temperature is Now ".$d_temp;
+                $noti->created_at = new Datetime();
+                $noti->save();
+            }
+        
+    }
 
 
 
     public function receiver2($request)
     {
-        
+
         //return response()->json(["values" => $request->user_id], 200);
 
         $channel_id = $request->channel_name;
@@ -192,7 +223,7 @@ class RequestController extends Controller
 
 
         if ($channel_id != 999) {
-            
+
             $user = User::where('id', $user_id)->first();
             $user->tvoff = 1;
             $user->save();
@@ -201,15 +232,14 @@ class RequestController extends Controller
             $deselect_device = DeselectPeriod::where('device_id', $request->device_id)->whereNotNull('start_date')->whereNull('end_date')->first();
             if ($deselect_device) {
                 $Deselect_log = DeselectLog::where('user_id', $user_id)->where('channel_id', $channel_id)
-                ->where('finished_watching_at', $request->start)->first();
+                    ->where('finished_watching_at', $request->start)->first();
                 if ($Deselect_log) {
                     $Deselect_log->finished_watching_at = $request->finish;
                     $Deselect_log->duration_minute = abs(strtotime($Deselect_log->started_watching_at) - strtotime($Deselect_log->finished_watching_at)) / 60;
-                    if(strtotime($Deselect_log->started_watching_at)<strtotime($Deselect_log->finished_watching_at)){
+                    if (strtotime($Deselect_log->started_watching_at) < strtotime($Deselect_log->finished_watching_at)) {
 
                         $Deselect_log->save();
-                    }
-                    else{
+                    } else {
                         return;
                     }
                 } else {
@@ -220,42 +250,39 @@ class RequestController extends Controller
                     $var->started_watching_at = $request->start;
                     $var->finished_watching_at = $request->finish;
                     $var->duration_minute = abs(strtotime($var->started_watching_at) - strtotime($var->finished_watching_at)) / 60;
-                    if(strtotime($var->started_watching_at)<strtotime($var->finished_watching_at)){
+                    if (strtotime($var->started_watching_at) < strtotime($var->finished_watching_at)) {
 
                         $var->save();
-                    }
-                    else{
+                    } else {
                         return;
                     }
                 }
             } else {
                 $log = ViewLog::where('user_id', $user_id)->where('channel_id', $channel_id)
-                ->where('finished_watching_at', $request->start)->first();
+                    ->where('finished_watching_at', $request->start)->first();
                 if ($log) {
                     $log->finished_watching_at = $request->finish;
                     $log->duration_minute = abs(strtotime($log->started_watching_at) - strtotime($log->finished_watching_at)) / 60;
                     //$log->save();
-                    if(strtotime($log->started_watching_at)<strtotime($log->finished_watching_at)){
+                    if (strtotime($log->started_watching_at) < strtotime($log->finished_watching_at)) {
 
                         $log->save();
-                    }
-                    else{
+                    } else {
                         return;
                     }
                 } else {
 
-                    
+
                     $var = new ViewLog;
                     $var->user_id = $user_id;
                     $var->channel_id = $channel_id;
                     $var->started_watching_at = $request->start;
                     $var->finished_watching_at = $request->finish;
                     $var->duration_minute = abs(strtotime($var->started_watching_at) - strtotime($var->finished_watching_at)) / 60;
-                    if(strtotime($var->started_watching_at)<strtotime($var->finished_watching_at)){
+                    if (strtotime($var->started_watching_at) < strtotime($var->finished_watching_at)) {
 
                         $var->save();
-                    }
-                    else{
+                    } else {
                         return;
                     }
                     //$var->save();
@@ -414,6 +441,7 @@ class RequestController extends Controller
             $user->save();
         }
     }
+    
     public function updateDeviceLastReq($d_id, $time)
     {
         $d = Device::where('id', $d_id)->first();

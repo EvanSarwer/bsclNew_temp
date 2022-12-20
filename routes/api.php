@@ -211,6 +211,8 @@ Route::post('/receive',[RequestController::class,'receive']);
 Route::get('/receive',[RequestController::class,'receive']);
 Route::post('/receiveoutside',[RequestController::class,'receiveoutside']);
 
+Route::post('/receive/reliabilitylog',[RequestController::class,'receiveReliabilityLog']);
+Route::get('/receive/reliabilitylog',[RequestController::class,'receiveReliabilityLog']);
 //////////END/////////////////
 
 Route::get("/test",[UserController::class,'demo_test']);

@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Device;
 use App\Models\Channel;
+use App\Models\DataReliability;
 use App\Models\DeselectPeriod;
 use App\Models\DeselectLog;
 use App\Models\Notification;
@@ -18,6 +19,19 @@ use App\Models\TempData;
 
 class RequestController extends Controller
 {
+
+    public function receiveReliabilityLog(Request $request)
+    {
+        $dr = new DataReliability();
+        $data = $request->data;
+        $dr->data = json_encode($data);
+        $dr->time = Carbon::now()->toDateTimeString();;
+        $dr->save();
+
+        return response()->json(["response" => "done", "data"=>$request->data], 200);
+    }
+
+
     public function receiveoutside(Request $request)
     {
         $td = new TempData();

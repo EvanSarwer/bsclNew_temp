@@ -29,6 +29,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shutdown:device')->everyMinute();
         $schedule->command('adtrp:calculate')->dailyAt('00:10');
         $schedule->command('notification:generate')->hourly();
+        $schedule->command('notificationfu:generate')->everySixHours();
     }
 
     /**

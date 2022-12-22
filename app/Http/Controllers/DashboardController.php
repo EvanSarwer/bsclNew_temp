@@ -1080,8 +1080,8 @@ class DashboardController extends Controller
     $user_id = $userToken->login->appUser->id;
 
 
-    $unseen_noti = Notification::where('user_id', $user_id)->where('status', "unseen")->get();
-    $seen_noti = Notification::where('user_id', $user_id)->where('status', "seen")->get();
+    $unseen_noti = Notification::where('user_id', $user_id)->where('status', "unseen")->orderBy('created_at','desc')->get();
+    $seen_noti = Notification::where('user_id', $user_id)->where('status', "seen")->orderBy('created_at','desc')->get();
     $merged_noti = $unseen_noti->merge($seen_noti);
 
     if (count($merged_noti) > 0) {

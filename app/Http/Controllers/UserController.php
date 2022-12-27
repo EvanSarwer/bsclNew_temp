@@ -9,7 +9,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use App\Mail\SendMail;
+use App\Models\UserDataFilter;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 
 class UserController extends Controller
@@ -19,28 +21,29 @@ class UserController extends Controller
     //     $this->middleware('auth.admin');
     // }
 
-    public function logs(Request $req){
-        if($req->user != "" && $req->start != "" && $req->finish != ""){
-            
-            $startDate=substr($req->start,0,10);
-            $startTime=substr($req->start,11,19);
-            $finishDate=substr($req->finish,0,10);
-            $finishTime=substr($req->finish,11,19);
+    public function logs(Request $req)
+    {
+        if ($req->user != "" && $req->start != "" && $req->finish != "") {
 
-            $startDateTime = date($startDate)." ".$startTime;
-            $finishDateTime = date($finishDate)." ".$finishTime;
+            $startDate = substr($req->start, 0, 10);
+            $startTime = substr($req->start, 11, 19);
+            $finishDate = substr($req->finish, 0, 10);
+            $finishTime = substr($req->finish, 11, 19);
+
+            $startDateTime = date($startDate) . " " . $startTime;
+            $finishDateTime = date($finishDate) . " " . $finishTime;
 
             //return response()->json(["user"=>$req->user,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
 
-            $ndata=array();
+            $ndata = array();
             $data = ViewLog::where('user_id', $req->user)
-                ->where(function($query) use ($startDateTime,$finishDateTime){
-                    $query->where('finished_watching_at','>',$startDateTime)
-                    ->orWhereNull('finished_watching_at');
-                    })
-                ->where('started_watching_at','<',$finishDateTime)
-                ->orderBy('id','DESC')->get();
-        
+                ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                    $query->where('finished_watching_at', '>', $startDateTime)
+                        ->orWhereNull('finished_watching_at');
+                })
+                ->where('started_watching_at', '<', $finishDateTime)
+                ->orderBy('id', 'DESC')->get();
+
             //$data = ViewLog::where('user_id',$req->user)->orderBy('id','DESC')->get();
             //return response()->json(["user"=>$req->user,"start"=>$startDateTime,"finish"=>$finishDateTime,"data"=>$data],200);
             foreach ($data as $d) {
@@ -51,20 +54,16 @@ class UserController extends Controller
                 //     $from_time = $d->finished_watching_at;
                 // }
 
-                if(((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null ) )){
+                if (((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null))) {
                     $to_time = $startDateTime;
                     $from_time = $finishDateTime;
-                }
-                else if(((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && ((strtotime($d->finished_watching_at)) <= (strtotime($finishDateTime)))){
+                } else if (((strtotime($d->started_watching_at)) < (strtotime($startDateTime))) && ((strtotime($d->finished_watching_at)) <= (strtotime($finishDateTime)))) {
                     $to_time = $startDateTime;
                     $from_time = $d->finished_watching_at;
-
-                }
-                else if(((strtotime($d->started_watching_at)) >= (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null ) )){
+                } else if (((strtotime($d->started_watching_at)) >= (strtotime($startDateTime))) && (((strtotime($d->finished_watching_at)) > (strtotime($finishDateTime))) || (($d->finished_watching_at) == Null))) {
                     $to_time = $d->started_watching_at;
                     $from_time = $finishDateTime;
-                }
-                else{
+                } else {
                     $to_time = $d->started_watching_at;
                     $from_time = $d->finished_watching_at;
                 }
@@ -73,43 +72,43 @@ class UserController extends Controller
 
 
 
-                $arr=array(
-                    "log_id"=>$d->id,
-                    "channel_name"=>$d->channel->channel_name,
-                    "started_watching_at"=>$to_time,
-                    "finished_watching_at"=>$from_time,
-                    "duration_sec"=>abs(strtotime($to_time)-strtotime($from_time))
+                $arr = array(
+                    "log_id" => $d->id,
+                    "channel_name" => $d->channel->channel_name,
+                    "started_watching_at" => $to_time,
+                    "finished_watching_at" => $from_time,
+                    "duration_sec" => abs(strtotime($to_time) - strtotime($from_time))
                 );
-                array_push($ndata,$arr);
+                array_push($ndata, $arr);
             }
 
-            return response()->json(["data"=> $ndata],200);
+            return response()->json(["data" => $ndata], 200);
         }
-        return response()->json(["error"=> "Error"],200);
-        
+        return response()->json(["error" => "Error"], 200);
     }
 
-    public function alllogs(Request $req){
-        if($req->start != "" && $req->finish != ""){
-            
-            $startDate=substr($req->start,0,10);
-            $startTime=substr($req->start,11,19);
-            $finishDate=substr($req->finish,0,10);
-            $finishTime=substr($req->finish,11,19);
+    public function alllogs(Request $req)
+    {
+        if ($req->start != "" && $req->finish != "") {
 
-            $startDateTime = date($startDate)." ".$startTime;
-            $finishDateTime = date($finishDate)." ".$finishTime;
+            $startDate = substr($req->start, 0, 10);
+            $startTime = substr($req->start, 11, 19);
+            $finishDate = substr($req->finish, 0, 10);
+            $finishTime = substr($req->finish, 11, 19);
+
+            $startDateTime = date($startDate) . " " . $startTime;
+            $finishDateTime = date($finishDate) . " " . $finishTime;
 
             //return response()->json(["user"=>$req->user,"start"=>$startDateTime,"finish"=>$finishDateTime],200);
 
-            $ndata=array();
-            $data = ViewLog::where(function($query) use ($startDateTime,$finishDateTime){
-                    $query->where('finished_watching_at','>',$startDateTime)
+            $ndata = array();
+            $data = ViewLog::where(function ($query) use ($startDateTime, $finishDateTime) {
+                $query->where('finished_watching_at', '>', $startDateTime)
                     ->orWhereNull('finished_watching_at');
-                    })
-                ->where('started_watching_at','<',$finishDateTime)
-                ->orderBy('id','DESC')->get();
-        
+            })
+                ->where('started_watching_at', '<', $finishDateTime)
+                ->orderBy('id', 'DESC')->get();
+
             //$data = ViewLog::where('user_id',$req->user)->orderBy('id','DESC')->get();
             //return response()->json(["user"=>$req->user,"start"=>$startDateTime,"finish"=>$finishDateTime,"data"=>$data],200);
             foreach ($data as $d) {
@@ -151,47 +150,43 @@ class UserController extends Controller
                 //     "duration_sec"=>abs(strtotime($to_time)-strtotime($from_time))
                 // );
 
-                $arr=array(
-                    "log_id"=>$d->id,
-                    "user_id"=>$d->user_id,
-                    "channel_name"=>$d->channel->channel_name,
-                    "started_watching_at"=>$d->started_watching_at,
-                    "finished_watching_at"=>$d->finished_watching_at,
-                    "duration_sec"=>abs(strtotime($d->started_watching_at)-strtotime($d->finished_watching_at))
+                $arr = array(
+                    "log_id" => $d->id,
+                    "user_id" => $d->user_id,
+                    "channel_name" => $d->channel->channel_name,
+                    "started_watching_at" => $d->started_watching_at,
+                    "finished_watching_at" => $d->finished_watching_at,
+                    "duration_sec" => abs(strtotime($d->started_watching_at) - strtotime($d->finished_watching_at))
                 );
-                array_push($ndata,$arr);
+                array_push($ndata, $arr);
             }
 
-            return response()->json(["data"=> $ndata],200);
+            return response()->json(["data" => $ndata], 200);
         }
-        return response()->json(["error"=> "Error"],200);
-        
+        return response()->json(["error" => "Error"], 200);
     }
     //
-    public function usertimespent(Request $req){
+    public function usertimespent(Request $req)
+    {
 
-        if($req->user != "" && $req->time != ""){
-            if($req->time == "Daily"){
+        if ($req->user != "" && $req->time != "") {
+            if ($req->time == "Daily") {
 
                 $finishDateTime = date("Y-m-d H:i:s");
                 $min = 1440;
                 $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
                 $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-
-            }
-            else if($req->time == "Weekly"){
+            } else if ($req->time == "Weekly") {
                 $finishDateTime = date("Y-m-d H:i:s");
                 $min = 10080;
                 $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
                 $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-            }
-            else if($req->time == "Monthly"){
+            } else if ($req->time == "Monthly") {
                 $finishDateTime = date("Y-m-d H:i:s");
                 $min = 43200;
                 $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
                 $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-            }
-            else if($req->time == "Yearly"){
+            } else if ($req->time == "Yearly") {
                 $finishDateTime = date("Y-m-d H:i:s");
                 $min = 525600;
                 $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
@@ -200,97 +195,92 @@ class UserController extends Controller
 
             $to_time = strtotime($startDateTime);
             $from_time = strtotime($finishDateTime);
-            $diff=abs($to_time - $from_time) / 60;
+            $diff = abs($to_time - $from_time) / 60;
 
-            $channelArray=array();
-            $total_time =array();
-            $total =0.00;
+            $channelArray = array();
+            $total_time = array();
+            $total = 0.00;
 
-            $channels=Channel::all('id','channel_name');
+            $channels = Channel::all('id', 'channel_name');
             foreach ($channels as $c) {
                 $viewlogs = ViewLog::where('channel_id', $c->id)
-                ->where('user_id', $req->user)
-                ->where(function($query) use ($startDateTime,$finishDateTime){
-                    $query->where('finished_watching_at','>',$startDateTime)
-                    ->orWhereNull('finished_watching_at');
+                    ->where('user_id', $req->user)
+                    ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                        $query->where('finished_watching_at', '>', $startDateTime)
+                            ->orWhereNull('finished_watching_at');
                     })
-                ->where('started_watching_at','<',$finishDateTime)
-                ->get();
+                    ->where('started_watching_at', '<', $finishDateTime)
+                    ->get();
                 $total_time_viewed = 0;
-                
+
                 foreach ($viewlogs as $v) {
-                    if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    if (((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                         $watched_sec = abs($to_time - $from_time);
-                    }
-                    else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                    } else if (((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))) {
                         $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
-                    }
-                    else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    } else if (((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                         $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
-                    }
-                    else{
-                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    } else {
+                        $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
                     }
                     $total_time_viewed = $total_time_viewed + $watched_sec;
                     //$timeviewed = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at))/60;
                 }
-                $total_time_viewed = ($total_time_viewed)/60;
+                $total_time_viewed = ($total_time_viewed) / 60;
                 //$tota_time_viewed = $tota_time_viewed / $diff;
-                $total_time_viewed=round($total_time_viewed);
-                
-                array_push($total_time,$total_time_viewed);
-                array_push($channelArray,$c->channel_name);
+                $total_time_viewed = round($total_time_viewed);
 
+                array_push($total_time, $total_time_viewed);
+                array_push($channelArray, $c->channel_name);
             }
-            return response()->json(["start"=>$startDateTime, "finish"=>$finishDateTime,"totaltime"=>$total_time,"channels"=>$channelArray],200);
-
+            return response()->json(["start" => $startDateTime, "finish" => $finishDateTime, "totaltime" => $total_time, "channels" => $channelArray], 200);
         }
-        return response()->json(["error"=> "Error"],200);
+        return response()->json(["error" => "Error"], 200);
     }
 
-    public function getallList(){
-        $users = User::all('id','user_name');
-        return response()->json(["users"=>$users],200);
+    public function getallList()
+    {
+        $users = User::all('id', 'user_name');
+        return response()->json(["users" => $users], 200);
     }
 
-    public function userAllTimeView(Request $req){
-        if($req->user != ""){
+    public function userAllTimeView(Request $req)
+    {
+        if ($req->user != "") {
 
-            $channelArray=array();
-            $total =0.00;
+            $channelArray = array();
+            $total = 0.00;
 
-            $channels=Channel::all('id','channel_name','logo');
+            $channels = Channel::all('id', 'channel_name', 'logo');
             foreach ($channels as $c) {
                 $viewlogs = ViewLog::where('channel_id', $c->id)
-                ->where('user_id', $req->user)
-                ->get();
+                    ->where('user_id', $req->user)
+                    ->get();
                 $total_time_viewed = 0;
-                
+
                 foreach ($viewlogs as $v) {
-                    if(($v->finished_watching_at) == Null){
+                    if (($v->finished_watching_at) == Null) {
                         $finishDateTime = date("Y-m-d H:i:s");
                         $from_time = strtotime($finishDateTime);
                         $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
-                    }
-                    else{
-                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    } else {
+                        $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
                     }
                     $total_time_viewed = $total_time_viewed + $watched_sec;
                 }
                 //$total_time_viewed = date("H:i:s", $total_time_viewed);
-                $total_time_viewed = ($total_time_viewed/60);
-                $total_time_viewed=round($total_time_viewed);
-                if($total_time_viewed >= 60){
-                    $total_time = ($total_time_viewed/60);
+                $total_time_viewed = ($total_time_viewed / 60);
+                $total_time_viewed = round($total_time_viewed);
+                if ($total_time_viewed >= 60) {
+                    $total_time = ($total_time_viewed / 60);
                     $total_time = round($total_time);
-                    $duration = $total_time." hour";
-                }
-                else{
+                    $duration = $total_time . " hour";
+                } else {
                     $total_time = floor($total_time_viewed);
-                    $duration = $total_time." minute";
+                    $duration = $total_time . " minute";
                 }
-                
-                $chnls =[
+
+                $chnls = [
                     "id" => $c->id,
                     "channel_name" => $c->channel_name,
                     "logo" => $c->logo,
@@ -299,13 +289,11 @@ class UserController extends Controller
                 ];
 
                 //array_push($total_time,$total_time_viewed);
-                array_push($channelArray,$chnls);
-
+                array_push($channelArray, $chnls);
             }
-            return response()->json(["channels"=>$channelArray],200);
-
+            return response()->json(["channels" => $channelArray], 200);
         }
-        return response()->json(["error"=> "Error"],200);
+        return response()->json(["error" => "Error"], 200);
     }
 
     // public function userDayTimeViewList(Request $req){
@@ -320,13 +308,14 @@ class UserController extends Controller
     //         $ch["totaltime"] = abs(strtotime($c->channel->finished_watching_at)-strtotime($c->channel->started_watching_at))/60;
     //         $data[] = (object)$ch;
     //     }
-        
+
     //     if (count($data))return response()->json(["channels"=>$data],200);
     //     return response()->json(["error"=> "Error"],200);
     // }
 
-    public function userDayTimeViewList(Request $req){
-        if($req->user != ""){
+    public function userDayTimeViewList(Request $req)
+    {
+        if ($req->user != "") {
             $finishDateTime = date('Y-m-d H:i:s');
             $addmin = 1439;
             $newtimestamp = strtotime("{$finishDateTime} - {$addmin} minute");
@@ -334,54 +323,50 @@ class UserController extends Controller
 
             $to_time = strtotime($startDateTime);
             $from_time = strtotime($finishDateTime);
-            $diff=abs($to_time - $from_time) / 60;
+            $diff = abs($to_time - $from_time) / 60;
 
-            $channelArray=array();
-            $total =0.00;
+            $channelArray = array();
+            $total = 0.00;
 
-            $channels=Channel::all('id','channel_name','logo');
+            $channels = Channel::all('id', 'channel_name', 'logo');
             foreach ($channels as $c) {
                 $viewlogs = ViewLog::where('channel_id', $c->id)
-                ->where('user_id', $req->user)
-                ->where(function($query) use ($startDateTime,$finishDateTime){
-                    $query->where('finished_watching_at','>',$startDateTime)
-                    ->orWhereNull('finished_watching_at');
+                    ->where('user_id', $req->user)
+                    ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                        $query->where('finished_watching_at', '>', $startDateTime)
+                            ->orWhereNull('finished_watching_at');
                     })
-                ->where('started_watching_at','<',$finishDateTime)
-                ->get();
+                    ->where('started_watching_at', '<', $finishDateTime)
+                    ->get();
                 $total_time_viewed = 0;
                 $total_time = 0;
                 $duration = "";
                 foreach ($viewlogs as $v) {
-                    if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    if (((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                         $watched_sec = abs($to_time - $from_time);
-                    }
-                    else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                    } else if (((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))) {
                         $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
-                    }
-                    else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    } else if (((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                         $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
-                    }
-                    else{
-                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    } else {
+                        $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
                     }
                     $total_time_viewed = $total_time_viewed + $watched_sec;
                     //$timeviewed = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at))/60;
                 }
                 //$total_time_viewed = date("H:i:s", $total_time_viewed);
-                $total_time_viewed = ($total_time_viewed/60);
-                $total_time_viewed=round($total_time_viewed);
-                if($total_time_viewed >= 60){
-                    $total_time = ($total_time_viewed/60);
+                $total_time_viewed = ($total_time_viewed / 60);
+                $total_time_viewed = round($total_time_viewed);
+                if ($total_time_viewed >= 60) {
+                    $total_time = ($total_time_viewed / 60);
                     $total_time = round($total_time);
-                    $duration = $total_time." hour";
-                  }
-                  else{
+                    $duration = $total_time . " hour";
+                } else {
                     $total_time = floor($total_time_viewed);
-                    $duration = $total_time." minute";
-                  }
-                    
-                $chnls =[
+                    $duration = $total_time . " minute";
+                }
+
+                $chnls = [
                     "id" => $c->id,
                     "channel_name" => $c->channel_name,
                     "logo" => $c->logo,
@@ -389,205 +374,194 @@ class UserController extends Controller
                     "duration" => $duration
                 ];
                 //array_push($total_time,$total_time_viewed);
-                array_push($channelArray,$chnls);
-
+                array_push($channelArray, $chnls);
             }
-            return response()->json(["channels"=>$channelArray],200);
+            return response()->json(["channels" => $channelArray], 200);
         }
-        return response()->json(["error"=> "Error"],200);
+        return response()->json(["error" => "Error"], 200);
     }
 
-    public function usertimespent2(Request $req){
-        if($req->user != "" && $req->start != "" && $req->finish != ""){
-            
-            $startDate=substr($req->start,0,10);
-            $startTime=substr($req->start,11,19);
-            $finishDate=substr($req->finish,0,10);
-            $finishTime=substr($req->finish,11,19);
+    public function usertimespent2(Request $req)
+    {
+        if ($req->user != "" && $req->start != "" && $req->finish != "") {
 
-            $startDateTime = date($startDate)." ".$startTime;
-            $finishDateTime = date($finishDate)." ".$finishTime;
-            
+            $startDate = substr($req->start, 0, 10);
+            $startTime = substr($req->start, 11, 19);
+            $finishDate = substr($req->finish, 0, 10);
+            $finishTime = substr($req->finish, 11, 19);
 
-            $to_time = strtotime($startDate." ".$startTime);
-            $from_time = strtotime($finishDate." ".$finishTime);
+            $startDateTime = date($startDate) . " " . $startTime;
+            $finishDateTime = date($finishDate) . " " . $finishTime;
 
-            $channelArray=array();
-            $total_time =array();
-            $total =0.00;
 
-            $channels=Channel::all('id','channel_name');
+            $to_time = strtotime($startDate . " " . $startTime);
+            $from_time = strtotime($finishDate . " " . $finishTime);
+
+            $channelArray = array();
+            $total_time = array();
+            $total = 0.00;
+
+            $channels = Channel::all('id', 'channel_name');
             foreach ($channels as $c) {
                 $viewlogs = ViewLog::where('channel_id', $c->id)
-                ->where('user_id', $req->user)
-                ->where(function($query) use ($startDateTime,$finishDateTime){
-                    $query->where('finished_watching_at','>',$startDateTime)
-                    ->orWhereNull('finished_watching_at');
+                    ->where('user_id', $req->user)
+                    ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                        $query->where('finished_watching_at', '>', $startDateTime)
+                            ->orWhereNull('finished_watching_at');
                     })
-                ->where('started_watching_at','<',$finishDateTime)
-                ->get();
+                    ->where('started_watching_at', '<', $finishDateTime)
+                    ->get();
                 $total_time_viewed = 0;
-                
+
                 foreach ($viewlogs as $v) {
-                    if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    if (((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                         $watched_sec = abs($to_time - $from_time);
-                    }
-                    else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                    } else if (((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))) {
                         $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
-                    }
-                    else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                    } else if (((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                         $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
-                    }
-                    else{
-                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                    } else {
+                        $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
                     }
                     $total_time_viewed = $total_time_viewed + $watched_sec;
                     //$timeviewed = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at))/60;
                 }
-                $total_time_viewed = ($total_time_viewed)/60;
+                $total_time_viewed = ($total_time_viewed) / 60;
 
-                $total_time_viewed=round($total_time_viewed);
-                
-                array_push($total_time,$total_time_viewed);
-                array_push($channelArray,$c->channel_name);
+                $total_time_viewed = round($total_time_viewed);
 
+                array_push($total_time, $total_time_viewed);
+                array_push($channelArray, $c->channel_name);
             }
-            return response()->json(["totaltime"=>$total_time,"channels"=>$channelArray],200);
-
+            return response()->json(["totaltime" => $total_time, "channels" => $channelArray], 200);
         }
-        return response()->json(["error"=> "Error"],200);
+        return response()->json(["error" => "Error"], 200);
     }
 
-    public function LastTweentyFourViewsGraph(Request $req){
+    public function LastTweentyFourViewsGraph(Request $req)
+    {
         $rows = 0;
         $chart_labels = [];
         $chart_data = [];
 
-        if($req->user != ""){
+        if ($req->user != "") {
 
-            $data = ViewLog::where('user_id', $req->user)->where(function($query){
+            $data = ViewLog::where('user_id', $req->user)->where(function ($query) {
                 $query->where('started_watching_at', '>=', Carbon::now()->subHours(730));
             })->with('channel:id,channel_name')->orderBy('started_watching_at')->get();
             $channel_ids = array_unique($data->pluck('channel_id')->toArray());
             array_splice($channel_ids, 0, 0);
             $chart_labels = array_unique($data->whereIn('channel_id', $channel_ids)->pluck('channel.channel_name')->toArray());
             array_splice($chart_labels, 0, 0);
-            for($i = 0; $i < count($channel_ids); $i++){
+            for ($i = 0; $i < count($channel_ids); $i++) {
                 $rows = $rows + 1;
                 $datum = $data->where('channel_id', $channel_ids[$i]);
                 $graph_data = [];
-                $datum->map(function($temp) use(&$graph_data){
+                $datum->map(function ($temp) use (&$graph_data) {
                     array_push($graph_data, [Carbon::parse($temp->started_watching_at), Carbon::Parse($temp->finished_watching_at) ?? Carbon::now(), Carbon::Parse($temp->started_watching_at)->diffInMinutes(Carbon::parse($temp->finished_watching_at) ?? Carbon::now()) . ' min']);
                 });
                 $chart_data[$i]['data'] = $graph_data;
-            }//dd($this->chart_data);
-            return response()->json(["rows"=>$rows,"chart_data"=>$chart_data,"chart_labels"=>$chart_labels]);
-    
+            } //dd($this->chart_data);
+            return response()->json(["rows" => $rows, "chart_data" => $chart_data, "chart_labels" => $chart_labels]);
         }
-        return response()->json(["error"=> "Error"],200);
-        
+        return response()->json(["error" => "Error"], 200);
     }
 
 
 
-    public function LastSeventyTwoViewsGraph(Request $req){
+    public function LastSeventyTwoViewsGraph(Request $req)
+    {
         $rows = 0;
         $chart_labels = [];
         $chart_data = [];
 
-        if($req->user != ""){
+        if ($req->user != "") {
 
-            $data = ViewLog::where('user_id', $req->user)->where(function($query){
+            $data = ViewLog::where('user_id', $req->user)->where(function ($query) {
                 $query->where('started_watching_at', '>=', Carbon::now()->subHours(72));
             })->with('channel:id,channel_name')->orderBy('started_watching_at')->get();
             $channel_ids = array_unique($data->pluck('channel_id')->toArray());
             array_splice($channel_ids, 0, 0);
             $chart_labels = array_unique($data->whereIn('channel_id', $channel_ids)->pluck('channel.channel_name')->toArray());
             array_splice($chart_labels, 0, 0);
-            for($i = 0; $i < count($channel_ids); $i++){
+            for ($i = 0; $i < count($channel_ids); $i++) {
                 $rows = $rows + 1;
                 $datum = $data->where('channel_id', $channel_ids[$i]);
                 $graph_data = [];
-                $datum->map(function($temp) use(&$graph_data){
+                $datum->map(function ($temp) use (&$graph_data) {
                     array_push($graph_data, [Carbon::parse($temp->started_watching_at), Carbon::Parse($temp->finished_watching_at) ?? Carbon::now(), Carbon::Parse($temp->started_watching_at)->diffInMinutes(Carbon::parse($temp->finished_watching_at) ?? Carbon::now()) . ' min']);
                 });
                 $chart_data[$i]['data'] = $graph_data;
-            }//dd($this->chart_data);
-            return response()->json(["rows"=>$rows,"chart_data"=>$chart_data,"chart_labels"=>$chart_labels]);
-    
+            } //dd($this->chart_data);
+            return response()->json(["rows" => $rows, "chart_data" => $chart_data, "chart_labels" => $chart_labels]);
         }
-        return response()->json(["error"=> "Error"],200);
-
+        return response()->json(["error" => "Error"], 200);
     }
 
-    public function last24WatchingData(Request $req){
+    public function last24WatchingData(Request $req)
+    {
 
-        if($req->user != "" ){
+        if ($req->user != "") {
             $finishDateTime = date("Y-m-d H:i:s");
             $min = 1439;
             $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
             $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-            
+
             $to_time = strtotime($startDateTime);
             $from_time = strtotime($finishDateTime);
-            
 
-            $channelArray=array();
-            $total_time =array();
-            $total =0.00;
-            
+
+            $channelArray = array();
+            $total_time = array();
+            $total = 0.00;
+
             $viewlogs = ViewLog::where('user_id', $req->user)
-            ->where(function($query) use ($startDateTime,$finishDateTime){
-                $query->where('finished_watching_at','>',$startDateTime)
-                ->orWhereNull('finished_watching_at');
+                ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                    $query->where('finished_watching_at', '>', $startDateTime)
+                        ->orWhereNull('finished_watching_at');
                 })
-            ->where('started_watching_at','<',$finishDateTime)
-            ->get();
+                ->where('started_watching_at', '<', $finishDateTime)
+                ->get();
             $total_time_viewed = 0;
-            
+
             foreach ($viewlogs as $v) {
-                if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                if (((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                     $watched_sec = abs($to_time - $from_time);
                     $start_time = $startDateTime;
                     $finish_time = $finishDateTime;
-                }
-                else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                } else if (((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))) {
                     $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
                     $start_time = $startDateTime;
                     $finish_time = $v->finished_watching_at;
-                }
-                else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                } else if (((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                     $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
                     $start_time = $v->started_watching_at;
                     $finish_time = $finishDateTime;
-
-                }
-                else{
-                    $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                } else {
+                    $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
                     $start_time = $v->started_watching_at;
                     $finish_time = $v->finished_watching_at;
                 }
-                $total_time_viewed = floor($watched_sec/60);
-                $chnls =[
+                $total_time_viewed = floor($watched_sec / 60);
+                $chnls = [
                     "channel_name" => $v->channel->channel_name,
-                    "start" => date('Y-m-d H:i:s',(strtotime($start_time)+21600)),
-                    "finish" => date('Y-m-d H:i:s',(strtotime($finish_time)+21600)),
-                    "min" => $total_time_viewed." min"
+                    "start" => date('Y-m-d H:i:s', (strtotime($start_time) + 21600)),
+                    "finish" => date('Y-m-d H:i:s', (strtotime($finish_time) + 21600)),
+                    "min" => $total_time_viewed . " min"
                 ];
-                array_push($channelArray,$chnls);
-  
+                array_push($channelArray, $chnls);
             }
             array_multisort(array_column($channelArray, 'start'), SORT_ASC, $channelArray);
             $rows = count($channelArray);
-            return response()->json(["rows"=>$rows,"channels"=>$channelArray],200);
-
+            return response()->json(["rows" => $rows, "channels" => $channelArray], 200);
         }
-        return response()->json(["error"=> "Error"],200);
+        return response()->json(["error" => "Error"], 200);
     }
 
-    public function last72WatchingData(Request $req){
+    public function last72WatchingData(Request $req)
+    {
 
-        if($req->user != "" ){
+        if ($req->user != "") {
             //$startDate=date('Y-m-d',strtotime("2022-05-18"));
             //$startTime="00:00:00";
             // $finishDate=date('Y-m-d',strtotime("2022-05-18"));
@@ -596,64 +570,59 @@ class UserController extends Controller
             $min = 4319;
             $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
             $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-            
+
             $to_time = strtotime($startDateTime);
             $from_time = strtotime($finishDateTime);
-            
-            $channelArray=array();
-            $total_time =array();
-            $total =0.00;
+
+            $channelArray = array();
+            $total_time = array();
+            $total = 0.00;
 
             $viewlogs = ViewLog::where('user_id', $req->user)
-            ->where(function($query) use ($startDateTime,$finishDateTime){
-                $query->where('finished_watching_at','>',$startDateTime)
-                ->orWhereNull('finished_watching_at');
+                ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                    $query->where('finished_watching_at', '>', $startDateTime)
+                        ->orWhereNull('finished_watching_at');
                 })
-            ->where('started_watching_at','<',$finishDateTime)
-            ->get();
+                ->where('started_watching_at', '<', $finishDateTime)
+                ->get();
             $total_time_viewed = 0;
-            
+
             foreach ($viewlogs as $v) {
-                if(((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                if (((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                     $watched_sec = abs($to_time - $from_time);
                     $start_time = $startDateTime;
                     $finish_time = $finishDateTime;
-                }
-                else if(((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))){
+                } else if (((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))) {
                     $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
                     $start_time = $startDateTime;
                     $finish_time = $v->finished_watching_at;
-                }
-                else if(((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null ) )){
+                } else if (((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
                     $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
                     $start_time = $v->started_watching_at;
                     $finish_time = $finishDateTime;
-
-                }
-                else{
-                    $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                } else {
+                    $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
                     $start_time = $v->started_watching_at;
                     $finish_time = $v->finished_watching_at;
                 }
-                $total_time_viewed = floor($watched_sec/60);
-                $chnls =[
+                $total_time_viewed = floor($watched_sec / 60);
+                $chnls = [
                     "channel_name" => $v->channel->channel_name,
-                    "start" => date('Y-m-d H:i:s',(strtotime($start_time)+21600)),
-                    "finish" => date('Y-m-d H:i:s',(strtotime($finish_time)+21600)),
-                    "min" => $total_time_viewed." min"
+                    "start" => date('Y-m-d H:i:s', (strtotime($start_time) + 21600)),
+                    "finish" => date('Y-m-d H:i:s', (strtotime($finish_time) + 21600)),
+                    "min" => $total_time_viewed . " min"
                 ];
-                array_push($channelArray,$chnls);
- 
+                array_push($channelArray, $chnls);
             }
             array_multisort(array_column($channelArray, 'start'), SORT_ASC, $channelArray);
             $rows = count($channelArray);
-            return response()->json(["rows"=>$rows,"channels"=>$channelArray],200);
-
+            return response()->json(["rows" => $rows, "channels" => $channelArray], 200);
         }
-        return response()->json(["error"=> "Error"],200);
+        return response()->json(["error" => "Error"], 200);
     }
 
-    function user_info(Request $req){
+    function user_info(Request $req)
+    {
         $user = User::where('id', $req->user)->first();
         $user->device_name = $user->device->device_name;
         $user->device_id = $user->device->id;
@@ -678,28 +647,85 @@ class UserController extends Controller
 
 
         $user->age = Carbon::parse($user->dob)->diff(Carbon::now())->y;
-        
-        return response()->json(["user"=>$user],200);
+
+        return response()->json(["user" => $user], 200);
+    }
+
+    function getUserFilterDataList(){
+        $data = UserDataFilter::orderBy('id', 'DESC')->get();
+        foreach($data as $d){
+            if($d->channel_id){
+                $ch = Channel::where('id',$d->channel_id)->select('channel_name')->first();
+                $d->channel_name = $ch->channel_name;
+            }
+            
+
+            if ($d->gender == "m") {
+                $d->gender = "Male";
+            } elseif ($d->gender == "f") {
+                $d->gender = "Female";
+            }
+
+        }
+        return response()->json($data);
+
+    }
+
+    function userFilterValueAdd(Request $req){
+        $validator = Validator::make($req->all(), $this->UserFilterData_rules());
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $udf = new UserDataFilter();
+        $udf->filter_name = $req->filter_name;
+        $udf->channel_id = $req->channel_id;
+        $udf->start = $req->start;
+        $udf->finish = $req->finish;
+        $udf->gender = $req->gender;
+        $udf->from_age = $req->from_age;
+        $udf->to_age = $req->to_age;
+        $udf->created_at = date('Y-m-d H:i:s');
+        $udf->save();
+
+
+        // $userFilterData = (object)$req->all();
+        // //$userFilterData->survey_date = date('Y-m-d H:i:s');
+        // //$userFilterData->installation_date = date('Y-m-d H:i:s');
+        // //return response()->json(["message"=>$user->user_name]);
+        // $d = UserDataFilter::create((array)$userFilterData);
+
+        return response()->json(["message" => "User Filter Added Successfully"], 200);
+
+    }
+
+    function UserFilterData_rules()
+    {
+        return [
+            "start" => "required",
+            "finish" => "required",
+            "from_age" => "numeric|lt:to_age",
+            "to_age" => "numeric|",
+        ];
     }
 
 
 
-    function demo_test(){
-        
+    function demo_test()
+    {
+
         $path = base_path('.git/');
 
-    if (! file_exists($path)) {
-        return null;
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        $head = trim(substr(file_get_contents($path . 'HEAD'), 4));
+
+        $hash = trim(file_get_contents(sprintf($path . $head)));
+
+        //return $hash;
+        return response()->json(["git_id" => $hash], 200);
     }
-
-    $head = trim(substr(file_get_contents($path . 'HEAD'), 4));
-
-    $hash = trim(file_get_contents(sprintf($path . $head)));
-
-    //return $hash;
-                return response()->json(["git_id"=>$hash],200);
-    }
-
-
 
 }

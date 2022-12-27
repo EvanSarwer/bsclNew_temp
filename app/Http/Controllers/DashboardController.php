@@ -926,7 +926,72 @@ class DashboardController extends Controller
     return response()->json(["notifyNumber" => count($notifications), "data" => $notifications], 200);
   }
 
+  public function generate_notification3()
+  {
+    $day1Before = date('Y-m-d H:i:s', strtotime("-1 days"));
+    $day2Before = date('Y-m-d H:i:s', strtotime("-2 days"));
+    $today = date('Y-m-d H:i:s');
 
+    $appUser = AppUser::select('app_users.id')->where('login.role', 'admin')
+      ->join('login', 'login.user_name', '=', 'app_users.user_name')
+      ->get();
+
+
+
+    $devices = Device::where('type', "STB")
+      ->get();
+    if ($devices) {
+      foreach ($devices as $d) {
+        //if()
+        $channelmax = //(int)(
+          RawRequest::select('channel_id')
+          ->where('device_id', $d->id)
+          ->where('start', '>', $day1Before)
+          ->groupBy('channel_id')
+          ->orderByRaw('COUNT(*) DESC')
+          ->limit(1)
+          ->first();
+        if ($channelmax == null) {
+          continue;
+        }
+
+        $channelmax = (int)($channelmax->channel_id);
+        //return  response()->json(["total" => $channelmax], 200);
+        $rawCount = RawRequest::where('start', '>', $day1Before)
+          ->where('device_id', $d->id)
+          ->count();
+        $rawchCount = RawRequest::where('start', '>', $day1Before)
+          ->where('channel_id', $channelmax)
+          ->where('device_id', $d->id)
+          ->count();
+
+        //return response()->json(["total" => $channelmax,"c"=>$rawCount,"ch"=>$rawchCount,"ok"=>"not","1d"=>$day1Before], 200);
+        if ($rawCount > 0) {
+          if ($rawchCount / $rawCount >= 0.98) {
+            //return response()->json(["total" => $rawCount,"error" => $rawchCount,"ok"=>"not"], 200);
+            $check_noti = Notification::where('flag', 6)->where('du_id', $d->id)->where('created_at', '>', $day2Before)->orWhere('created_at', $day2Before)->first();    //
+            //return response()->json(["data" => $check_noti], 200);
+            if (!$check_noti) {
+              Notification::where('flag', 6)->where('du_id', $d->id)->where('created_at', '<', $day2Before)->delete();
+              foreach ($appUser as $au) {
+                $noti = new Notification();
+                $noti->user_id = $au->id;
+                $noti->flag = 6;                 // Device has not made any requests yet
+                $noti->status = 'unseen';
+                $noti->du_id = $d->id;
+                $noti->du_name = $d->device_name;
+                $noti->details = " same channel 24 hours";
+                $noti->created_at = new Datetime();
+                $noti->save();
+              }
+            }
+          }
+        }
+        //return response()->json(["total" => $rawCount,"error" => $rawchCount], 200);
+
+      }
+    }
+  }
   public function generate_notification2()
   {
     $day5Before = date('Y-m-d H:i:s', strtotime("-5 days"));
@@ -1080,8 +1145,8 @@ class DashboardController extends Controller
     $user_id = $userToken->login->appUser->id;
 
 
-    $unseen_noti = Notification::where('user_id', $user_id)->where('status', "unseen")->orderBy('created_at','desc')->get();
-    $seen_noti = Notification::where('user_id', $user_id)->where('status', "seen")->orderBy('created_at','desc')->get();
+    $unseen_noti = Notification::where('user_id', $user_id)->where('status', "unseen")->orderBy('created_at', 'desc')->get();
+    $seen_noti = Notification::where('user_id', $user_id)->where('status', "seen")->orderBy('created_at', 'desc')->get();
     $merged_noti = $unseen_noti->merge($seen_noti);
 
     if (count($merged_noti) > 0) {

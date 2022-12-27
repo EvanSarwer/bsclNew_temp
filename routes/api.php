@@ -150,6 +150,8 @@ Route::post('/user/last72WatchingData',[UserController::class,'last72WatchingDat
 Route::get('/getuserlist',[UserController::class,'getallList'])->middleware('auth.admin');
 Route::post('/user/userinfo',[UserController::class,'user_info'])->middleware('auth.admin');
 //
+Route::post('/user/userfilterdata/add',[UserController::class,'userFilterValueAdd']);
+Route::get('/user/userfilterdata/list',[UserController::class,'getUserFilterDataList']);
 Route::post('/user/userdefined/usertimespent',[UserController::class,'usertimespent2'])->middleware('auth.admin');
 
 ///////////END//////////////

@@ -30,6 +30,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('adtrp:calculate')->dailyAt('00:10');
         $schedule->command('notification:generate')->hourly();
         $schedule->command('notificationfu:generate')->everySixHours();
+        $schedule->command('notification2hr:generate')->everySixHours();
     }
 
     /**

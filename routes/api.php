@@ -120,6 +120,7 @@ Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserli
 //Route::get('/dashboard/notification', [DashboardController::class, 'notification']);//->middleware('auth.admin.user');
 Route::get('/notification', [DashboardController::class, 'generate_notification']);//->middleware('auth.admin.user');
 Route::get('/notification2', [DashboardController::class, 'generate_notification2']);//->middleware('auth.admin.user');
+Route::get('/notification3', [DashboardController::class, 'generate_notification3']);//->middleware('auth.admin.user');
 Route::get('/dashboard/notification', [DashboardController::class, 'get_notification']);//->middleware('auth.admin.user');
 Route::get('/dashboard/seennotification', [DashboardController::class, 'seen_notification']);//->middleware('auth.admin.user');
 

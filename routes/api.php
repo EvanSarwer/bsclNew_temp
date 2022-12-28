@@ -152,6 +152,9 @@ Route::post('/user/userinfo',[UserController::class,'user_info'])->middleware('a
 //
 Route::post('/user/userfilterdata/add',[UserController::class,'userFilterValueAdd']);
 Route::get('/user/userfilterdata/list',[UserController::class,'getUserFilterDataList']);
+Route::get('/user/generate_userFilterData',[UserController::class,'generate_userFilterData']);
+Route::get('/device/getUserFilter_generatedData/{view_id}',[UserController::class,'getUserFilter_generatedData']);
+
 Route::post('/user/userdefined/usertimespent',[UserController::class,'usertimespent2'])->middleware('auth.admin');
 
 ///////////END//////////////

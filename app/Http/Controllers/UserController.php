@@ -651,27 +651,27 @@ class UserController extends Controller
         return response()->json(["user" => $user], 200);
     }
 
-    function getUserFilterDataList(){
+    function getUserFilterDataList()
+    {
         $data = UserDataFilter::orderBy('id', 'DESC')->get();
-        foreach($data as $d){
-            if($d->channel_id){
-                $ch = Channel::where('id',$d->channel_id)->select('channel_name')->first();
+        foreach ($data as $d) {
+            if ($d->channel_id) {
+                $ch = Channel::where('id', $d->channel_id)->select('channel_name')->first();
                 $d->channel_name = $ch->channel_name;
             }
-            
+
 
             if ($d->gender == "m") {
                 $d->gender = "Male";
             } elseif ($d->gender == "f") {
                 $d->gender = "Female";
             }
-
         }
         return response()->json($data);
-
     }
 
-    function userFilterValueAdd(Request $req){
+    function userFilterValueAdd(Request $req)
+    {
         $validator = Validator::make($req->all(), $this->UserFilterData_rules());
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
@@ -696,17 +696,69 @@ class UserController extends Controller
         // $d = UserDataFilter::create((array)$userFilterData);
 
         return response()->json(["message" => "User Filter Added Successfully"], 200);
-
     }
 
     function UserFilterData_rules()
     {
         return [
+            "channel_id" => "required",
             "start" => "required",
             "finish" => "required",
             "from_age" => "numeric|lt:to_age",
             "to_age" => "numeric|",
         ];
+    }
+
+
+    function generate_userFilterData()
+    {
+        $data = UserDataFilter::where('generate_flag', 0)->get();
+        $all_data = [];
+        foreach ($data as $d) {
+
+            $startDateTime = $d->start;
+            $finishDateTime = $d->finish;
+            $minDate = Carbon::today()->subYears($d->to_age + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears($d->from_age)->endOfDay();
+
+            $logs = ViewLog::where('view_logs.channel_id', $d->channel_id)
+                ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                    $query->where('view_logs.finished_watching_at', '>', $startDateTime)
+                        ->orWhereNull('view_logs.finished_watching_at');
+                })
+                ->where('view_logs.started_watching_at', '<', $finishDateTime)
+                ->where('users.user_name', 'like', '%' . $d->filter_name . '%')
+                ->where('users.gender', 'like', '%' . $d->gender . '%')
+                ->whereBetween('users.dob', [$minDate, $maxDate])
+                ->join('users', 'users.id', '=', 'view_logs.user_id')
+                ->select('users.id','users.user_name','users.device_id')
+                ->distinct('view_logs.user_id')->get();
+            
+            //$logs->gid = $d->id;
+            if(count($logs)>0){
+                $d->generate_flag = 1;
+                $d->generated_data = json_encode($logs);
+                $d->save();
+            }else{
+                $d->generate_flag = 1;
+                //$d->generated_data = json_encode($logs);
+                $d->save();
+            }
+            
+            //array_push($all_data, $logs);
+
+        }
+        return response()->json(["Data" => "data"], 200);
+    }
+
+    function getUserFilter_generatedData($view_id){
+
+        $data = UserDataFilter::where('id',$view_id)->where('generate_flag', 1)->first();
+        if($data){
+            $data->generated_data = json_decode($data->generated_data);
+            return response()->json(["data" => $data->generated_data], 200);
+        }
+
     }
 
 
@@ -727,5 +779,4 @@ class UserController extends Controller
         //return $hash;
         return response()->json(["git_id" => $hash], 200);
     }
-
 }

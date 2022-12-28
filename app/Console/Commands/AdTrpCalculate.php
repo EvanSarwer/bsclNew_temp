@@ -10,6 +10,7 @@ use DateTime;
 use App\Models\PlayoutFile;
 use App\Models\PlayoutLog;
 use App\Models\AdTrp;
+use App\Models\UserDataFilter;
 use Illuminate\Console\Command;
 
 class AdTrpCalculate extends Command
@@ -253,4 +254,47 @@ class AdTrpCalculate extends Command
 
         return $count;
     }
+
+
+    function generate_userFilterData()
+    {
+        $data = UserDataFilter::where('generate_flag', 0)->get();
+        foreach ($data as $d) {
+
+            $startDateTime = $d->start;
+            $finishDateTime = $d->finish;
+            $minDate = Carbon::today()->subYears($d->to_age + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears($d->from_age)->endOfDay();
+
+            $logs = ViewLog::where('view_logs.channel_id', $d->channel_id)
+                ->where(function ($query) use ($startDateTime, $finishDateTime) {
+                    $query->where('view_logs.finished_watching_at', '>', $startDateTime)
+                        ->orWhereNull('view_logs.finished_watching_at');
+                })
+                ->where('view_logs.started_watching_at', '<', $finishDateTime)
+                ->where('users.user_name', 'like', '%' . $d->filter_name . '%')
+                ->where('users.gender', 'like', '%' . $d->gender . '%')
+                ->whereBetween('users.dob', [$minDate, $maxDate])
+                ->join('users', 'users.id', '=', 'view_logs.user_id')
+                ->select('users.id','users.user_name','users.device_id')
+                ->distinct('view_logs.user_id')->get();
+            
+            //$logs->gid = $d->id;
+            if(count($logs)>0){
+                $d->generate_flag = 1;
+                $d->generated_data = json_encode($logs);
+                $d->save();
+            }else{
+                $d->generate_flag = 1;
+                //$d->generated_data = json_encode($logs);
+                $d->save();
+            }
+            
+            //array_push($all_data, $logs);
+
+        }
+        return response()->json(["Data" => "data"], 200);
+    }
+
+
 }

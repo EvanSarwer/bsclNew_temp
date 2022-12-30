@@ -272,7 +272,6 @@ class AdTrpCalculate extends Command
                         ->orWhereNull('view_logs.finished_watching_at');
                 })
                 ->where('view_logs.started_watching_at', '<', $finishDateTime)
-                ->where('users.user_name', 'like', '%' . $d->filter_name . '%')
                 ->where('users.gender', 'like', '%' . $d->gender . '%')
                 ->whereBetween('users.dob', [$minDate, $maxDate])
                 ->join('users', 'users.id', '=', 'view_logs.user_id')

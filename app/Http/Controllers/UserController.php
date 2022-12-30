@@ -665,6 +665,8 @@ class UserController extends Controller
                 $d->gender = "Male";
             } elseif ($d->gender == "f") {
                 $d->gender = "Female";
+            }else{
+                $d->gender = "All";
             }
         }
         return response()->json($data);
@@ -701,6 +703,7 @@ class UserController extends Controller
     function UserFilterData_rules()
     {
         return [
+            "filter_name" => "required",
             "channel_id" => "required",
             "start" => "required",
             "finish" => "required",
@@ -727,7 +730,6 @@ class UserController extends Controller
                         ->orWhereNull('view_logs.finished_watching_at');
                 })
                 ->where('view_logs.started_watching_at', '<', $finishDateTime)
-                ->where('users.user_name', 'like', '%' . $d->filter_name . '%')
                 ->where('users.gender', 'like', '%' . $d->gender . '%')
                 ->whereBetween('users.dob', [$minDate, $maxDate])
                 ->join('users', 'users.id', '=', 'view_logs.user_id')

@@ -23,8 +23,8 @@ class RequestController extends Controller
     public function receiveReliabilityLog(Request $request)
     {
         $dr = new DataReliability();
-        $data = $request->data;
-        $dr->data = json_encode($data);
+        //$data = $request->data;
+        $dr->data = $request->data;//json_encode($data);
         $dr->time = Carbon::now()->toDateTimeString();;
         $dr->save();
 

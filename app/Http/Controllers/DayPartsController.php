@@ -18,77 +18,77 @@ class DayPartsController extends Controller
     {
 
         $channel = Channel::all();
-        foreach($channel as $c){
-        $userids=User::where('type', 'like', '%' . $req->type . '%')
-            ->pluck('id')->toArray();
-        //return response()->json(["time" => $channel->channel_name], 200);
-        $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];
-        $users = User::all();
-        $numOfUser = $users->count();
-        //$numOfUser = $users->count();
-        $time = $this->dayrange($req->start, $req->start, ((int)$req->range));
+        foreach ($channel as $c) {
+            $userids = User::where('type', 'like', '%' . $req->type . '%')
+                ->pluck('id')->toArray();
+            //return response()->json(["time" => $channel->channel_name], 200);
+            $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];
+            $users = User::all();
+            $numOfUser = $users->count();
+            //$numOfUser = $users->count();
+            $time = $this->dayrange($req->start, $req->start, ((int)$req->range));
 
-        //   return response()->json(["time" => $time], 200);
-        if (((int)$req->range) == 30) {
-            $dd = 30 * count($time);
-            $m = 900;
-            $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
-            $reachp = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
-            $reach0 = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+            //   return response()->json(["time" => $time], 200);
+            if (((int)$req->range) == 30) {
+                $dd = 30 * count($time);
+                $m = 900;
+                $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+                $reachp = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+                $reach0 = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
 
-            $tvrs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-            $tvrp = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-            $tvr0 = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-        } else {
-            $dd = 15 * count($time);
-            $m = 450;
-            $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
-            $reachp = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
-            $reach0 = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+                $tvrs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                $tvrp = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                $tvr0 = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            } else {
+                $dd = 15 * count($time);
+                $m = 450;
+                $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+                $reachp = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+                $reach0 = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
 
-            $tvrs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-            $tvrp = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-            $tvr0 = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-        }
-        //return response()->json(["time" => count($reachs)], 200);
-        $label = array();
-        foreach ($time as $tt) {
-            for ($i = 0; $i < count($tt); $i++) {
-                
-                // $viewers = $this->views($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
-                // $watchtime = $this->timeviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
-                
-                $timeandviewers = $this->timeandviewed($c->id,$userids, $tt[$i]["start"], $tt[$i]["finish"]);
-                $viewers = $timeandviewers->view;
-                $watchtime = $timeandviewers->time;
-                //return response()->json(["ok"=>"ss","time" => $viewers ], 200);
-                //return response()->json(["time" => $viewers], 200);
-                if (!empty($viewers)) {
-                    //return response()->json(["time" => $viewers,"timer" => $i], 200);
-                    $reachs[$i] = array_merge($reachs[$i], $viewers);
-                }
-
-                //$timeandviewers = $this->timeandviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
-                //(object)(array("time"=>$watchtime,"viewers"=>$viewers));
-                //return response()->json(["time" => $timeandviewers], 200);
-                $tvrs[$i] = $tvrs[$i] + $watchtime;
+                $tvrs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                $tvrp = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                $tvr0 = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
             }
-        }
-        for ($i = 0; $i < count($tt); $i++) {
+            //return response()->json(["time" => count($reachs)], 200);
+            $label = array();
+            foreach ($time as $tt) {
+                for ($i = 0; $i < count($tt); $i++) {
 
-            $reachp[$i] = (count(array_unique($reachs[$i])) * 100) / $numOfUser;
-            $reach0[$i] = count(array_unique($reachs[$i]));
-            $tvr0[$i] = $tvrs[$i] / ($numOfUser * $dd);
+                    // $viewers = $this->views($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
+                    // $watchtime = $this->timeviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
 
-            $tvrp[$i] = ($tvrs[$i] / ($numOfUser * $dd)) * 100;
-            $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
-            $mid = date("H:i:s", $mid);
-            array_push($label, $mid);
-            array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
+                    $timeandviewers = $this->timeandviewed($c->id, $userids, $tt[$i]["start"], $tt[$i]["finish"]);
+                    $viewers = $timeandviewers->view;
+                    $watchtime = $timeandviewers->time;
+                    //return response()->json(["ok"=>"ss","time" => $viewers ], 200);
+                    //return response()->json(["time" => $viewers], 200);
+                    if (!empty($viewers)) {
+                        //return response()->json(["time" => $viewers,"timer" => $i], 200);
+                        $reachs[$i] = array_merge($reachs[$i], $viewers);
+                    }
+
+                    //$timeandviewers = $this->timeandviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
+                    //(object)(array("time"=>$watchtime,"viewers"=>$viewers));
+                    //return response()->json(["time" => $timeandviewers], 200);
+                    $tvrs[$i] = $tvrs[$i] + $watchtime;
+                }
+            }
+            for ($i = 0; $i < count($tt); $i++) {
+
+                $reachp[$i] = (count(array_unique($reachs[$i])) * 100) / $numOfUser;
+                $reach0[$i] = count(array_unique($reachs[$i]));
+                $tvr0[$i] = $tvrs[$i] / ($numOfUser * $dd);
+
+                $tvrp[$i] = ($tvrs[$i] / ($numOfUser * $dd)) * 100;
+                $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
+                $mid = date("H:i:s", $mid);
+                array_push($label, $mid);
+                array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
+            }
+            DayPart::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($req->type != "") ? $req->type : "all"), "data" => json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))]);
         }
-        DayPart::create(["channel_id"=>$c->id,"day"=>$req->start,"time_range"=>$req->range,"type"=>(($req->type!="")?$req->type:"all"),"data"=>json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))]);
-    }
-    return response()->json(["done"=>"properly done"],200);
+        return response()->json(["done" => "properly done"], 200);
         //return response()->json(["channel" => $channel->channel_name, "value" => ((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])), "all" => $all], 200);
     }
 
@@ -98,9 +98,11 @@ class DayPartsController extends Controller
 
     public function dayrangedtrendall(Request $req)
     {
+        
         $channel = Channel::where('id', $req->id)
             ->first();
-        $userids=User::where('type', 'like', '%' . $req->type . '%')
+        /*
+            $userids=User::where('type', 'like', '%' . $req->type . '%')
             ->pluck('id')->toArray();
         //return response()->json(["time" => $channel->channel_name], 200);
         $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];
@@ -166,8 +168,38 @@ class DayPartsController extends Controller
             $mid = date("H:i:s", $mid);
             array_push($label, $mid);
             array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
+        }*/
+        $daypart = DayPart::where('channel_id', $req->id)
+            ->where('type', 'like', '%' . $req->type . '%')
+            ->where('time_range', $req->range)
+            ->where('day', '<=', $req->start)
+            ->where('day', '>=', $req->finish)
+            ->get();
+        $label = (json_decode($daypart[0]->data))->label;
+        if ((int)$req->range == 30) {
+            
+            $f=48;
+            $reachp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            $reach0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            $tvrp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            $tvr0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        } else {
+            $f=96;
+            $reachp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            $reach0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            $tvrp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            $tvr0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         }
-        return response()->json(["channel" => $channel->channel_name, "value" => ((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])), "all" => $all], 200);
+        //return response()->json(["channel" => $label],200);
+        foreach ($daypart as $d) {
+for($i=0;$i<$f;$i++){
+    $reachp[$i] = (json_decode($d[$i]->data))->reachp;
+    $reach0[$i] = (json_decode($d[$i]->data))->reach0;
+    $tvrp[$i] = (json_decode($d[$i]->data))->tvrp;
+    $tvr0[$i] = (json_decode($d[$i]->data))->tvr0;
+}
+        }
+        return response()->json(["channel" => $channel->channel_name, "value" => ((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp]))], 200);
     }
 
 
@@ -228,7 +260,7 @@ class DayPartsController extends Controller
     }
 
 
-    public function timeandviewed($id,$userids, $start, $finish)
+    public function timeandviewed($id, $userids, $start, $finish)
     {
         //$id=36;$start="2022-08-12 00:00:00" ;$finish="2022-08-12 00:30:00";
         $time = array();

@@ -98,7 +98,7 @@ class DayPartsController extends Controller
 
     public function dayrangedtrendall(Request $req)
     {
-        
+
         $channel = Channel::where('id', $req->id)
             ->first();
         /*
@@ -172,33 +172,34 @@ class DayPartsController extends Controller
         $daypart = DayPart::where('channel_id', $req->id)
             ->where('type', 'like', '%' . $req->type . '%')
             ->where('time_range', $req->range)
-            ->where('day', '<=', $req->start)
-            ->where('day', '>=', $req->finish)
+            ->where('day', '>=', $req->start)
+            ->where('day', '<=', $req->finish)
             ->get();
+        //return response()->json(["channel" => count($daypart)],200);
         $label = (json_decode($daypart[0]->data))->label;
         if ((int)$req->range == 30) {
-            
-            $f=48;
+
+            $f = 48;
             $reachp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             $reach0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             $tvrp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             $tvr0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         } else {
-            $f=96;
+            $f = 96;
             $reachp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             $reach0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             $tvrp = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             $tvr0 = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         }
-        //return response()->json(["channel" => $label],200);
+        //return response()->json(["channel" => count($daypart)],200);
         foreach ($daypart as $d) {
-for($i=0;$i<$f;$i++){
-    $reachp[$i] = (json_decode($d->data))->reachp[$i];
-    //return response()->json(["channel" => $reachp[$i]],200);
-    $reach0[$i] = (json_decode($d->data))->reach0[$i];
-    $tvrp[$i] = (json_decode($d->data))->tvrp[$i];
-    $tvr0[$i] = (json_decode($d->data))->tvr0[$i];
-}
+            for ($i = 0; $i < $f; $i++) {
+
+                $reachp[$i] += (json_decode($d->data))->reachp[$i];
+                $reach0[$i] += (json_decode($d->data))->reach0[$i];
+                $tvrp[$i] += (json_decode($d->data))->tvrp[$i];
+                $tvr0[$i] += (json_decode($d->data))->tvr0[$i];
+            }
         }
         return response()->json(["channel" => $channel->channel_name, "value" => ((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp]))], 200);
     }

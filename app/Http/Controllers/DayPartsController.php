@@ -193,10 +193,11 @@ class DayPartsController extends Controller
         //return response()->json(["channel" => $label],200);
         foreach ($daypart as $d) {
 for($i=0;$i<$f;$i++){
-    $reachp[$i] = (json_decode($d[$i]->data))->reachp;
-    $reach0[$i] = (json_decode($d[$i]->data))->reach0;
-    $tvrp[$i] = (json_decode($d[$i]->data))->tvrp;
-    $tvr0[$i] = (json_decode($d[$i]->data))->tvr0;
+    $reachp[$i] = (json_decode($d->data))->reachp[$i];
+    //return response()->json(["channel" => $reachp[$i]],200);
+    $reach0[$i] = (json_decode($d->data))->reach0[$i];
+    $tvrp[$i] = (json_decode($d->data))->tvrp[$i];
+    $tvr0[$i] = (json_decode($d->data))->tvr0[$i];
 }
         }
         return response()->json(["channel" => $channel->channel_name, "value" => ((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp]))], 200);

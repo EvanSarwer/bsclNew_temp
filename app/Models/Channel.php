@@ -34,6 +34,9 @@ class Channel extends Model
     public function adTrp(){
         return $this->hasMany(AdTrp::class, 'channel_id');
     }
+    public function daypart(){
+        return $this->hasMany(DayPart::class, 'channel_id');
+    }
 
     public function deselectLogs(){
         return $this->hasMany(DeselctLog::class, 'channel_id');

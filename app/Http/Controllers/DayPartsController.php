@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\ViewLog;
 use App\Models\Channel;
 use App\Models\DayPart;
+use App\Models\DayPartProcess;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
@@ -19,6 +20,18 @@ class DayPartsController extends Controller
 
         $channel = Channel::all();
         foreach ($channel as $c) {
+            $daypartcheck = DayPartProcess::where('channel_id', $req->id)
+            ->where('type', 'like', '%' . $req->type . '%')
+            ->where('time_range', $req->range)
+            ->where('day', $req->start)
+            ->first();
+            if($daypartcheck){
+                continue;
+            }
+            else{
+                DayPartProcess::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($req->type != "") ? $req->type : "all")]);
+        
+            }
             $userids = User::where('type', 'like', '%' . $req->type . '%')
                 ->pluck('id')->toArray();
             //return response()->json(["time" => $channel->channel_name], 200);

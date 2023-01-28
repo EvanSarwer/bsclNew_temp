@@ -107,7 +107,7 @@ class DayPartsController extends Controller
             DayPart::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($req->type != "") ? $req->type : "all"), "data" => json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))]);
             $count++;
         }
-        return response()->json(["done" => "properly done","previous"=>$pcount,"new"=>$count,"total"=>$count], 200);
+        return response()->json(["done" => "properly done","previous"=>$pcount,"new"=>$count,"total"=>$c_count], 200);
         //return response()->json(["channel" => $channel->channel_name, "value" => ((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])), "all" => $all], 200);
     }
 

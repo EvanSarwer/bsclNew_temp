@@ -19,6 +19,9 @@ class DayPartsController extends Controller
     {
 
         $channel = Channel::all();
+        $c_count = $channel->count();
+        $count=0;
+        $pcount=0;
         foreach ($channel as $c) {
             $daypartcheck = DayPartProcess::where('channel_id', $req->id)
             ->where('type', 'like', '%' . $req->type . '%')
@@ -26,9 +29,11 @@ class DayPartsController extends Controller
             ->where('day', $req->start)
             ->first();
             if($daypartcheck){
+                $pcount++;
                 continue;
             }
             else{
+                
                 DayPartProcess::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($req->type != "") ? $req->type : "all")]);
         
             }
@@ -100,8 +105,9 @@ class DayPartsController extends Controller
                 array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
             }
             DayPart::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($req->type != "") ? $req->type : "all"), "data" => json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))]);
+            $count++;
         }
-        return response()->json(["done" => "properly done"], 200);
+        return response()->json(["done" => "properly done","previous"=>$pcount,"new"=>$count,"total"=>$count], 200);
         //return response()->json(["channel" => $channel->channel_name, "value" => ((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])), "all" => $all], 200);
     }
 

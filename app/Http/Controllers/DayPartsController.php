@@ -23,13 +23,16 @@ class DayPartsController extends Controller
         $count=0;
         $pcount=0;
         foreach ($channel as $c) {
-            $daypartcheck = DayPartProcess::where('channel_id', $req->id)
+            $daypartcheck = DayPartProcess::where('channel_id', $c->id)
             ->where('type', 'like', '%' . $req->type . '%')
             ->where('time_range', $req->range)
             ->where('day', $req->start)
             ->first();
+            //return response()->json(["done" => $daypartcheck], 200);
             if($daypartcheck){
+                
                 $pcount++;
+
                 continue;
             }
             else{

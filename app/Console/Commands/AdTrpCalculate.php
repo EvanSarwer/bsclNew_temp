@@ -292,7 +292,7 @@ class AdTrpCalculate extends Command
             //array_push($all_data, $logs);
 
         }
-        return response()->json(["Data" => "data"], 200);
+        // return response()->json(["Data" => "data"], 200);
     }
 
 

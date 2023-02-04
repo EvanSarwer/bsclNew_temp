@@ -17,30 +17,31 @@ class DayPartsController extends Controller
     //
     public function dayrangedtrendsave(Request $req)
     {
-
+        $type=$req->type;
+        if ($req->type == "") {
+            $type = "all";
+        }
         $channel = Channel::all();
         $c_count = $channel->count();
-        $count=0;
-        $pcount=0;
+        $count = 0;
+        $pcount = 0;
         foreach ($channel as $c) {
             $daypartcheck = DayPartProcess::where('channel_id', $c->id)
-            ->where('type', 'like', '%' . $req->type . '%')
-            ->where('time_range', $req->range)
-            ->where('day', $req->start)
-            ->first();
+                ->where('type', 'like', '%' . $type . '%')
+                ->where('time_range', $req->range)
+                ->where('day', $req->start)
+                ->first();
             //return response()->json(["done" => $daypartcheck], 200);
-            if($daypartcheck){
-                
+            if ($daypartcheck) {
+
                 $pcount++;
 
                 continue;
+            } else {
+
+                DayPartProcess::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($type != "") ? $type : "all")]);
             }
-            else{
-                
-                DayPartProcess::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($req->type != "") ? $req->type : "all")]);
-        
-            }
-            $userids = User::where('type', 'like', '%' . $req->type . '%')
+            $userids = User::where('type', 'like', '%' . $type . '%')
                 ->pluck('id')->toArray();
             //return response()->json(["time" => $channel->channel_name], 200);
             $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];
@@ -107,10 +108,10 @@ class DayPartsController extends Controller
                 array_push($label, $mid);
                 array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
             }
-            DayPart::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($req->type != "") ? $req->type : "all"), "data" => json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))]);
+            DayPart::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($type != "") ? $type : "all"), "data" => json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))]);
             $count++;
         }
-        return response()->json(["done" => "properly done","previous"=>$pcount,"new"=>$count,"total"=>$c_count], 200);
+        return response()->json(["done" => "properly done", "previous" => $pcount, "new" => $count, "total" => $c_count], 200);
         //return response()->json(["channel" => $channel->channel_name, "value" => ((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])), "all" => $all], 200);
     }
 
@@ -123,6 +124,10 @@ class DayPartsController extends Controller
 
         $channel = Channel::where('id', $req->id)
             ->first();
+            $type=$req->type;
+        if ($req->type == "") {
+            $type = "all";
+        }
         /*
             $userids=User::where('type', 'like', '%' . $req->type . '%')
             ->pluck('id')->toArray();
@@ -192,7 +197,7 @@ class DayPartsController extends Controller
             array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
         }*/
         $daypart = DayPart::where('channel_id', $req->id)
-            ->where('type', 'like', '%' . $req->type . '%')
+            ->where('type', 'like', '%' . $type . '%')
             ->where('time_range', $req->range)
             ->where('day', '>=', $req->start)
             ->where('day', '<=', $req->finish)

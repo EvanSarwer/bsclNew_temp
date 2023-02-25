@@ -148,6 +148,43 @@ class DayPartsGenerate extends Command
             $count++;
         }
     }
+    public function timeandviewed($id, $userids, $start, $finish)
+    {
+        //$id=36;$start="2022-08-12 00:00:00" ;$finish="2022-08-12 00:30:00";
+        $time = array();
+
+        $view = array();
+        $viewers = ViewLog::where('channel_id', $id)
+            ->where(function ($query) use ($start) {
+                $query->where('finished_watching_at', '>', $start)
+                    ->orWhereNull('finished_watching_at');
+            })
+            ->where('started_watching_at', '<', $finish)
+            ->whereIn('user_id', $userids)
+            ->get();
+
+        foreach ($viewers as $v) {
+
+            if (((strtotime($v->started_watching_at)) < (strtotime($start))) && (((strtotime($v->finished_watching_at)) > (strtotime($finish))) || (($v->finished_watching_at) == Null))) {
+                $watched_sec = abs(strtotime($start) - strtotime($finish));
+            } else if (((strtotime($v->started_watching_at)) < (strtotime($start))) && ((strtotime($v->finished_watching_at)) <= (strtotime($finish)))) {
+                $watched_sec = abs(strtotime($start) - strtotime($v->finished_watching_at));
+            } else if (((strtotime($v->started_watching_at)) >= (strtotime($start))) && (((strtotime($v->finished_watching_at)) > (strtotime($finish))) || (($v->finished_watching_at) == Null))) {
+                $watched_sec = abs(strtotime($v->started_watching_at) - strtotime($finish));
+            } else {
+                $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+            }
+            $watched_sec = $watched_sec / 60;
+            array_push($time, $watched_sec);
+            array_push($view, $v->user_id);
+        }
+
+        $vv = (object)(array("time" => array_sum($time), "view" => array_unique($view)));
+
+        //return response()->json(["values" => $vv], 200);
+
+        return $vv;
+    }
     public function timeviewed($id, $start, $finish)
     {
         $viewer = array();

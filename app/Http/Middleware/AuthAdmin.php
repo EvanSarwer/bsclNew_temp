@@ -19,7 +19,7 @@ class AuthAdmin
     {
         $token = $request->header('Authorization');
         $userToken = Token::where('token', $token)->first();
-        if ($userToken && $userToken->login->role == 'admin') {
+        if ($userToken && ($userToken->login->role == 'admin'||$userToken->login->role == 'operator')) {
             return $next($request);
         }
         return response()->json(["msg" => "Unauthorized"], 401);

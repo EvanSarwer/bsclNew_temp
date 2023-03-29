@@ -19,7 +19,7 @@ class AuthAdminUserDeployer
     {
         $token = $request->header('Authorization');
         $userToken = Token::where('token', $token)->first();
-        if ($userToken && ($userToken->login->role == 'admin' || $userToken->login->role == 'deployer' || $userToken->login->role == 'general' || $userToken->login->role == 'add-agency')) {
+        if ($userToken && ($userToken->login->role == 'admin' ||$userToken->login->role == 'operator' || $userToken->login->role == 'deployer' || $userToken->login->role == 'general' || $userToken->login->role == 'add-agency')) {
             return $next($request);
         }
         return response()->json(["msg" => "Unauthorized"], 401);

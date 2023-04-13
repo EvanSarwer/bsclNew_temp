@@ -43,7 +43,7 @@ class DayPartsGenerate extends Command
      */
     public function handle()
     {
-        $type=['all','stb','ott'];
+        $type=['','stb','ott'];
         $ranges=[30,15];
         $day=date("Y-m-d", strtotime('-1 days'));
         foreach($type as $t){
@@ -81,7 +81,7 @@ class DayPartsGenerate extends Command
 
                 DayPartProcess::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all")]);
             }
-            $userids = User::where('type', 'like', '%' . $type . '%')
+            $userids = User::where('type', 'like', '%' . $req->type . '%')
                 ->pluck('id')->toArray();
             //return response()->json(["time" => $channel->channel_name], 200);
             $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];

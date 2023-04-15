@@ -22,6 +22,7 @@ class DayPartsController extends Controller
             $type = "all";
         }
         $channel = Channel::all();
+        //return response()->json(["done" => $channel], 200);
         $c_count = $channel->count();
         $count = 0;
         $pcount = 0;
@@ -41,9 +42,9 @@ class DayPartsController extends Controller
 
                 DayPartProcess::create(["channel_id" => $c->id, "day" => $req->start, "time_range" => $req->range, "type" => (($type != "") ? $type : "all")]);
             }
-            $userids = User::where('type', 'like', '%' . $type . '%')
+            $userids = User::where('type', 'like', '%' . $req->type . '%')
                 ->pluck('id')->toArray();
-            //return response()->json(["time" => $channel->channel_name], 200);
+            //return response()->json(["time" => $userids], 200);
             $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];
             $users = User::all();
             $numOfUser = $users->count();

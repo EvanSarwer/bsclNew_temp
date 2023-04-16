@@ -22,7 +22,7 @@ class DayPartsController extends Controller
         $day=date("Y-m-d", strtotime($req->day));
         foreach($type as $t){
             foreach($ranges as $r){
-                $this->dayrangedtrendsave((object)['type'=>$t,'range'=>$r,'day'=>$day]);
+                $this->dayrangedtrendsaver((object)['type'=>$t,'range'=>$r,'day'=>$day]);
             }
         }
         return response()->json(["done" => 'done'], 200);

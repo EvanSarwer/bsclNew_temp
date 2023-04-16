@@ -53,8 +53,8 @@ class GenerateNotification24hr extends Command
     $day1Before = date('Y-m-d H:i:s', strtotime("-1 days"));
     $day2Before = date('Y-m-d H:i:s', strtotime("-2 days"));
     $today = date('Y-m-d H:i:s');
-
-    $appUser = AppUser::select('app_users.id')->where('login.role', 'admin')
+    $roles=['admin','operator'];
+    $appUser = AppUser::select('app_users.id')->whereIn('login.role',$roles )
       ->join('login', 'login.user_name', '=', 'app_users.user_name')
       ->get();
 

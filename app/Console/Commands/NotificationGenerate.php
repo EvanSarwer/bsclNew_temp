@@ -52,8 +52,8 @@ class NotificationGenerate extends Command
       $day5Before = date('Y-m-d H:i:s', strtotime("-5 days"));
       $day10Before = date('Y-m-d H:i:s', strtotime("-10 days"));
       $today = date('Y-m-d H:i:s');
-  
-      $appUser = AppUser::select('app_users.id')->where('login.role', 'admin')
+      $roles=['admin','operator'];
+      $appUser = AppUser::select('app_users.id')->whereIn('login.role',$roles )
         ->join('login', 'login.user_name', '=', 'app_users.user_name')
         ->get();
   

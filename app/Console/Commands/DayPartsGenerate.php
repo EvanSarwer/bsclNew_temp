@@ -140,8 +140,9 @@ class DayPartsGenerate extends Command
                 $tvr0[$i] = $tvrs[$i] / ($numOfUser * $dd);
 
                 $tvrp[$i] = ($tvrs[$i] / ($numOfUser * $dd)) * 100;
-                $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
-                $mid = date("H:i:s", $mid);
+                //$mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
+                //$mid = date("H:i:s", $mid);
+                $mid = date("H:i:s", strtotime($time[0][$i]["start"]));
                 array_push($label, $mid);
                 array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
             }

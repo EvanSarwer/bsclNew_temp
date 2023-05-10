@@ -38,7 +38,7 @@ class RemoveFuture extends Command
      */
     public function handle()
     {
-        ViewLog::where('started_watching_at', '>', 'finished_watching_at')->delete();
+        ViewLog::whereColumn('started_watching_at', '>', 'finished_watching_at')->delete();
         return 0;
     }
 }

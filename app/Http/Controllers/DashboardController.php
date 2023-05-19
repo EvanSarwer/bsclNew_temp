@@ -889,7 +889,7 @@ class DashboardController extends Controller
   {
     $activeChannels = [];
     $actives = [];
-    $compare_date = date('Y-m-d H:i:s', (time() - 7889238)); //where('users.last_request', '>', $compare_date)
+    $compare_date = date('Y-m-d H:i:s', (time() - 40)); //where('users.last_request', '>', $compare_date)
 
     $active_users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', $compare_date)->where('devices.tvoff', 1)
       ->select('users.id', 'users.user_name', 'devices.device_name', 'devices.id as device_id')

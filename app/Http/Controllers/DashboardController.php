@@ -42,11 +42,18 @@ class DashboardController extends Controller
     //$stb_total = User::where('type', 'STB')->get()->count();
     $ott_total = User::where('type', 'OTT')->get()->count();
 
-    $active = ViewLog::select('user_id')->whereNull('finished_watching_at')->distinct('user_id')->get();
-    $active_user = count($active);
-    $stb_active = Device::whereIn('users.id', $active)
-      ->join('users', 'devices.id', '=', 'users.device_id')
-      ->distinct('devices.id')->count();
+
+
+    //$active = ViewLog::select('user_id')->whereNull('finished_watching_at')->distinct('user_id')->get();
+    $compare_date = date('Y-m-d H:i:s', (time() - 40)); 
+    $active_users = User::where('last_request', '>', $compare_date)->get();
+    $stb_active_user = $active_users->where('type', 'STB')->where('tvoff', 1)->count();
+    $ott_active_user = $active_users->where('type', 'OTT')->count();
+    // $stb_active = Device::whereIn('users.id', $active)
+    //   ->join('users', 'devices.id', '=', 'users.device_id')
+    //   ->distinct('devices.id')->count();
+    $stb_active = Device::where('last_request', '>', $compare_date)->where('tvoff', 1)->count();
+
     $active_percent = ($stb_active * 100) / $stb_total;
     $active_percent = round($active_percent, 2);
 
@@ -69,18 +76,19 @@ class DashboardController extends Controller
     //     $stb_active = count($cw);
     // }
 
-    //$ott_active = $active_user - $stb_active;
+    //$ott_active = $stb_active_user - $stb_active;
 
-    //return response()->json(["total_user" => $total_user, "stb_total" => $stb_total, "ott_total" => $ott_total, "stb_active" => $stb_active, "ott_active" => $ott_active, "active_user" => $active_user, "active_percent" => $active_percent], 200);
+    //return response()->json(["total_user" => $total_user, "stb_total" => $stb_total, "ott_total" => $ott_total, "stb_active" => $stb_active, "ott_active" => $ott_active, "stb_active_user" => $stb_active_user, "active_percent" => $active_percent], 200);
     $t_data = new stdClass;
     $t_data->stb_all = $stb_all;
     $t_data->total_user = $total_user;
     $t_data->stb_total = $stb_total;
     $t_data->ott_total = $ott_total;
     $t_data->stb_active = $stb_active;
-    //$t_data->ott_active = $ott_active;
-    $t_data->active_user = $active_user;
     $t_data->active_percent = $active_percent;
+    $t_data->ott_active_user = $ott_active_user;
+    $t_data->stb_active_user = $stb_active_user;
+    
     return $t_data;
   }
 
@@ -889,13 +897,20 @@ class DashboardController extends Controller
   {
     $activeChannels = [];
     $actives = [];
-    $compare_date = date('Y-m-d H:i:s', (time() - 7889238)); //where('users.last_request', '>', $compare_date)
+    $compare_date = date('Y-m-d H:i:s', (time() - 40)); //where('users.last_request', '>', $compare_date)
 
-    $active_users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', $compare_date)->where('devices.tvoff', 1)
+    // $view = ViewLog::latest('id')
+    //   ->first();
+
+    // return response()->json($view, 200);
+    
+
+    $active_users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', $compare_date)->where('users.tvoff', 1)
       ->select('users.id', 'users.user_name', 'devices.device_name', 'devices.id as device_id')
       ->get();
 
-      $view_log = ViewLog::where('user_id', 10055)->latest('id')->first();
+    //$active_users = User::with(['view_logs' => fn($query) => $query->latest('id')])->get();
+    
 
     foreach ($active_users as $key => $a) {
       $view_log = ViewLog::where('user_id', $a->id)->latest('id')->first();
@@ -922,7 +937,7 @@ class DashboardController extends Controller
     $currentStatusUser = $this->CurrentStatusUser();
 
     //return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "ott_active" => $currentStatusUser->ott_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
-    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "stb_all" => $currentStatusUser->stb_all, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent], 200);
+    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "stb_all" => $currentStatusUser->stb_all, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "stb_active_user" => $currentStatusUser->stb_active_user, "ott_active_user" => $currentStatusUser->ott_active_user, "active_percent" => $currentStatusUser->active_percent], 200);
 
     //return response()->json($actives, 200);
   }

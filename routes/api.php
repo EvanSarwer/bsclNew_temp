@@ -109,7 +109,8 @@ Route::post('/deviceuser/edit',[DeviceController::class,'editDeviceUser'])->midd
 //Route::get('/dashboard/CurrentStatusTopReach', [DashboardController::class, 'CurrentStatusTopReach'])->middleware('auth.admin.user');
 //Route::get('/dashboard/CurrentStatusTopTvr', [DashboardController::class, 'CurrentStatusTopTvr'])->middleware('auth.admin.user');
 //Route::get('/dashboard/activechannellist',[DashboardController::class,'activechannellistget']);   //->middleware('auth.admin.user')
-Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserlistget'])->middleware('auth.admin.user');   //
+Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserlistget']);   //->middleware('auth.admin.user')
+Route::get('/dashboard/dashboardstatus',[DashboardController::class,'dashboardstatus']);   //->middleware('auth.admin.user')
 //Route::get('/reachuser/dashboard', [DashboardController::class, 'reachuserdashboard'])->middleware('auth.admin.user');
 //Route::get('/reach/percent/dashboard', [DashboardController::class, 'reachpercentdashboard'])->middleware('auth.admin.user');
 //Route::get('/tvrgraph/dashboard', [DashboardController::class, 'tvrgraphdashboard'])->middleware('auth.admin.user');

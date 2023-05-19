@@ -880,7 +880,49 @@ class DashboardController extends Controller
 
 
     //return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "ott_active" => $currentStatusUser->ott_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
-    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList,"stb_all"=>$currentStatusUser->stb_all, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent], 200);
+    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "stb_all" => $currentStatusUser->stb_all, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent], 200);
+
+    //return response()->json($actives, 200);
+  }
+
+  public function dashboardstatus()
+  {
+    $activeChannels = [];
+    $actives = [];
+    $compare_date = date('Y-m-d H:i:s', (time() - 7889238)); //where('users.last_request', '>', $compare_date)
+
+    $active_users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', $compare_date)->where('devices.tvoff', 1)
+      ->select('users.id', 'users.user_name', 'devices.device_name', 'devices.id as device_id')
+      ->get();
+
+      $view_log = ViewLog::where('user_id', 10055)->latest('id')->first();
+
+    foreach ($active_users as $key => $a) {
+      $view_log = ViewLog::where('user_id', $a->id)->latest('id')->first();
+      if ($view_log) {
+        $a->duration = Carbon::parse($view_log->started_watching_at)->diffForHumans(Carbon::parse($view_log->finished_watching_at));
+        $a->totaltime = Carbon::parse($view_log->started_watching_at)->diffForHumans(Carbon::parse($view_log->finished_watching_at));
+        $a->channel = $view_log->channel;
+        $a->started_watching_at = $view_log->started_watching_at;
+        array_push($activeChannels, $view_log->channel_id);
+        array_push($actives, $a);
+      }
+    }
+
+    $countChannels = array_count_values($activeChannels);
+    $allChnlList = [];
+    foreach ($countChannels as $key => $val) {
+      $chnl = Channel::where('id', $key)->first();
+      $chnl->user_count = $val;
+
+
+      array_push($allChnlList, $chnl);
+    }
+
+    $currentStatusUser = $this->CurrentStatusUser();
+
+    //return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "ott_active" => $currentStatusUser->ott_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
+    return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "stb_all" => $currentStatusUser->stb_all, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent], 200);
 
     //return response()->json($actives, 200);
   }

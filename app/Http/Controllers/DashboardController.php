@@ -45,7 +45,7 @@ class DashboardController extends Controller
 
 
     //$active = ViewLog::select('user_id')->whereNull('finished_watching_at')->distinct('user_id')->get();
-    $compare_date = date('Y-m-d H:i:s', (time() - 40)); 
+    $compare_date = date('Y-m-d H:i:s', (time() - 45)); 
     $active_users = User::where('last_request', '>', $compare_date)->get();
     $stb_active_user = $active_users->where('type', 'STB')->where('tvoff', 1)->count();
     $ott_active_user = $active_users->where('type', 'OTT')->count();
@@ -897,21 +897,12 @@ class DashboardController extends Controller
   {
     $activeChannels = [];
     $actives = [];
-    $compare_date = date('Y-m-d H:i:s', (time() - 40)); //where('users.last_request', '>', $compare_date)
-
-    // $view = ViewLog::latest('id')
-    //   ->first();
-
-    // return response()->json($view, 200);
-    
+    $compare_date = date('Y-m-d H:i:s', (time() - 45)); //where('users.last_request', '>', $compare_date)
 
     $active_users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', $compare_date)->where('users.tvoff', 1)
       ->select('users.id', 'users.user_name', 'devices.device_name', 'devices.id as device_id')
       ->get();
-
-    //$active_users = User::with(['view_logs' => fn($query) => $query->latest('id')])->get();
     
-
     foreach ($active_users as $key => $a) {
       $view_log = ViewLog::where('user_id', $a->id)->latest('id')->first();
       if ($view_log) {

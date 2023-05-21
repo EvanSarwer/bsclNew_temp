@@ -88,51 +88,43 @@ class LiveChannelController extends Controller
         return response()->json(["channels" => $activeChannels, "user_count" => $number_of_user, "points" => $points], 200);
     }
 
-
     public function activechannellistgraphfast(Request $req)
     {
-
-        //}
-
         $channels = Channel::all();
         $activeChannels = [];
         $number_of_user = [];
-        $points = [];
         $allusers = [];
 
         if ($req->userType == "STB") {
             $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
             $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
-            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
-            $userids = User::where('type', $req->userType)
-                ->where('address', 'like', '%' . $req->region . '%')
-                ->where('gender', 'like', '%' . $req->gender . '%')
-                ->where('economic_status', 'like', '%' . $req->economic . '%')
-                ->where('socio_status', 'like', '%' . $req->socio . '%')
-                //->whereBetween('age', [$req->age1, $req->age2])
-                ->whereBetween('dob', [$minDate, $maxDate])
-                ->pluck('id')->toArray();
+
+            $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - 45)))->where('users.tvoff', 1)
+                            ->select('users.id', 'users.user_name', 'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
+                            ->where('users.type', $req->userType)
+                            ->where('users.address', 'like', '%' . $req->region . '%')
+                            ->where('users.gender', 'like', '%' . $req->gender . '%')
+                            ->where('users.economic_status', 'like', '%' . $req->economic . '%')
+                            ->where('users.socio_status', 'like', '%' . $req->socio . '%')
+                            ->whereBetween('users.dob', [$minDate, $maxDate])
+                            ->get();
         } else if ($req->userType == "OTT") {
-            $userids = User::where('type', $req->userType)
-                ->pluck('id')->toArray();
+            $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - 45)))->where('users.tvoff', 1)
+                            ->select('users.id', 'users.user_name',  'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
+                            ->where('users.type', $req->userType)
+                            ->get();
         } else {
-            $userids = User::pluck('id')->toArray();
+            $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - 45)))->where('users.tvoff', 1)
+                            ->select('users.id', 'users.user_name',  'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
+                            ->get();
         }
-        //return response()->json(["user" => $userids], 200);
-        //if (count($channels) > 0) {
-        //foreach ($channels as $c) {
-        $users = ViewLog:: //where('channel_id', $c->id)
-            //->
-            whereNull('finished_watching_at')
-            ->whereIn('user_id', $userids)
-            //->pluck('user_id')->toArray();
-            //select('user_id','channel_id')
-            ->get();
+
         foreach ($channels as $c) {
             $u_count = array();
-            foreach ($users as $value) {
-                if ($c->id == $value->channel_id) {
-                    array_push($u_count, $value->user_id);
+            foreach ($users as $u) {
+                $u->view_log = ViewLog::where('user_id', $u->id)->latest('id')->first();
+                if ($c->id == $u->view_log->channel_id) {
+                    array_push($u_count, $u->user_id);
                 }
             }
             array_push($number_of_user, count($u_count));
@@ -140,20 +132,76 @@ class LiveChannelController extends Controller
             array_push($activeChannels, $c->channel_name);
             unset($u_count);
         }
-        //return response()->json(["user" => $users], 200);
-        //$user_count = count($users);
 
-        //$allusers = array_merge($allusers, $users);
-        //array_push($activeChannels, 'channel_name');
-        //array_push($number_of_user, $user_count);
-
-
-        //}
-        $points = User::select('devices.id', 'devices.device_name as title', 'devices.lat', 'devices.lng')->whereIn('users.id', $allusers)
-            ->join('devices', 'devices.id', '=', 'users.device_id')
-            ->get();
-        //}
-
-        return response()->json(["channels" => $activeChannels, "user_count" => $number_of_user, "points" => $points], 200);
+        return response()->json(["channels" => $activeChannels, "user_count" => $number_of_user, "points" => $users], 200);
     }
+
+
+    // public function activechannellistgraphfast(Request $req)
+    // {
+
+    //     //}
+
+    //     $channels = Channel::all();
+    //     $activeChannels = [];
+    //     $number_of_user = [];
+    //     $points = [];
+    //     $allusers = [];
+
+    //     if ($req->userType == "STB") {
+    //         $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+    //         $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+    //         //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
+    //         $userids = User::where('type', $req->userType)
+    //             ->where('address', 'like', '%' . $req->region . '%')
+    //             ->where('gender', 'like', '%' . $req->gender . '%')
+    //             ->where('economic_status', 'like', '%' . $req->economic . '%')
+    //             ->where('socio_status', 'like', '%' . $req->socio . '%')
+    //             //->whereBetween('age', [$req->age1, $req->age2])
+    //             ->whereBetween('dob', [$minDate, $maxDate])
+    //             ->pluck('id')->toArray();
+    //     } else if ($req->userType == "OTT") {
+    //         $userids = User::where('type', $req->userType)
+    //             ->pluck('id')->toArray();
+    //     } else {
+    //         $userids = User::pluck('id')->toArray();
+    //     }
+    //     //return response()->json(["user" => $userids], 200);
+    //     //if (count($channels) > 0) {
+    //     //foreach ($channels as $c) {
+    //     $users = ViewLog:: //where('channel_id', $c->id)
+    //         //->
+    //         whereNull('finished_watching_at')
+    //         ->whereIn('user_id', $userids)
+    //         //->pluck('user_id')->toArray();
+    //         //select('user_id','channel_id')
+    //         ->get();
+    //     foreach ($channels as $c) {
+    //         $u_count = array();
+    //         foreach ($users as $value) {
+    //             if ($c->id == $value->channel_id) {
+    //                 array_push($u_count, $value->user_id);
+    //             }
+    //         }
+    //         array_push($number_of_user, count($u_count));
+    //         $allusers = array_merge($allusers, $u_count);
+    //         array_push($activeChannels, $c->channel_name);
+    //         unset($u_count);
+    //     }
+    //     //return response()->json(["user" => $users], 200);
+    //     //$user_count = count($users);
+
+    //     //$allusers = array_merge($allusers, $users);
+    //     //array_push($activeChannels, 'channel_name');
+    //     //array_push($number_of_user, $user_count);
+
+
+    //     //}
+    //     $points = User::select('devices.id', 'devices.device_name as title', 'devices.lat', 'devices.lng')->whereIn('users.id', $allusers)
+    //         ->join('devices', 'devices.id', '=', 'users.device_id')
+    //         ->get();
+    //     //}
+
+    //     return response()->json(["channels" => $activeChannels, "user_count" => $number_of_user, "points" => $points], 200);
+    // }
 }

@@ -125,7 +125,7 @@ class RequestController extends Controller
 
 
         if ($req->channel_name >= 40 && $req->channel_name <= 100) {
-            $req->channel_name = 888;
+            $req->channel_name = 40;
         }
 
 
@@ -165,9 +165,6 @@ class RequestController extends Controller
                     }
                 }
             }
-
-
-
 
 
             if ($req->temp && (substr($req->temp, 0, -2)) > 80) {

@@ -45,7 +45,7 @@ class DashboardController extends Controller
 
 
     //$active = ViewLog::select('user_id')->whereNull('finished_watching_at')->distinct('user_id')->get();
-    $compare_date = date('Y-m-d H:i:s', (time() - 45)); 
+    $compare_date = date('Y-m-d H:i:s', (time() - 45));
     $active_users = User::where('last_request', '>', $compare_date)->get();
     $stb_active_user = $active_users->where('type', 'STB')->where('tvoff', 1)->count();
     $ott_active_user = $active_users->where('type', 'OTT')->count();
@@ -88,7 +88,7 @@ class DashboardController extends Controller
     $t_data->active_percent = $active_percent;
     $t_data->ott_active_user = $ott_active_user;
     $t_data->stb_active_user = $stb_active_user;
-    
+
     return $t_data;
   }
 
@@ -273,7 +273,7 @@ class DashboardController extends Controller
     $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
     $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
-    $channels = Channel::whereNotIn('id', [888, 39])
+    $channels = Channel::whereNotIn('id', [888, 40])
       ->select('id', 'channel_name')
       ->get();
     $total_user = User::count();
@@ -322,7 +322,7 @@ class DashboardController extends Controller
     $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
     $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
-    $channels = Channel::whereNotIn('id', [888, 39])
+    $channels = Channel::whereNotIn('id', [888, 40])
       ->select('id', 'channel_name')
       ->get();
     $total_user = User::count();
@@ -387,7 +387,7 @@ class DashboardController extends Controller
 
     //return response()->json([$di],200);
     //return response()->json(["tvr"=>$diff],200);
-    $channels = Channel::whereNotIn('id', [888, 39])
+    $channels = Channel::whereNotIn('id', [888, 40])
       ->select('id', 'channel_name')
       ->get();
 
@@ -495,7 +495,7 @@ class DashboardController extends Controller
     $start_range = strtotime($startDateTime);
     $finish_range = strtotime($finishDateTime);
     $diff = abs($start_range - $finish_range) / 60;
-    $channels = Channel::whereNotIn('id', [888, 39])
+    $channels = Channel::whereNotIn('id', [888, 40])
       ->select('id', 'channel_name')
       ->get();
     $users = User::all();
@@ -589,7 +589,7 @@ class DashboardController extends Controller
     $shares = array();
     $all_tvr = array();
 
-    $channels = Channel::whereNotIn('id', [888, 39])
+    $channels = Channel::whereNotIn('id', [888, 40])
       ->select('id', 'channel_name')
       ->get();
     foreach ($channels as $c) {
@@ -686,7 +686,7 @@ class DashboardController extends Controller
 
     //return response()->json([$di],200);
     //return response()->json(["tvr"=>$diff],200);
-    $channels = Channel::whereNotIn('id', [888, 39])
+    $channels = Channel::whereNotIn('id', [888, 40])
       ->select('id', 'channel_name')
       ->get();
     $users = User::all();
@@ -902,7 +902,7 @@ class DashboardController extends Controller
     $active_users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', $compare_date)->where('users.tvoff', 1)
       ->select('users.id', 'users.user_name', 'devices.device_name', 'devices.id as device_id')
       ->get();
-    
+
     foreach ($active_users as $key => $a) {
       $view_log = ViewLog::where('user_id', $a->id)->latest('id')->first();
       if ($view_log) {

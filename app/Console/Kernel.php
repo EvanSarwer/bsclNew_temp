@@ -25,7 +25,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('remove:future')->dailyAt('00:05');
+        $schedule->command('remove:future')->dailyAt('23:59');
         $schedule->command('shutdown:device')->everyMinute();
         $schedule->command('adtrp:calculate')->dailyAt('00:10');
         $schedule->command('dayparts:generate')->dailyAt('03:00');

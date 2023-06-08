@@ -35,6 +35,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('notification:generate')->hourly();
         $schedule->command('notificationfu:generate')->everySixHours();
         $schedule->command('notification2hr:generate')->everySixHours();
+        $schedule->command('dashboardGraph:generate')->dailyAt('00:00');
     }
 
     /**

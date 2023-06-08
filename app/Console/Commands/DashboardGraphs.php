@@ -42,8 +42,8 @@ class DashboardGraphs extends Command
         $startDateTime = $yesterday . " 00:00:00";
         $finishDateTime = $yesterday . " 23:59:59";
 
-        $y_data = DashboardTempData::where('date', $yesterday)->first();
-        if (!$y_data) {
+        // $y_data = DashboardTempData::where('date', $yesterday)->first();
+        // if (!$y_data) {
 
             // $yesterday_ForData = date("Y-m-d");
             // $finishDateTime = $yesterday_ForData . " 00:00:00";
@@ -75,7 +75,9 @@ class DashboardGraphs extends Command
                 "timeSpent_channel" => $timeSpent->timeSpent_channel,
                 "timeSpent_value" => $timeSpent->timeSpent_value,
                 "start" => $startDateTime,
-                "finish" => $finishDateTime
+                "finish" => $finishDateTime,
+                "top_reach" => $reach->reach_channel[0],
+                "top_tvr" => $tvr->tvr_channel[0],
             ];
 
             $td = new DashboardTempData();
@@ -85,7 +87,7 @@ class DashboardGraphs extends Command
 
         //$all_graph = json_encode($y_data->data);
 
-        }
+        //}
 
     }
 

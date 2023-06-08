@@ -264,14 +264,14 @@ class DashboardController extends Controller
   //     return response()->json(["value"=>$value,"label"=>$label,"start"=>($startDate." ".$startTime),"finish"=>($finishDate." ".$finishTime)],200);
   //   }
 
-  public function reachpercentdashboard()
+  public function reachpercentdashboard($startDateTime, $finishDateTime)
   {
-    $yesterday = date("Y-m-d");
-    $finishDateTime = $yesterday . " 00:00:00";
-    //$finishDateTime = date("Y-m-d H:i:s");
-    $min = 1440;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    // $yesterday = date("Y-m-d");
+    // $finishDateTime = $yesterday . " 00:00:00";
+    // //$finishDateTime = date("Y-m-d H:i:s");
+    // $min = 1440;
+    // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+    // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
     $channels = Channel::whereNotIn('id', [888, 40])
       ->select('id', 'channel_name')
@@ -313,14 +313,14 @@ class DashboardController extends Controller
     return $t_data;
   }
 
-  public function reachuserdashboard()
+  public function reachuserdashboard($startDateTime, $finishDateTime)
   {
-    $yesterday = date("Y-m-d");
-    $finishDateTime = $yesterday . " 00:00:00";
-    //$finishDateTime = date("Y-m-d H:i:s");
-    $min = 1440;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    // $yesterday = date("Y-m-d");
+    // $finishDateTime = $yesterday . " 00:00:00";
+    // //$finishDateTime = date("Y-m-d H:i:s");
+    // $min = 1440;
+    // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+    // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
     $channels = Channel::whereNotIn('id', [888, 40])
       ->select('id', 'channel_name')
@@ -363,7 +363,7 @@ class DashboardController extends Controller
   }
 
 
-  public function tvrgraphdashboard()
+  public function tvrgraphdashboard($startDateTime, $finishDateTime)
   {
 
 
@@ -375,12 +375,12 @@ class DashboardController extends Controller
     /*if($req->start=="" && $req->finish==""){
         return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
         }*/
-    $yesterday = date("Y-m-d");
-    $finishDateTime = $yesterday . " 00:00:00";
-    //$finishDateTime = date("Y-m-d H:i:s");
-    $min = 1440;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    // $yesterday = date("Y-m-d");
+    // $finishDateTime = $yesterday . " 00:00:00";
+    // //$finishDateTime = date("Y-m-d H:i:s");
+    // $min = 1440;
+    // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+    // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
     $start_range = strtotime($startDateTime);
     $finish_range = strtotime($finishDateTime);
     $diff = abs($start_range - $finish_range) / 60;
@@ -476,7 +476,7 @@ class DashboardController extends Controller
 
 
 
-  public function tvrgraphzerodashboard()
+  public function tvrgraphzerodashboard($startDateTime, $finishDateTime)
   {
 
 
@@ -486,12 +486,12 @@ class DashboardController extends Controller
     $temp = array();
     $viewer = array();
 
-    $yesterday = date("Y-m-d");
-    $finishDateTime = $yesterday . " 00:00:00";
-    //$finishDateTime = date("Y-m-d H:i:s");
-    $min = 1440;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    // $yesterday = date("Y-m-d");
+    // $finishDateTime = $yesterday . " 00:00:00";
+    // //$finishDateTime = date("Y-m-d H:i:s");
+    // $min = 1440;
+    // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+    // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
     $start_range = strtotime($startDateTime);
     $finish_range = strtotime($finishDateTime);
     $diff = abs($start_range - $finish_range) / 60;
@@ -569,14 +569,14 @@ class DashboardController extends Controller
   }
 
 
-  public function sharegraphdashboard()
+  public function sharegraphdashboard($startDateTime, $finishDateTime)
   {
-    $yesterday = date("Y-m-d");
-    $finishDateTime = $yesterday . " 00:00:00";
-    //$finishDateTime = date("Y-m-d H:i:s");
-    $min = 1440;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    // $yesterday = date("Y-m-d");
+    // $finishDateTime = $yesterday . " 00:00:00";
+    // //$finishDateTime = date("Y-m-d H:i:s");
+    // $min = 1440;
+    // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+    // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
 
     $temp = array();
     $to_time = strtotime($startDateTime);
@@ -662,7 +662,7 @@ class DashboardController extends Controller
     return $t_data;
   }
 
-  public function timeSpentUniverse()
+  public function timeSpentUniverse($startDateTime, $finishDateTime)
   {
 
 
@@ -674,12 +674,12 @@ class DashboardController extends Controller
     /*if($req->start=="" && $req->finish==""){
     return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
     }*/
-    $yesterday = date("Y-m-d");
-    $finishDateTime = $yesterday . " 00:00:00";
-    //$finishDateTime = date("Y-m-d H:i:s");
-    $min = 1440;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    // $yesterday = date("Y-m-d");
+    // $finishDateTime = $yesterday . " 00:00:00";
+    // //$finishDateTime = date("Y-m-d H:i:s");
+    // $min = 1440;
+    // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+    // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
     $start_range = strtotime($startDateTime);
     $finish_range = strtotime($finishDateTime);
     $diff = abs($start_range - $finish_range) / 60;
@@ -789,12 +789,22 @@ class DashboardController extends Controller
 
       $all_graph = json_decode($y_data->data);
     } else {
-      $reach = $this->reachpercentdashboard();
-      $reachZero = $this->reachuserdashboard();
-      $tvr = $this->tvrgraphdashboard();
-      $tvrZero = $this->tvrgraphzerodashboard();
-      $share =  $this->sharegraphdashboard();
-      $timeSpent = $this->timeSpentUniverse();
+
+      // $yesterday_ForData = date("Y-m-d");
+      // $finishDateTime = $yesterday_ForData . " 00:00:00";
+      // //$finishDateTime = date("Y-m-d H:i:s");
+      // $min = 1440;
+      // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+      // $startDateTime = date('Y-m-d H:i:s', $newtimestamp); 
+
+
+      $reach = $this->reachpercentdashboard($startDateTime, $finishDateTime);
+      $reachZero = $this->reachuserdashboard($startDateTime, $finishDateTime);
+      $tvr = $this->tvrgraphdashboard($startDateTime, $finishDateTime);
+      $tvrZero = $this->tvrgraphzerodashboard($startDateTime, $finishDateTime);
+      $share =  $this->sharegraphdashboard($startDateTime, $finishDateTime);
+      $timeSpent = $this->timeSpentUniverse($startDateTime, $finishDateTime);
+
 
       $all_graph = [
         "reach_channel" => $reach->reach_channel,
@@ -824,10 +834,6 @@ class DashboardController extends Controller
 
     return $all_graph;
   }
-
-
-
-
 
 
 

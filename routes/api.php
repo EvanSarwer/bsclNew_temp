@@ -125,7 +125,7 @@ Route::get('/dashboard/notification', [DashboardController::class, 'get_notifica
 Route::get('/dashboard/seennotification', [DashboardController::class, 'seen_notification']);//->middleware('auth.admin.user');
 
 Route::get('/dashboard/CurrentStatusTopTvrReach', [DashboardController::class, 'CurrentStatusTopTvrReach'])->middleware('auth.admin.user');
-Route::get('/allgraph/dashboard', [DashboardController::class, 'allgraphdashboard'])->middleware('auth.admin.user')->middleware('auth.admin.user');     //->middleware('auth.admin.user')
+Route::get('/allgraph/dashboard', [DashboardController::class, 'allgraphdashboard']); //->middleware('auth.admin.user')->middleware('auth.admin.user');     //->middleware('auth.admin.user')
 /////////END////////////
 
 //////////Overview///////////

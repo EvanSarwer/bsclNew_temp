@@ -3,6 +3,12 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\ViewLog;
+use App\Models\Device;
+use App\Models\Channel;
+use App\Models\DashboardTempData;
+use App\Models\User;
+use stdClass;
 
 class DashboardGraphs extends Command
 {

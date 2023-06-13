@@ -25,17 +25,17 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('remove:future')->dailyAt('23:59');
+        $schedule->command('remove:future')->dailyAt('00:05')->timezone('Asia/Dhaka');
         $schedule->command('shutdown:device')->everyMinute();
-        $schedule->command('adtrp:calculate')->dailyAt('00:10');
-        $schedule->command('dayparts:generate')->dailyAt('03:00');
-        $schedule->command('dayparts:generate')->dailyAt('05:00');
-        $schedule->command('dayparts:generate')->dailyAt('07:00');
-        $schedule->command('dayparts:generate')->dailyAt('08:00');
+        $schedule->command('adtrp:calculate')->dailyAt('00:10')->timezone('Asia/Dhaka');
+        $schedule->command('dayparts:generate')->dailyAt('03:00')->timezone('Asia/Dhaka');
+        $schedule->command('dayparts:generate')->dailyAt('05:00')->timezone('Asia/Dhaka');
+        $schedule->command('dayparts:generate')->dailyAt('07:00')->timezone('Asia/Dhaka');
+        $schedule->command('dayparts:generate')->dailyAt('08:00')->timezone('Asia/Dhaka');
         $schedule->command('notification:generate')->hourly();
         $schedule->command('notificationfu:generate')->everySixHours();
         $schedule->command('notification2hr:generate')->everySixHours();
-        $schedule->command('dashboardGraph:generate')->dailyAt('12:00');
+        $schedule->command('dashboardGraph:generate')->dailyAt('12:00')->timezone('Asia/Dhaka');
     }
 
     /**

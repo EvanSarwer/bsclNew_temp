@@ -133,9 +133,17 @@ class AppUserController extends Controller
             $dep->active = $d->active;
             array_push($deployer_users,$dep);
         }
+
+        $operators = Login::where('role','operator')->where('deleted_by',null)->get();
+        $operator_users = [];
+        foreach($operators as $o){
+            $operat = AppUser::where('user_name',$o->user_name)->first();
+            $operat->active = $o->active;
+            array_push($operator_users,$operat);
+        }
         
         //$admin_users = $admins->appUser;
-        return response()->json(["admin_users"=>$admin_users,"channel_users"=>$channel_users, "addAgency_users"=>$addAgency_users, "deployer_users"=>$deployer_users]);
+        return response()->json(["admin_users"=>$admin_users,"channel_users"=>$channel_users, "addAgency_users"=>$addAgency_users, "deployer_users"=>$deployer_users, "operator_users"=>$operator_users]);
     }
 
 

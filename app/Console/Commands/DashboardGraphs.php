@@ -460,9 +460,14 @@ class DashboardGraphs extends Command
 
         $total_share = 0;
         for ($i = 0; $i < count($all_tvr); $i++) {
-        $s = ($all_tvr[$i] / $total_tvr) * 100;
-        $total_share = $total_share + $s;
-        array_push($shares, $s);
+            if($total_tvr == 0){
+                $s = 0;
+            }else{
+                $s = ($all_tvr[$i] / $total_tvr) * 100;
+            }
+        
+            $total_share = $total_share + $s;
+            array_push($shares, $s);
         }
         for ($i = 0; $i < count($all_tvr); $i++) {
         $tempc = array(

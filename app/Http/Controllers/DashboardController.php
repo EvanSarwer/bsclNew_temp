@@ -631,7 +631,11 @@ class DashboardController extends Controller
 
     $total_share = 0;
     for ($i = 0; $i < count($all_tvr); $i++) {
-      $s = ($all_tvr[$i] / $total_tvr) * 100;
+      if($total_tvr == 0){
+        $s = 0;
+      }else{
+          $s = ($all_tvr[$i] / $total_tvr) * 100;
+      }
       $total_share = $total_share + $s;
       array_push($shares, $s);
     }
@@ -839,6 +843,62 @@ class DashboardController extends Controller
     // }
 
     // return $all_graph;
+  }
+
+  public function test_dashboradGraph_generate(){
+    
+            //$all_graph = [];
+            $yesterday = date("Y-m-d", strtotime('-1 days'));
+            $startDateTime = $yesterday . " 00:00:00";
+            $finishDateTime = $yesterday . " 23:59:59";
+    
+            // $y_data = DashboardTempData::where('date', $yesterday)->first();
+            // if (!$y_data) {
+    
+                // $yesterday_ForData = date("Y-m-d");
+                // $finishDateTime = $yesterday_ForData . " 00:00:00";
+                // //$finishDateTime = date("Y-m-d H:i:s");
+                // $min = 1440;
+                // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
+                // $startDateTime = date('Y-m-d H:i:s', $newtimestamp); 
+    
+    
+                $reach = $this->reachpercentdashboard($startDateTime, $finishDateTime);
+                $reachZero = $this->reachuserdashboard($startDateTime, $finishDateTime);
+                $tvr = $this->tvrgraphdashboard($startDateTime, $finishDateTime);
+                $tvrZero = $this->tvrgraphzerodashboard($startDateTime, $finishDateTime);
+                $share =  $this->sharegraphdashboard($startDateTime, $finishDateTime);
+                $timeSpent = $this->timeSpentUniverse($startDateTime, $finishDateTime);
+    
+    
+                $all_graph = [
+                    "reach_channel" => $reach->reach_channel,
+                    "reach_value" => $reach->reach_value,
+                    "reachZero_channel" => $reachZero->reachzero_channel,
+                    "reachZero_value" => $reachZero->reachzero_value,
+                    "tvr_channel" => $tvr->tvr_channel,
+                    "tvr_value" => $tvr->tvr_value,
+                    "tvrZero_channel" => $tvrZero->tvrzero_channel,
+                    "tvrZero_value" => $tvrZero->tvrzero_value,
+                    "share_channel" => $share->share_channel,
+                    "share_value" => $share->share_value,
+                    "timeSpent_channel" => $timeSpent->timeSpent_channel,
+                    "timeSpent_value" => $timeSpent->timeSpent_value,
+                    "start" => $startDateTime,
+                    "finish" => $finishDateTime,
+                    "top_reach" => $reach->reach_channel[0],
+                    "top_tvr" => $tvr->tvr_channel[0],
+                ];
+    
+                $td = new DashboardTempData();
+                $td->data = json_encode($all_graph);
+                $td->date = $yesterday;
+                $td->save();
+    
+            //$all_graph = json_encode($y_data->data);
+    
+            //}
+    return "success";
   }
 
 

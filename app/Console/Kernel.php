@@ -32,10 +32,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('dayparts:generate')->dailyAt('05:00')->timezone('Asia/Dhaka');
         $schedule->command('dayparts:generate')->dailyAt('07:00')->timezone('Asia/Dhaka');
         $schedule->command('dayparts:generate')->dailyAt('08:00')->timezone('Asia/Dhaka');
+        $schedule->command('dashboardGraph:generate')->dailyAt('11:56');
         $schedule->command('notification:generate')->hourly();
         $schedule->command('notificationfu:generate')->everySixHours();
         $schedule->command('notification2hr:generate')->everySixHours();
-        $schedule->command('dashboardGraph:generate')->dailyAt('12:00')->timezone('Asia/Dhaka');
+        
     }
 
     /**

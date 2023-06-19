@@ -119,7 +119,10 @@ class RequestController extends Controller
         $rr->error = $req->error;
         $rr->server_time = Carbon::now()->toDateTimeString();;
         $rr->save();
-        if ((strtotime($req->start) >= strtotime($req->finish))||(strtotime($req->start) < strtotime("2020-01-01 00:00:00"))||(strtotime($req->finish) < strtotime("2020-01-01 00:00:00"))) {
+        if ((strtotime($req->start) >= strtotime($req->finish))||
+        (strtotime($req->start) < strtotime("2020-01-01 00:00:00"))||(strtotime($req->finish) < strtotime("2020-01-01 00:00:00"))
+        ||((strtotime($req->start)-strtotime($req->finish))>600)
+        ) {
             return;
         }
 

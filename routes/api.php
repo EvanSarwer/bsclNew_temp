@@ -18,7 +18,7 @@ use App\Http\Controllers\PlayoutController;
 use App\Http\Controllers\AdTrpController;
 use App\Http\Controllers\DayPartsController;
 use App\Http\Controllers\DayRangedController;
-;
+use App\Http\Controllers\DataCleanseController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -230,3 +230,6 @@ Route::post("/adtrp/keywords/add",[AdTrpController::class,'addKeyword'])->middle
 Route::post("/adtrp/keywords/remove",[AdTrpController::class,'removeKeyword'])->middleware('auth.admin.user');
 Route::get("/adtrp/keywords/get",[AdTrpController::class,'getKeywords'])->middleware('auth.admin.user');
 Route::post("/adagency/adtrp",[AdTrpController::class,'getAdTrp'])->middleware('auth.admin.user');
+Route::get("/data/cleanse/alldates",[DataCleanseController::class,'index']);
+Route::get("/viewlog/{id}",[DataCleanseController::class,'getViewlog']);
+Route::get("/clean/data/{id}",[DataCleanseController::class,'cleanData']);

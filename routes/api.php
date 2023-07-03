@@ -230,6 +230,8 @@ Route::post("/adtrp/keywords/add",[AdTrpController::class,'addKeyword'])->middle
 Route::post("/adtrp/keywords/remove",[AdTrpController::class,'removeKeyword'])->middleware('auth.admin.user');
 Route::get("/adtrp/keywords/get",[AdTrpController::class,'getKeywords'])->middleware('auth.admin.user');
 Route::post("/adagency/adtrp",[AdTrpController::class,'getAdTrp'])->middleware('auth.admin.user');
-Route::get("/data/cleanse/alldates",[DataCleanseController::class,'index']);
+
+Route::get("/data/cleanse/alldates",[DataCleanseController::class,'index'])->name('data.cleanse.alldates');
 Route::get("/viewlog/{id}",[DataCleanseController::class,'getViewlog']);
 Route::get("/clean/data/{id}",[DataCleanseController::class,'cleanData']);
+Route::get("/cleaning/data/date/{id}",[DataCleanseController::class,'cleaningData_Date']);

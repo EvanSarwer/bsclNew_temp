@@ -11,9 +11,34 @@ class DataCleanseController extends Controller
 {
     //
     function index(){
-        $data = DataCleanse::all();
-        return response()->json($data);
+        $yesterday = date("Y-m-d", strtotime('-1 days'));
+        $lastData = DataCleanse::latest('id')->first();
+        if($yesterday > $lastData->date){
+            $newData=new DataCleanse();
+            $newData->date = $yesterday;
+            $newData->status = 0;
+            $newData->save();
+        }
+        $lastUpdatedDate = DataCleanse::where('status',1)->latest('id')->first();
+        $updatedData = DataCleanse::all();
+        $lastUpdatedData = $updatedData->last(); 
+        //return response()->json($lastUpdatedData->date);
+        if($yesterday == $lastUpdatedData->date){
+            return response()->json(["data"=>[$lastUpdatedData], "lastUpdatedDate"=>$lastUpdatedDate?->date],200);
+        }
+        
     }
+
+    function cleaningData_Date(Request $req){
+        $data = DataCleanse::where('id',$req->id)->first();
+        $data->status = 1;
+        $data->save();
+
+        return redirect()->route('data.cleanse.alldates');
+    }
+
+
+
     function getViewlog(Request $req){
         $data = ViewLog::where('id',$req->id)->first();
         return response()->json($data);

@@ -48,6 +48,11 @@ class DashboardGraphs extends Command
         $startDateTime = $yesterday . " 00:00:00";
         $finishDateTime = $yesterday . " 23:59:59";
 
+        $lastCleanedUpdatedDate = DataCleanse::where('status',1)->latest('id')->first();
+        
+        if ($lastCleanedUpdatedDate >= $yesterday) {
+
+
         // $y_data = DashboardTempData::where('date', $yesterday)->first();
         // if (!$y_data) {
 
@@ -93,7 +98,7 @@ class DashboardGraphs extends Command
 
         //$all_graph = json_encode($y_data->data);
 
-        //}
+        }
 
     }
 

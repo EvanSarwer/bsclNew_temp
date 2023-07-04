@@ -13,7 +13,7 @@ class DataCleanseController extends Controller
     function index(){
         $yesterday = date("Y-m-d", strtotime('-1 days'));
         $lastData = DataCleanse::latest('id')->first();
-        if($yesterday > $lastData->date){
+        if(!$lastData || $yesterday > $lastData->date){
             $newData=new DataCleanse();
             $newData->date = $yesterday;
             $newData->status = 0;

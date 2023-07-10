@@ -16,8 +16,298 @@ class OverviewController extends Controller
     // {
     //     $this->middleware('auth.admin');
     // }
-
     public function reachusergraph(Request $req)
+    {
+        $startDate = substr($req->start, 0, 10);
+        $startTime = substr($req->start, 11, 19);
+        $finishDate = substr($req->finish, 0, 10);
+        $finishTime = substr($req->finish, 11, 19);
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
+
+        $channels = Channel::all('id', 'channel_name');
+
+        $number_of_user = [];
+        $channel_label = [];
+        $channel_id = [];
+        if ($req->userType == "STB") {
+            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
+            $userids = User::where('type', $req->userType)
+                ->where('address', 'like', '%' . $req->region . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('economic_status', 'like', '%' . $req->economic . '%')
+                ->where('socio_status', 'like', '%' . $req->socio . '%')
+                //->whereBetween('age', [$req->age1, $req->age2])
+                ->whereBetween('dob', [$minDate, $maxDate])
+                ->pluck('id')->toArray();
+        } else if ($req->userType == "OTT") {
+            $userids = User::where('type', $req->userType)
+                ->pluck('id')->toArray();
+        } else {
+            $userids = User::pluck('id')->toArray();
+        }
+        $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+            ->where('started_watching_at', '<', $finishDateTime)
+            ->whereIn('user_id', $userids)
+            ->get();
+        //return response()->json(["reachsum" => $ram_logs], 200);
+        foreach ($channels as $c) {
+
+            $user_count = $ram_logs->where('channel_id', $c->id)
+
+                ->pluck('user_id')->unique()->count();
+            //return response()->json(["reachsum" => $viewlogs], 200);
+
+            //$user_count = 0;
+
+
+
+            array_push($channel_label, $c->channel_name);
+            array_push($channel_id, $c->id);
+            array_push($number_of_user, $user_count);
+            $user_count = 0;
+        }
+
+        return response()->json(["reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
+    }
+    public function reachpercentgraph(Request $req)
+    {
+        $startDate = substr($req->start, 0, 10);
+        $startTime = substr($req->start, 11, 19);
+        $finishDate = substr($req->finish, 0, 10);
+        $finishTime = substr($req->finish, 11, 19);
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
+        $total_user = User::count();
+        $channels = Channel::all('id', 'channel_name');
+
+        $number_of_user = [];
+        $channel_label = [];
+        $channel_id = [];
+        if ($req->userType == "STB") {
+            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
+            $userids = User::where('type', $req->userType)
+                ->where('address', 'like', '%' . $req->region . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('economic_status', 'like', '%' . $req->economic . '%')
+                ->where('socio_status', 'like', '%' . $req->socio . '%')
+                //->whereBetween('age', [$req->age1, $req->age2])
+                ->whereBetween('dob', [$minDate, $maxDate])
+                ->pluck('id')->toArray();
+        } else if ($req->userType == "OTT") {
+            $userids = User::where('type', $req->userType)
+                ->pluck('id')->toArray();
+        } else {
+            $userids = User::pluck('id')->toArray();
+        }
+        $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+            ->where('started_watching_at', '<', $finishDateTime)
+            ->whereIn('user_id', $userids)
+            ->get();
+        //return response()->json(["reachsum" => $ram_logs], 200);
+        foreach ($channels as $c) {
+
+            $user_count = $ram_logs->where('channel_id', $c->id)
+
+                ->pluck('user_id')->unique()->count();
+            //return response()->json(["reachsum" => $viewlogs], 200);
+
+            //$user_count = 0;
+
+
+
+            $user_count = ($user_count / $total_user) * 100;
+            $user_count = round($user_count, 1);
+            array_push($channel_label, $c->channel_name);
+            array_push($channel_id, $c->id);
+            array_push($number_of_user, $user_count);
+            $user_count = 0;
+        }
+
+        return response()->json(["reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
+    }
+    public function tvrgraphallchannelzero(Request $req)
+    {
+        $startDate = substr($req->start, 0, 10);
+        $startTime = substr($req->start, 11, 19);
+        $finishDate = substr($req->finish, 0, 10);
+        $finishTime = substr($req->finish, 11, 19);
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
+        $numOfUser = User::count();
+        //$numOfUser = $users->count();
+        $channelArray = array();
+        $channel_id = [];
+        $tvrs = array();
+        $viewer = array();
+        $channels = Channel::all('id', 'channel_name');
+        $to_time = strtotime($startDateTime);
+        $from_time = strtotime($finishDateTime);
+
+        $diff = abs($to_time - $from_time) / 60;
+        $tvrs = array();
+        $viewer = array();
+        $number_of_user = [];
+        $channel_label = [];
+        $channel_id = [];
+        if ($req->userType == "STB") {
+            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
+            $userids = User::where('type', $req->userType)
+                ->where('address', 'like', '%' . $req->region . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('economic_status', 'like', '%' . $req->economic . '%')
+                ->where('socio_status', 'like', '%' . $req->socio . '%')
+                //->whereBetween('age', [$req->age1, $req->age2])
+                ->whereBetween('dob', [$minDate, $maxDate])
+                ->pluck('id')->toArray();
+        } else if ($req->userType == "OTT") {
+            $userids = User::where('type', $req->userType)
+                ->pluck('id')->toArray();
+        } else {
+            $userids = User::pluck('id')->toArray();
+        }
+        $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+            ->where('started_watching_at', '<', $finishDateTime)
+            ->whereIn('user_id', $userids)
+            ->get();
+        //return response()->json(["reachsum" => $ram_logs], 200);
+        foreach ($channels as $c) {
+
+            $users = $ram_logs->where('channel_id', $c->id)
+
+                ->toArray();
+            //return response()->json(["reachsum" => $users], 200);
+
+            //$user_count = 0;
+            foreach ($users as $user) {
+
+                $user = (object)$user;
+                //return response()->json(["reachsum" => $user->started_watching_at], 200);
+                if (((strtotime($user->started_watching_at)) < ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
+                    $watched_sec = abs($to_time - $from_time);
+                } else if (((strtotime($user->started_watching_at)) < ($to_time)) && ((strtotime($user->finished_watching_at)) <= ($from_time))) {
+                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at));
+                } else if (((strtotime($user->started_watching_at)) >= ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
+                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time);
+                } else {
+                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at));
+                }
+                //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                $watched_sec = $watched_sec / 60;
+                array_push($viewer, $watched_sec);
+            }
+
+
+            $tvr = array_sum($viewer) / $numOfUser; ///$numOfUser;
+            //return response()->json(["reachsum" => $tvr], 200);
+            //$tvr=$tvr/60;
+            $tvr = $tvr / $diff;
+            //$tvr=$tvr*100;
+            unset($viewer);
+            $viewer = array();
+            array_push($channelArray, $c->channel_name);
+            array_push($tvrs, $tvr);
+            array_push($channel_id, $c->id);
+        }
+
+        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
+    }
+    public function tvrgraphallchannelpercent(Request $req)
+    {
+        $startDate = substr($req->start, 0, 10);
+        $startTime = substr($req->start, 11, 19);
+        $finishDate = substr($req->finish, 0, 10);
+        $finishTime = substr($req->finish, 11, 19);
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
+        $numOfUser = User::count();
+        //$numOfUser = $users->count();
+        $channelArray = array();
+        $channel_id = [];
+        $tvrs = array();
+        $viewer = array();
+        $channels = Channel::all('id', 'channel_name');
+        $to_time = strtotime($startDateTime);
+        $from_time = strtotime($finishDateTime);
+
+        $diff = abs($to_time - $from_time) / 60;
+        $tvrs = array();
+        $viewer = array();
+        $number_of_user = [];
+        $channel_label = [];
+        $channel_id = [];
+        if ($req->userType == "STB") {
+            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
+            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
+            $userids = User::where('type', $req->userType)
+                ->where('address', 'like', '%' . $req->region . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('economic_status', 'like', '%' . $req->economic . '%')
+                ->where('socio_status', 'like', '%' . $req->socio . '%')
+                //->whereBetween('age', [$req->age1, $req->age2])
+                ->whereBetween('dob', [$minDate, $maxDate])
+                ->pluck('id')->toArray();
+        } else if ($req->userType == "OTT") {
+            $userids = User::where('type', $req->userType)
+                ->pluck('id')->toArray();
+        } else {
+            $userids = User::pluck('id')->toArray();
+        }
+        $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+            ->where('started_watching_at', '<', $finishDateTime)
+            ->whereIn('user_id', $userids)
+            ->get();
+        //return response()->json(["reachsum" => $ram_logs], 200);
+        foreach ($channels as $c) {
+
+            $users = $ram_logs->where('channel_id', $c->id)
+
+                ->toArray();
+            //return response()->json(["reachsum" => $users], 200);
+
+            //$user_count = 0;
+            foreach ($users as $user) {
+
+                $user = (object)$user;
+                //return response()->json(["reachsum" => $user->started_watching_at], 200);
+                if (((strtotime($user->started_watching_at)) < ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
+                    $watched_sec = abs($to_time - $from_time);
+                } else if (((strtotime($user->started_watching_at)) < ($to_time)) && ((strtotime($user->finished_watching_at)) <= ($from_time))) {
+                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at));
+                } else if (((strtotime($user->started_watching_at)) >= ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
+                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time);
+                } else {
+                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at));
+                }
+                //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                $watched_sec = $watched_sec / 60;
+                array_push($viewer, $watched_sec);
+            }
+
+
+            $tvr = array_sum($viewer) / $numOfUser; ///$numOfUser;
+            //return response()->json(["reachsum" => $tvr], 200);
+            //$tvr=$tvr/60;
+            $tvr = $tvr / $diff;
+            $tvr=$tvr*100;
+            unset($viewer);
+            $viewer = array();
+            array_push($channelArray, $c->channel_name);
+            array_push($tvrs, $tvr);
+            array_push($channel_id, $c->id);
+        }
+
+        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
+    }
+
+    public function reachusergraphs(Request $req)
     {
         $startDate = substr($req->start, 0, 10);
         $startTime = substr($req->start, 11, 19);
@@ -94,7 +384,7 @@ class OverviewController extends Controller
         return response()->json(["reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
     }
 
-    public function reachpercentgraph(Request $req)
+    public function reachpercentgraphs(Request $req)
     {
         $startDate = substr($req->start, 0, 10);
         $startTime = substr($req->start, 11, 19);
@@ -207,7 +497,7 @@ class OverviewController extends Controller
     //     return response()->json(["reachsum"=>array_sum($value),"reach"=>$value,"channels"=>$label],200);
     // }
 
-    public function tvrgraphallchannelzero(Request $req)
+    public function tvrgraphallchannelzeros(Request $req)
     {
         $channelArray = array();
         $channel_id = [];
@@ -304,7 +594,7 @@ class OverviewController extends Controller
         //return response()->json(["tvr"=>$tvr],200);
 
     }
-    public function tvrgraphallchannelpercent(Request $req)
+    public function tvrgraphallchannelpercents(Request $req)
     {
         $channelArray = array();
         $channel_id = [];
@@ -490,10 +780,10 @@ class OverviewController extends Controller
 
         $total_share = 0;
         for ($i = 0; $i < count($all_tvr); $i++) {
-            if($total_tvr != 0){
+            if ($total_tvr != 0) {
                 $s = ($all_tvr[$i] / $total_tvr) * 100;
-            }else{
-                $s=0;
+            } else {
+                $s = 0;
             }
             //$s = ($all_tvr[$i] / $total_tvr) * 100;
             $total_share = $total_share + $s;

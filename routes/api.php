@@ -130,10 +130,13 @@ Route::get('/allgraph/dashboard/generate', [DashboardController::class, 'test_da
 /////////END////////////
 
 //////////Overview///////////
-Route::post('/overview/reachusergraph',[OverviewController::class,'reachusergraph'])->middleware('auth.admin.user');
-Route::post('/overview/reachpercentgraph',[OverviewController::class,'reachpercentgraph'])->middleware('auth.admin.user');
-Route::post('/overview/tvrgraphallchannelzero',[OverviewController::class,'tvrgraphallchannelzero'])->middleware('auth.admin.user');
-Route::post('/overview/tvrgraphallchannelpercent',[OverviewController::class,'tvrgraphallchannelpercent'])->middleware('auth.admin.user');
+Route::post('/overview/reachusergraph',[OverviewController::class,'reachusergraph']);//->middleware('auth.admin.user');
+Route::post('/overview/reachusergraphs',[OverviewController::class,'reachusergraphs']);//->middleware('auth.admin.user');
+Route::post('/overview/reachpercentgraph',[OverviewController::class,'reachpercentgraph']);//->middleware('auth.admin.user');
+Route::post('/overview/tvrgraphallchannelzero',[OverviewController::class,'tvrgraphallchannelzero']);//->middleware('auth.admin.user');
+Route::post('/overview/tvrgraphallchannelzeros',[OverviewController::class,'tvrgraphallchannelzeros']);//->middleware('auth.admin.user');
+Route::post('/overview/tvrgraphallchannelpercent',[OverviewController::class,'tvrgraphallchannelpercent']);//->middleware('auth.admin.user');
+Route::post('/overview/tvrgraphallchannelpercents',[OverviewController::class,'tvrgraphallchannelpercents']);//->middleware('auth.admin.user');
 Route::post('/overview/tvrsharegraph',[OverviewController::class,'tvrsharegraph'])->middleware('auth.admin.user');
 Route::post('/overview/timespentgraph',[OverviewController::class,'timespentgraph'])->middleware('auth.admin.user');
 //////////END///////////////

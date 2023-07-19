@@ -217,6 +217,10 @@ Route::post('/appuser/delete',[AppUserController::class,'delete'])->middleware('
 Route::any('/appuser/activate',[AppUserController::class,'activateDeactivate'])->middleware('auth.admin');
 Route::get('/appuser/list',[AppUserController::class,'list']);   //->middleware('auth.admin')
 Route::get('/appuser/get/{user_name}',[AppUserController::class,'get']);
+Route::get("/appuser/{username}",[AppUserController::class,'getAppUser'])->middleware('auth.admin');
+Route::post('/appuser/resetpass', [AppUserController::class, 'resetPass'])->middleware('auth.admin');
+
+
 Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.user.deployer');
 
 Route::post('/receive',[RequestController::class,'receive']);

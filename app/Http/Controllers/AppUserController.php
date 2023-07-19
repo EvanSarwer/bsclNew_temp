@@ -218,6 +218,24 @@ class AppUserController extends Controller
         ];
     }
 
+    function getAppUser(Request $req){
+        $data = AppUser::where('user_name',$req->username)->first();
+        return response()->json($data);
+    }
+
+    function resetPass(Request $req){
+        $user= Login::where('user_name',$req->username)->first();
+        if($user){
+            if($req->newpassword){
+                $user->password=md5($req->newpassword);
+                $user->save();
+                return response()->json(["msg" =>"Password Reset Successful"], 200);
+            }
+            return response()->json(["err" =>"PASSWORD Reset Faild."], 422);
+        }
+        return response()->json(["err" =>"User Not Found"], 422);
+    }
+
 
 
 

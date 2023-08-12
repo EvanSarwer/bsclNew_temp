@@ -41,13 +41,13 @@ Route::post('playout/receive', [PlayoutController::class, 'receive']);
 //////////////Playout////////////////////
 //////////////Adtrp////////////////////
 
-Route::post('frequency', [AdTrpController::class, 'frequency']);
-Route::get('testadtrp', [AdTrpController::class, 'adtrpall']);
-Route::post('channelwiseadtrp', [AdTrpController::class, 'channelwiseadtrp']);
-Route::post('dailyadtrp', [AdTrpController::class, 'dailyadtrp']);
+Route::post('frequency', [AdTrpController::class, 'frequency'])->middleware('auth.admin.user');
+Route::get('testadtrp', [AdTrpController::class, 'adtrpall'])->middleware('auth.admin.user');
+Route::post('channelwiseadtrp', [AdTrpController::class, 'channelwiseadtrp'])->middleware('auth.admin.user');
+Route::post('dailyadtrp', [AdTrpController::class, 'dailyadtrp'])->middleware('auth.admin.user');
 
-Route::get('/allkeyword', [AdTrpController::class, 'allkeyword']);//->middleware('auth.admin.user');
-Route::post('/keywordadtrp', [AdTrpController::class, 'keywordadtrp']);//->middleware('auth.admin.user');
+Route::get('/allkeyword', [AdTrpController::class, 'allkeyword'])->middleware('auth.admin.user');
+Route::post('/keywordadtrp', [AdTrpController::class, 'keywordadtrp'])->middleware('auth.admin.user');
 //////////////Adtrp////////////////////
 
 
@@ -71,13 +71,13 @@ Route::post('/excel/reach0', [ExcelController::class, 'reach0'])->middleware('au
 Route::post('/excel/tvr0', [ExcelController::class, 'tvr0'])->middleware('auth.admin.user');
 Route::post('/excel/tvrp', [ExcelController::class, 'tvrp'])->middleware('auth.admin.user');
 
-Route::post('/adtrp/reachp', [ExcelController::class, 'adtrpreachp']);//->middleware('auth.admin.user');
-Route::post('/adtrp/reach0', [ExcelController::class, 'adtrpreach0']);//->middleware('auth.admin.user');
-Route::post('/adtrp/tvr0', [ExcelController::class, 'adtrptvr0']);//->middleware('auth.admin.user');
-Route::post('/adtrp/tvrp', [ExcelController::class, 'adtrptvrp']);//->middleware('auth.admin.user');
+Route::post('/adtrp/reachp', [ExcelController::class, 'adtrpreachp'])->middleware('auth.admin.user');
+Route::post('/adtrp/reach0', [ExcelController::class, 'adtrpreach0'])->middleware('auth.admin.user');
+Route::post('/adtrp/tvr0', [ExcelController::class, 'adtrptvr0'])->middleware('auth.admin.user');
+Route::post('/adtrp/tvrp', [ExcelController::class, 'adtrptvrp'])->middleware('auth.admin.user');
 
-Route::post('/adtrpv3/reachp', [ExcelController::class, 'adtrpv3reachp']);//->middleware('auth.admin.user');
-Route::post('/adtrpv3/reach0', [ExcelController::class, 'adtrpv3reach0']);//->middleware('auth.admin.user');
+Route::post('/adtrpv3/reachp', [ExcelController::class, 'adtrpv3reachp'])->middleware('auth.admin.user');
+Route::post('/adtrpv3/reach0', [ExcelController::class, 'adtrpv3reach0'])->middleware('auth.admin.user');
 // Route::post('/adtrp/reach0', [ExcelController::class, 'adtrpreach0'])->middleware('auth.admin.user');
 // Route::post('/adtrp/tvr0', [ExcelController::class, 'adtrptvr0'])->middleware('auth.admin.user');
 // Route::post('/adtrp/tvrp', [ExcelController::class, 'adtrptvrp'])->middleware('auth.admin.user');
@@ -92,9 +92,9 @@ Route::post('/device/edit',[DeviceController::class,'editDevice'])->middleware('
 Route::post('/device/deselect',[DeviceController::class,'deselectDevice'])->middleware('auth.admin');
 
 
-Route::get('/device/tvoff', [DeviceController::class, 'tvoff'])->middleware('auth.admin');
-Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff'])->middleware('auth.admin');
-Route::get('/device/currentlywatching', [DeviceController::class, 'currentlyWatching'])->middleware('auth.admin');
+Route::get('/device/tvoff', [DeviceController::class, 'tvoff'])->middleware('auth.admin.deployer');
+Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff'])->middleware('auth.admin.deployer');
+Route::get('/device/currentlywatching', [DeviceController::class, 'currentlyWatching'])->middleware('auth.admin.deployer');
 
 // Device User
 Route::post('/deviceuser/create',[DeviceController::class,'addDeviceUser'])->middleware('auth.admin.deployer'); 
@@ -109,7 +109,7 @@ Route::post('/deviceuser/edit',[DeviceController::class,'editDeviceUser'])->midd
 //Route::get('/dashboard/CurrentStatusTopReach', [DashboardController::class, 'CurrentStatusTopReach'])->middleware('auth.admin.user');
 //Route::get('/dashboard/CurrentStatusTopTvr', [DashboardController::class, 'CurrentStatusTopTvr'])->middleware('auth.admin.user');
 //Route::get('/dashboard/activechannellist',[DashboardController::class,'activechannellistget']);   //->middleware('auth.admin.user')
-Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserlistget']);   //->middleware('auth.admin.user')
+Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserlistget'])->middleware('auth.admin.user');
 Route::get('/dashboard/dashboardstatus',[DashboardController::class,'dashboardstatus'])->middleware('auth.admin.user');   //->middleware('auth.admin.user')
 //Route::get('/reachuser/dashboard', [DashboardController::class, 'reachuserdashboard'])->middleware('auth.admin.user');
 //Route::get('/reach/percent/dashboard', [DashboardController::class, 'reachpercentdashboard'])->middleware('auth.admin.user');
@@ -118,26 +118,27 @@ Route::get('/dashboard/dashboardstatus',[DashboardController::class,'dashboardst
 //Route::get('/dashboard/timespentuni', [DashboardController::class, 'timeSpentUniverse'])->middleware('auth.admin.user');
 //Route::get('/sharegraph/dashboard', [DashboardController::class, 'sharegraphdashboard'])->middleware('auth.admin.user');
 //Route::get('/dashboard/notification', [DashboardController::class, 'notification']);//->middleware('auth.admin.user');
-Route::get('/notification', [DashboardController::class, 'generate_notification']);//->middleware('auth.admin.user');
-Route::get('/notification2', [DashboardController::class, 'generate_notification2']);//->middleware('auth.admin.user');
-Route::get('/notification3', [DashboardController::class, 'generate_notification3']);//->middleware('auth.admin.user');
-Route::get('/dashboard/notification', [DashboardController::class, 'get_notification']);//->middleware('auth.admin.user');
-Route::get('/dashboard/seennotification', [DashboardController::class, 'seen_notification']);//->middleware('auth.admin.user');
+Route::get('/notification', [DashboardController::class, 'generate_notification'])->middleware('auth.admin.user.deployer');
+Route::get('/notification2', [DashboardController::class, 'generate_notification2'])->middleware('auth.admin.user.deployer');
+Route::get('/notification3', [DashboardController::class, 'generate_notification3'])->middleware('auth.admin.user.deployer');
+Route::get('/dashboard/notification', [DashboardController::class, 'get_notification'])->middleware('auth.admin.user.deployer');
+Route::get('/dashboard/seennotification', [DashboardController::class, 'seen_notification'])->middleware('auth.admin.user.deployer');
 
 Route::get('/dashboard/CurrentStatusTopTvrReach', [DashboardController::class, 'CurrentStatusTopTvrReach'])->middleware('auth.admin.user');
 Route::get('/allgraph/dashboard', [DashboardController::class, 'allgraphdashboard'])->middleware('auth.admin.user'); //->middleware('auth.admin.user')
-Route::get('/dashboard/graphGenerate/byDate/{date}', [DashboardController::class, 'dashboradGraph_generate_byDate']); //->middleware('auth.admin.user')->middleware('auth.admin.user');     //->middleware('auth.admin.user')
-Route::get('/allgraph/dashboard/generate', [DashboardController::class, 'test_dashboradGraph_generate']);
+Route::get('/dashboard/graphGenerate/byDate/{date}', [DashboardController::class, 'dashboradGraph_generate_byDate'])->middleware('auth.admin');     //->middleware('auth.admin.user')
+
+// Route::get('/allgraph/dashboard/generate', [DashboardController::class, 'test_dashboradGraph_generate']);
 /////////END////////////
 
 //////////Overview///////////
-Route::post('/overview/reachusergraph',[OverviewController::class,'reachusergraph']);//->middleware('auth.admin.user');
-Route::post('/overview/reachusergraphs',[OverviewController::class,'reachusergraphs']);//->middleware('auth.admin.user');
-Route::post('/overview/reachpercentgraph',[OverviewController::class,'reachpercentgraph']);//->middleware('auth.admin.user');
-Route::post('/overview/tvrgraphallchannelzero',[OverviewController::class,'tvrgraphallchannelzero']);//->middleware('auth.admin.user');
-Route::post('/overview/tvrgraphallchannelzeros',[OverviewController::class,'tvrgraphallchannelzeros']);//->middleware('auth.admin.user');
-Route::post('/overview/tvrgraphallchannelpercent',[OverviewController::class,'tvrgraphallchannelpercent']);//->middleware('auth.admin.user');
-Route::post('/overview/tvrgraphallchannelpercents',[OverviewController::class,'tvrgraphallchannelpercents']);//->middleware('auth.admin.user');
+Route::post('/overview/reachusergraph',[OverviewController::class,'reachusergraph'])->middleware('auth.admin.user');
+Route::post('/overview/reachusergraphs',[OverviewController::class,'reachusergraphs'])->middleware('auth.admin.user');
+Route::post('/overview/reachpercentgraph',[OverviewController::class,'reachpercentgraph'])->middleware('auth.admin.user');
+Route::post('/overview/tvrgraphallchannelzero',[OverviewController::class,'tvrgraphallchannelzero'])->middleware('auth.admin.user');
+Route::post('/overview/tvrgraphallchannelzeros',[OverviewController::class,'tvrgraphallchannelzeros'])->middleware('auth.admin.user');
+Route::post('/overview/tvrgraphallchannelpercent',[OverviewController::class,'tvrgraphallchannelpercent'])->middleware('auth.admin.user');
+Route::post('/overview/tvrgraphallchannelpercents',[OverviewController::class,'tvrgraphallchannelpercents'])->middleware('auth.admin.user');
 Route::post('/overview/tvrsharegraph',[OverviewController::class,'tvrsharegraph'])->middleware('auth.admin.user');
 Route::post('/overview/timespentgraph',[OverviewController::class,'timespentgraph'])->middleware('auth.admin.user');
 //////////END///////////////
@@ -155,28 +156,28 @@ Route::post('/user/last72WatchingData',[UserController::class,'last72WatchingDat
 Route::get('/getuserlist',[UserController::class,'getallList'])->middleware('auth.admin');
 Route::post('/user/userinfo',[UserController::class,'user_info'])->middleware('auth.admin');
 //
-Route::post('/user/userfilterdata/add',[UserController::class,'userFilterValueAdd']);
-Route::get('/user/userfilterdata/list',[UserController::class,'getUserFilterDataList']);
-Route::get('/user/generate_userFilterData',[UserController::class,'generate_userFilterData']);
-Route::get('/device/getUserFilter_generatedData/{view_id}',[UserController::class,'getUserFilter_generatedData']);
+Route::post('/user/userfilterdata/add',[UserController::class,'userFilterValueAdd'])->middleware('auth.admin');
+Route::get('/user/userfilterdata/list',[UserController::class,'getUserFilterDataList'])->middleware('auth.admin');
+Route::get('/user/generate_userFilterData',[UserController::class,'generate_userFilterData'])->middleware('auth.admin');
+Route::get('/device/getUserFilter_generatedData/{view_id}',[UserController::class,'getUserFilter_generatedData'])->middleware('auth.admin');
 
 Route::post('/user/userdefined/usertimespent',[UserController::class,'usertimespent2'])->middleware('auth.admin');
 
 ///////////END//////////////
 
 //////////Live Channels/////////
-Route::post('/livechannel/activechannellistgraph',[LiveChannelController::class,'activechannellistgraph']); 
-Route::post('/livechannel/activechannellistgraphfast',[LiveChannelController::class,'activechannellistgraphfast']); //->middleware('auth.admin.user')
+Route::post('/livechannel/activechannellistgraph',[LiveChannelController::class,'activechannellistgraph'])->middleware('auth.admin.user'); 
+Route::post('/livechannel/activechannellistgraphfast',[LiveChannelController::class,'activechannellistgraphfast'])->middleware('auth.admin.user'); //->middleware('auth.admin.user')
 
 ///////////END////////////////
 
 //////////Trend////////////
-Route::get('trend/channels', [ChannelController::class, 'trendchannel']);//->middleware('auth.admin.user');
-Route::post('trend/reach/zero', [ChannelController::class, 'reachtrend']);//->middleware('auth.admin.user');
+Route::get('trend/channels', [ChannelController::class, 'trendchannel'])->middleware('auth.admin.user');
+Route::post('trend/reach/zero', [ChannelController::class, 'reachtrend'])->middleware('auth.admin.user');
 Route::post('trend/reach/percent', [ChannelController::class, 'reachpercenttrend'])->middleware('auth.admin.user');
 Route::post('trend/tvr/percent', [ChannelController::class, 'tvrtrend'])->middleware('auth.admin.user');
-Route::post('trend/tvr/zero', [ChannelController::class, 'tvrtrendzero']);//->middleware('auth.admin.user');
-Route::post('trend/general/all', [TrendController::class, 'trendGeneralAll']);//->middleware('auth.admin.user');
+Route::post('trend/tvr/zero', [ChannelController::class, 'tvrtrendzero'])->middleware('auth.admin.user');
+Route::post('trend/general/all', [TrendController::class, 'trendGeneralAll'])->middleware('auth.admin.user');
 Route::post('channel/reach/percent', [ChannelController::class, 'reachpercent'])->middleware('auth.admin.user');
 Route::post('channel/definedtrendreachp', [ChannelController::class, 'definedtrendreachp'])->middleware('auth.admin.user');
 Route::post('channel/definedtrendreachp', [ChannelController::class, 'definedtrendreachp'])->middleware('auth.admin.user');
@@ -192,18 +193,18 @@ Route::post('dayrangedall', [DayRangedController::class, 'dayrangedall'])->middl
 
 Route::get('servertime', [DeviceController::class, 'servertime']);
 
-Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0']);
-Route::post('trend/dayrangedreach0', [TrendController::class, 'dayrangedtrendreach0']);
-Route::post('trend/dayrangedtvr0', [TrendController::class, 'dayrangedtrendtvr0']);
-Route::post('trend/dayrangedtvrp', [TrendController::class, 'dayrangedtrendtvrp']);
-Route::post('trend/dayrangedreachp', [TrendController::class, 'dayrangedtrendreachp']);
-Route::post('dayparts/all', [DayPartsController::class, 'dayrangedtrendall']);
-Route::post('dayparts/save', [DayPartsController::class, 'dayrangedtrendsave']);//->middleware('auth.admin.user.deployer');
-Route::get('demov', [TrendController::class, 'views']);
-Route::get('demot', [TrendController::class, 'timeviewed']);
-Route::post('channel/rangedtrendreachp', [TrendController::class, 'rangedtrendreachp']);
-Route::post('channel/rangedtrendtvr0', [TrendController::class, 'rangedtrendtvr0']);
-Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp']);
+Route::post('channel/rangedtrendreach0', [TrendController::class, 'rangedtrendreach0'])->middleware('auth.admin.user');
+Route::post('trend/dayrangedreach0', [TrendController::class, 'dayrangedtrendreach0'])->middleware('auth.admin.user');
+Route::post('trend/dayrangedtvr0', [TrendController::class, 'dayrangedtrendtvr0'])->middleware('auth.admin.user');
+Route::post('trend/dayrangedtvrp', [TrendController::class, 'dayrangedtrendtvrp'])->middleware('auth.admin.user');
+Route::post('trend/dayrangedreachp', [TrendController::class, 'dayrangedtrendreachp'])->middleware('auth.admin.user');
+Route::post('dayparts/all', [DayPartsController::class, 'dayrangedtrendall'])->middleware('auth.admin.user');
+Route::post('dayparts/save', [DayPartsController::class, 'dayrangedtrendsave'])->middleware('auth.admin.user');//->middleware('auth.admin.user.deployer');
+Route::get('demov', [TrendController::class, 'views'])->middleware('auth.admin.user');
+Route::get('demot', [TrendController::class, 'timeviewed'])->middleware('auth.admin.user');
+Route::post('channel/rangedtrendreachp', [TrendController::class, 'rangedtrendreachp'])->middleware('auth.admin.user');
+Route::post('channel/rangedtrendtvr0', [TrendController::class, 'rangedtrendtvr0'])->middleware('auth.admin.user');
+Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp'])->middleware('auth.admin.user');
 
 //////////////trend////////////////////
 
@@ -211,12 +212,12 @@ Route::post('channel/rangedtrendtvrp', [TrendController::class, 'rangedtrendtvrp
 Route::post('/appuser/changepass', [AppUserController::class, 'changepass'])->middleware('auth.admin.user.deployer');
 Route::post('/deployer/create',[AppUserController::class,'addDeployer']);
 //Tanvir APIs//
-Route::post('/appuser/create',[AppUserController::class,'store']);
-Route::post('/appuser/edit',[AppUserController::class,'edit']);
+Route::post('/appuser/create',[AppUserController::class,'store'])->middleware('auth.admin');
+Route::post('/appuser/edit',[AppUserController::class,'edit'])->middleware('auth.admin');
 Route::post('/appuser/delete',[AppUserController::class,'delete'])->middleware('auth.admin');
 Route::any('/appuser/activate',[AppUserController::class,'activateDeactivate'])->middleware('auth.admin');
-Route::get('/appuser/list',[AppUserController::class,'list']);   //->middleware('auth.admin')
-Route::get('/appuser/get/{user_name}',[AppUserController::class,'get']);
+Route::get('/appuser/list',[AppUserController::class,'list'])->middleware('auth.admin');   //->middleware('auth.admin')
+Route::get('/appuser/get/{user_name}',[AppUserController::class,'get'])->middleware('auth.admin');
 Route::get("/appuser/{username}",[AppUserController::class,'getAppUser'])->middleware('auth.admin');
 Route::post('/appuser/resetpass', [AppUserController::class, 'resetPass'])->middleware('auth.admin');
 
@@ -239,7 +240,7 @@ Route::post("/adtrp/keywords/remove",[AdTrpController::class,'removeKeyword'])->
 Route::get("/adtrp/keywords/get",[AdTrpController::class,'getKeywords'])->middleware('auth.admin.user');
 Route::post("/adagency/adtrp",[AdTrpController::class,'getAdTrp'])->middleware('auth.admin.user');
 
-Route::get("/data/cleanse/alldates",[DataCleanseController::class,'index'])->name('data.cleanse.alldates');
-Route::get("/viewlog/{id}",[DataCleanseController::class,'getViewlog']);
-Route::get("/clean/data/{id}",[DataCleanseController::class,'cleanData']);
-Route::get("/cleaning/data/date/{id}",[DataCleanseController::class,'cleaningData_Date']);
+Route::get("/data/cleanse/alldates",[DataCleanseController::class,'index'])->name('data.cleanse.alldates')->middleware('auth.admin.user');
+Route::get("/viewlog/{id}",[DataCleanseController::class,'getViewlog'])->middleware('auth.admin');;
+Route::get("/clean/data/{id}",[DataCleanseController::class,'cleanData'])->middleware('auth.admin');
+Route::get("/cleaning/data/date/{id}",[DataCleanseController::class,'cleaningData_Date'])->middleware('auth.admin');

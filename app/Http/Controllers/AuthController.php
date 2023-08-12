@@ -23,16 +23,37 @@ class AuthController extends Controller
         $user = Login::where('user_name', $req->username)->where('password', md5($req->password))->first();
         if ($user) {
             $old_tokens = Token::where('user_id',$user->id)->delete();
-
-            $tokenGen = bin2hex(random_bytes(37));
-            $token = new Token();
-            $token->value = md5($tokenGen);
-            $token->user_id = $user->id;
-            $token->token = $tokenGen;
-            $token->save();
-            $data = array("role"=>$user->role,"username"=>$user->user_name,"token"=>$tokenGen);
-            return response()->json(["data" => (object)$data, "error" => null], 201);
+            if($user->active == 1){
+                $tokenGen = bin2hex(random_bytes(37));
+                $token = new Token();
+                $token->value = md5($tokenGen);
+                $token->user_id = $user->id;
+                $token->token = $tokenGen;
+                $token->save();
+                $data = array("role"=>$user->role,"username"=>$user->user_name,"token"=>$tokenGen);
+                $user->try_time = 0;
+                $user->save();
+                return response()->json(["data" => (object)$data, "error" => null], 201);
+            } else {
+                return response()->json(["data" => null, "error" => "Account Is Deactive"], 423);
+            }
+            
         } else {
+            $falseTry_user = Login::where('user_name', $req->username)->first();
+            if($falseTry_user){
+                if($falseTry_user->try_time > 3){
+                    $falseTry_user->active = 0;
+                    $falseTry_user->save();
+                    return response()->json(["data" => null, "error" => "Too Many Wrong Try"], 422);
+
+                } else {
+
+                    $falseTry_user->try_time += 1;
+                    $falseTry_user->save();
+                    return response()->json(["data" => null, "error" => "USERNAME OR PASSWORD IS INCORRECT"], 422);
+                }
+                
+            }
             return response()->json(["data" => null, "error" => "USERNAME OR PASSWORD IS INCORRECT"], 422);
         }
     }

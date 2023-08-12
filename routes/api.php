@@ -110,7 +110,7 @@ Route::post('/deviceuser/edit',[DeviceController::class,'editDeviceUser'])->midd
 //Route::get('/dashboard/CurrentStatusTopTvr', [DashboardController::class, 'CurrentStatusTopTvr'])->middleware('auth.admin.user');
 //Route::get('/dashboard/activechannellist',[DashboardController::class,'activechannellistget']);   //->middleware('auth.admin.user')
 Route::get('/dashboard/activeuserlist',[DashboardController::class,'activeuserlistget']);   //->middleware('auth.admin.user')
-Route::get('/dashboard/dashboardstatus',[DashboardController::class,'dashboardstatus']);   //->middleware('auth.admin.user')
+Route::get('/dashboard/dashboardstatus',[DashboardController::class,'dashboardstatus'])->middleware('auth.admin.user');   //->middleware('auth.admin.user')
 //Route::get('/reachuser/dashboard', [DashboardController::class, 'reachuserdashboard'])->middleware('auth.admin.user');
 //Route::get('/reach/percent/dashboard', [DashboardController::class, 'reachpercentdashboard'])->middleware('auth.admin.user');
 //Route::get('/tvrgraph/dashboard', [DashboardController::class, 'tvrgraphdashboard'])->middleware('auth.admin.user');
@@ -125,7 +125,7 @@ Route::get('/dashboard/notification', [DashboardController::class, 'get_notifica
 Route::get('/dashboard/seennotification', [DashboardController::class, 'seen_notification']);//->middleware('auth.admin.user');
 
 Route::get('/dashboard/CurrentStatusTopTvrReach', [DashboardController::class, 'CurrentStatusTopTvrReach'])->middleware('auth.admin.user');
-Route::get('/allgraph/dashboard', [DashboardController::class, 'allgraphdashboard']); //->middleware('auth.admin.user')->middleware('auth.admin.user');     //->middleware('auth.admin.user')
+Route::get('/allgraph/dashboard', [DashboardController::class, 'allgraphdashboard'])->middleware('auth.admin.user'); //->middleware('auth.admin.user')
 Route::get('/dashboard/graphGenerate/byDate/{date}', [DashboardController::class, 'dashboradGraph_generate_byDate']); //->middleware('auth.admin.user')->middleware('auth.admin.user');     //->middleware('auth.admin.user')
 Route::get('/allgraph/dashboard/generate', [DashboardController::class, 'test_dashboradGraph_generate']);
 /////////END////////////

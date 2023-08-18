@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ViewLog;
 use App\Models\Channel;
 use App\Models\User;
+use App\Models\Universe;
 use Carbon\Carbon;
 use DateTime;
 use App\Mail\SendMail;
@@ -768,17 +769,55 @@ class UserController extends Controller
     function demo_test()
     {
 
-        $path = base_path('.git/');
+        $user = User::where('id', 11560)->first();
+                
+                $startDate = new DateTime($user->dob);
+$endDate = new DateTime();
 
-        if (!file_exists($path)) {
-            return null;
-        }
+$interval = $startDate->diff($endDate);
 
-        $head = trim(substr(file_get_contents($path . 'HEAD'), 4));
+$years = $interval->y;
+$age_group_string = array("0-14", "15-24", "25-34", "35-44", "45 & Above");
+if ($years <= 14) {
+    $minDate = Carbon::today()->subYears(14 + 1); // make sure to use Carbon\Carbon in the class
+    $maxDate = Carbon::today()->subYears(0)->endOfDay();
+    $age_group = $age_group_string[0];
+} elseif ($years >= 15 && $years <= 24) {
+    $minDate = Carbon::today()->subYears(24 + 1); // make sure to use Carbon\Carbon in the class
+    $maxDate = Carbon::today()->subYears(15)->endOfDay();
+    $age_group = $age_group_string[1];
+} elseif ($years >= 25 && $years <= 34) {
+    $minDate = Carbon::today()->subYears(34 + 1); // make sure to use Carbon\Carbon in the class
+    $maxDate = Carbon::today()->subYears(25)->endOfDay();
+    $age_group = $age_group_string[2];
+} elseif ($years >= 35 && $years <= 44) {
+    $minDate = Carbon::today()->subYears(44 + 1); // make sure to use Carbon\Carbon in the class
+    $maxDate = Carbon::today()->subYears(35)->endOfDay();
+    $age_group = $age_group_string[3];
+} elseif ($years >= 45) {
+    $minDate = Carbon::today()->subYears(150); // make sure to use Carbon\Carbon in the class
+    $maxDate = Carbon::today()->subYears(45)->endOfDay();
+    $age_group = $age_group_string[4];
+}
 
-        $hash = trim(file_get_contents(sprintf($path . $head)));
-
+$systemUniverse = User:://where('type', $req->userType)
+//->
+where('address', 'like', '%' . $user->address . '%')
+->where('gender', 'like', '%' . $user->gender . '%')
+->where('economic_status', 'like', '%' . $user->economic_status . '%')
+//->where('socio_status', 'like', '%' . $user->socio_status . '%')
+//->whereBetween('age', [$req->age1, $req->age2])
+->whereBetween('dob', [$minDate, $maxDate])//->get();
+->count();
+$universe = Universe:://where('type', $req->userType)
+    //->
+    where('region', 'like', '%' . strtolower($user->address) . '%')
+    ->where('gender', 'like', '%' . $user->gender . '%')
+    ->where('sec', 'like', '%' . $user->economic_status . '%')
+    ->where('age_group', $age_group)->first()->universe;
+    //->count();
+                
         //return $hash;
-        return response()->json(["git_id" => $hash], 200);
+        return response()->json(["systemUniverse" => $systemUniverse,"mindate"=>$minDate,"maxdate"=>$maxDate,"a"=>$age_group,"u"=>$universe], 200);
     }
 }

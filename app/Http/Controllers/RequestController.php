@@ -9,6 +9,7 @@ use DateTime;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Universe;
+use App\Models\Category;
 use App\Models\Device;
 use App\Models\Channel;
 use App\Models\DataReliability;
@@ -85,7 +86,7 @@ class RequestController extends Controller
     //                 //return response()->json(["ranges" => $index], 200);
     //                 if ($index) {
     //                     if ($req->people[$i] === '1') {
-    //                         $ob = array("device_id" => $index->id, "channel_name" => $req->channel_name, "time_stamp" => $req->time_stamp);
+    //                         $ob = array("device_id" => $index->id, "channel_name" => $channel_id, "time_stamp" => $req->time_stamp);
     //                         //array_push($user, (object)$ob);
     //                         $this->receiver((object)$ob);
     //                         //array_push($arr,$index);
@@ -127,9 +128,9 @@ class RequestController extends Controller
             return;
         }
 
-
+            $channel_id=$req->channel_name;
         if ($req->channel_name >= 40 && $req->channel_name <= 888) {
-            $req->channel_name = 888;
+            $channel_id = 888;
         }
 
 
@@ -138,9 +139,9 @@ class RequestController extends Controller
             $last_req_time = Carbon::now()->toDateTimeString();
             $this->updateDeviceLastReq($req->device_id, $last_req_time);
 
-            $hasChannel = Channel::where('id', $req->channel_name)->first();
+            $hasChannel = Channel::where('id', $channel_id)->first();
 
-            if (($req->channel_name == 999)) {
+            if (($channel_id == 999)) {
                 $hasDevice->tvoff = 0;
                 $hasDevice->save();
                 //$users = 
@@ -152,7 +153,7 @@ class RequestController extends Controller
 
 
 
-            } else if (($hasChannel && $req->channel_name != 999)) {
+            } else if (($hasChannel && $channel_id != 999)) {
                 $hasDevice->tvoff = 1;
                 $hasDevice->save();
                 User::where('device_id', $req->device_id)->update(['tvoff' => 1]);
@@ -163,7 +164,7 @@ class RequestController extends Controller
                     if ($index) {
                         if ($req->people[$i] === '1') {
 
-                            $ob = array("device_id" => $req->device_id, "user_id" => $index->id, "channel_name" => $req->channel_name, "start" => $req->start, "finish" => $req->finish, "error_msg" => $req->error);
+                            $ob = array("device_id" => $req->device_id, "user_id" => $index->id, "channel_name" => $channel_id, "start" => $req->start, "finish" => $req->finish, "error_msg" => $req->error);
                             $this->receiver((object)$ob);
                         }
                     }
@@ -248,7 +249,13 @@ $universe = Universe:://where('type', $req->userType)
     ->where('gender', 'like', '%' . $user->gender . '%')
     ->where('sec', 'like', '%' . $user->economic_status . '%')
     ->where('age_group', $age_group)->first()->universe;
-    $arr=array($systemUniverse,$universe);
+    $cat = Category:://where('type', $req->userType)
+        //->
+        where('region', 'like', '%' . strtolower($user->address) . '%')
+        ->where('gender', 'like', '%' . $user->gender . '%')
+        ->where('sec', 'like', '%' . $user->economic_status . '%')
+        ->where('age_group', $age_group)->first()->id;
+    $arr=array($systemUniverse,$universe,$cat);
     return $arr;
     }
     public function receiver($request)
@@ -293,6 +300,7 @@ $universe = Universe:://where('type', $req->userType)
                 $var->finished_watching_at = $request->finish;
                 $var->system = $uni[0];
                 $var->universe = $uni[1];
+                $var->category_id = $uni[2];
                 $var->duration_minute = abs(strtotime($var->started_watching_at) - strtotime($var->finished_watching_at)) / 60;
                 if (strtotime($var->started_watching_at) < strtotime($var->finished_watching_at)) {
 
@@ -326,6 +334,7 @@ $universe = Universe:://where('type', $req->userType)
                 
                 $var->system = $uni[0];
                 $var->universe = $uni[1];
+                $var->category_id = $uni[2];
                 $var->duration_minute = abs(strtotime($var->started_watching_at) - strtotime($var->finished_watching_at)) / 60;
                 if (strtotime($var->started_watching_at) < strtotime($var->finished_watching_at)) {
 

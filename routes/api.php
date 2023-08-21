@@ -224,6 +224,7 @@ Route::post('/appuser/resetpass', [AppUserController::class, 'resetPass'])->midd
 
 Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.user.deployer');
 
+Route::post('/datafix',[RequestController::class,'datafix']);
 Route::post('/receive',[RequestController::class,'receive']);
 Route::get('/receive',[RequestController::class,'receive']);
 Route::post('/receiveoutside',[RequestController::class,'receiveoutside']);

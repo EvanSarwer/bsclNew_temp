@@ -128,7 +128,7 @@ class RequestController extends Controller
             return;
         }
 
-            $channel_id=$req->channel_name;
+        $channel_id = $req->channel_name;
         if ($req->channel_name >= 40 && $req->channel_name <= 888) {
             $channel_id = 888;
         }
@@ -202,62 +202,93 @@ class RequestController extends Controller
 
     public function get_universe($id)
     {
-        
+
         $user = User::where('id', $id)->first();
-                
-                $startDate = new DateTime($user->dob);
-$endDate = new DateTime();
 
-$interval = $startDate->diff($endDate);
+        $startDate = new DateTime($user->dob);
+        $endDate = new DateTime();
 
-$years = $interval->y;
-$age_group_string = array("0-14", "15-24", "25-34", "35-44", "45 & Above");
-if ($years <= 14) {
-    $minDate = Carbon::today()->subYears(14 + 1); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(0)->endOfDay();
-    $age_group = $age_group_string[0];
-} elseif ($years >= 15 && $years <= 24) {
-    $minDate = Carbon::today()->subYears(24 + 1); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(15)->endOfDay();
-    $age_group = $age_group_string[1];
-} elseif ($years >= 25 && $years <= 34) {
-    $minDate = Carbon::today()->subYears(34 + 1); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(25)->endOfDay();
-    $age_group = $age_group_string[2];
-} elseif ($years >= 35 && $years <= 44) {
-    $minDate = Carbon::today()->subYears(44 + 1); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(35)->endOfDay();
-    $age_group = $age_group_string[3];
-} elseif ($years >= 45) {
-    $minDate = Carbon::today()->subYears(150); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(45)->endOfDay();
-    $age_group = $age_group_string[4];
-}
+        $interval = $startDate->diff($endDate);
 
-$systemUniverse = User:://where('type', $req->userType)
-//->
-where('address', 'like', '%' . $user->address . '%')
-->where('gender', 'like', '%' . $user->gender . '%')
-->where('economic_status', 'like', '%' . $user->economic_status . '%')
-//->where('socio_status', 'like', '%' . $user->socio_status . '%')
-//->whereBetween('age', [$req->age1, $req->age2])
-->whereBetween('dob', [$minDate, $maxDate])//->get();
-->count();
-$universe = Universe:://where('type', $req->userType)
-    //->
-    where('region', 'like', '%' . strtolower($user->address) . '%')
-    ->where('gender', 'like', '%' . $user->gender . '%')
-    ->where('sec', 'like', '%' . $user->economic_status . '%')
-    ->where('age_group', $age_group)->first()->universe;
-    $cat = Category:://where('type', $req->userType)
-        //->
-        where('region', 'like', '%' . strtolower($user->address) . '%')
-        ->where('gender', 'like', '%' . $user->gender . '%')
-        ->where('sec', 'like', '%' . $user->economic_status . '%')
-        ->where('age_group', $age_group)->first()->id;
-    $arr=array($systemUniverse,$universe,$cat);
-    return $arr;
+        $years = $interval->y;
+        $age_group_string = array("0-14", "15-24", "25-34", "35-44", "45 & Above");
+        if ($years <= 14) {
+            $minDate = Carbon::today()->subYears(14 + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears(0)->endOfDay();
+            $age_group = $age_group_string[0];
+        } elseif ($years >= 15 && $years <= 24) {
+            $minDate = Carbon::today()->subYears(24 + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears(15)->endOfDay();
+            $age_group = $age_group_string[1];
+        } elseif ($years >= 25 && $years <= 34) {
+            $minDate = Carbon::today()->subYears(34 + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears(25)->endOfDay();
+            $age_group = $age_group_string[2];
+        } elseif ($years >= 35 && $years <= 44) {
+            $minDate = Carbon::today()->subYears(44 + 1); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears(35)->endOfDay();
+            $age_group = $age_group_string[3];
+        } elseif ($years >= 45) {
+            $minDate = Carbon::today()->subYears(150); // make sure to use Carbon\Carbon in the class
+            $maxDate = Carbon::today()->subYears(45)->endOfDay();
+            $age_group = $age_group_string[4];
+        }
+
+        $systemUniverse = User:: //where('type', $req->userType)
+            //->
+            where('address', 'like', '%' . $user->address . '%')
+            ->where('gender', 'like', '%' . $user->gender . '%')
+            ->where('economic_status', 'like', '%' . $user->economic_status . '%')
+            //->where('socio_status', 'like', '%' . $user->socio_status . '%')
+            //->whereBetween('age', [$req->age1, $req->age2])
+            ->whereBetween('dob', [$minDate, $maxDate]) //->get();
+            ->count();
+        $universe = Universe:: //where('type', $req->userType)
+            //->
+            where('region', 'like', '%' . strtolower($user->address) . '%')
+            ->where('gender', 'like', '%' . $user->gender . '%')
+            ->where('sec', 'like', '%' . $user->economic_status . '%')
+            ->where('age_group', $age_group)->first();
+        $cat = Category:: //where('type', $req->userType)
+            //->
+            where('region', 'like', '%' . strtolower($user->address) . '%')
+            ->where('gender', 'like', '%' . $user->gender . '%')
+            ->where('sec', 'like', '%' . $user->economic_status . '%')
+            ->where('age_group', $age_group)->first();
+        $arr = array($systemUniverse, $universe, $cat);
+        return $arr;
     }
+    
+    public function datafix(Request $req)
+    {
+        $startDate = substr($req->start, 0, 10);
+        $startTime = substr($req->start, 11, 19);
+        $finishDate = substr($req->finish, 0, 10);
+        $finishTime = substr($req->finish, 11, 19);
+        $startDateTime = date($startDate) . " " . $startTime;
+        $finishDateTime = date($finishDate) . " " . $finishTime;
+        $i=0;
+        //return response()->json(["values" => $finishDateTime], 200);
+        $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+        ->where('started_watching_at', '<', $finishDateTime)
+        ->where('universe', '=', 1)
+
+            ->get();
+            foreach ($ram_logs as $ram_log) {
+                //return response()->json(["values" => $ram_log], 200);
+                $uni = $this->get_universe($ram_log->user_id);
+                //return response()->json(["values" => $uni], 200);
+                $ram_log->system = ($uni[0]!=0)?$uni[0]:1;
+                $ram_log->universe = ($uni[1]!=null)?$uni[1]->universe:1;
+                $ram_log->category_id = ($uni[2]!=null)?$uni[2]->id:-1;
+                $ram_log->save();
+                $i++;
+            }
+        return response()->json(["values" => $i,"total"=>count($ram_logs)], 200);
+    }
+
+
+
     public function receiver($request)
     {
 
@@ -291,16 +322,16 @@ $universe = Universe:://where('type', $req->userType)
                 }
             } else {
 
-                
-                $uni=$this->get_universe($user_id);
+
+                $uni = $this->get_universe($user_id);
                 $var = new DeselectLog;
                 $var->user_id = $user_id;
                 $var->channel_id = $channel_id;
                 $var->started_watching_at = $request->start;
                 $var->finished_watching_at = $request->finish;
-                $var->system = $uni[0];
-                $var->universe = $uni[1];
-                $var->category_id = $uni[2];
+                $var->system = ($uni[0]!=0)?$uni[0]:1;
+                $var->universe = ($uni[1]!=null)?$uni[1]->universe:1;
+                $var->category_id = ($uni[2]!=null)?$uni[2]->id:-1;
                 $var->duration_minute = abs(strtotime($var->started_watching_at) - strtotime($var->finished_watching_at)) / 60;
                 if (strtotime($var->started_watching_at) < strtotime($var->finished_watching_at)) {
 
@@ -325,16 +356,16 @@ $universe = Universe:://where('type', $req->userType)
             } else {
 
 
-                $uni=$this->get_universe($user_id);
+                $uni = $this->get_universe($user_id);
                 $var = new ViewLog;
                 $var->user_id = $user_id;
                 $var->channel_id = $channel_id;
                 $var->started_watching_at = $request->start;
                 $var->finished_watching_at = $request->finish;
-                
-                $var->system = $uni[0];
-                $var->universe = $uni[1];
-                $var->category_id = $uni[2];
+
+                $var->system = ($uni[0]!=0)?$uni[0]:1;
+                $var->universe = ($uni[1]!=null)?$uni[1]->universe:1;
+                $var->category_id = ($uni[2]!=null)?$uni[2]->id:-1;
                 $var->duration_minute = abs(strtotime($var->started_watching_at) - strtotime($var->finished_watching_at)) / 60;
                 if (strtotime($var->started_watching_at) < strtotime($var->finished_watching_at)) {
 

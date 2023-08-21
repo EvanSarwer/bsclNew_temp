@@ -110,7 +110,7 @@ class RequestController extends Controller
     {
         //return response()->json(["values" => "kk1"], 200);
 
-        $rr = new RawRequest();
+        /*$rr = new RawRequest();
         $rr->channel_id = $req->channel_name;
         $rr->device_id = $req->device_id;
         $rr->start = $req->start;
@@ -120,7 +120,7 @@ class RequestController extends Controller
         $rr->temp = $req->temp;
         $rr->error = $req->error;
         $rr->server_time = Carbon::now()->toDateTimeString();;
-        $rr->save();
+        $rr->save();*/
         if ((strtotime($req->start) >= strtotime($req->finish)) ||
             (strtotime($req->start) < strtotime("2020-01-01 00:00:00")) || (strtotime($req->finish) < strtotime("2020-01-01 00:00:00"))
             || (abs(strtotime($req->start) - strtotime($req->finish)) > 3600)

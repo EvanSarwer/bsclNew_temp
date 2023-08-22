@@ -363,56 +363,58 @@ class DeviceController extends Controller
                 $user_deselect->device_id = $req->device_id;
                 $user_deselect->save();
 
-                $user = User::where('device_id', $req->device_id)->first();   //For Old Device Request Only
-                $log = ViewLog::where('user_id', $user->id)
-                    ->where('finished_watching_at', NULL)->first();
-                if ($log) {
-                    $log->finished_watching_at = Carbon::now()->toDateTimeString();;
-                    $time = new DateTime($log->started_watching_at);
-                    $diff = $time->diff(new DateTime($log->finished_watching_at));
-                    $minutes = ($diff->days * 24 * 60) +
-                        ($diff->h * 60) + $diff->i;
-                    $minutes = $minutes > 999 ? 999 : $minutes;
-                    $log->duration_minute = $minutes;
-                    $log->save();
+                // $user = User::where('device_id', $req->device_id)->first();   //For Old Device Request Only
+                // $log = ViewLog::where('user_id', $user->id)
+                //     ->where('finished_watching_at', NULL)->first();
+                // if ($log) {
+                //     $log->finished_watching_at = Carbon::now()->toDateTimeString();;
+                //     $time = new DateTime($log->started_watching_at);
+                //     $diff = $time->diff(new DateTime($log->finished_watching_at));
+                //     $minutes = ($diff->days * 24 * 60) +
+                //         ($diff->h * 60) + $diff->i;
+                //     $minutes = $minutes > 999 ? 999 : $minutes;
+                //     $log->duration_minute = $minutes;
+                //     $log->save();
 
-                    $var = new DeselectLog;
-                    $var->user_id = $user->id;
-                    $var->channel_id = $log->channel_id;
-                    $var->started_watching_at = new Datetime();
-                    $var->save();
+                //     $var = new DeselectLog;
+                //     $var->user_id = $user->id;
+                //     $var->channel_id = $log->channel_id;
+                //     $var->started_watching_at = new Datetime();
+                //     $var->save();
 
-                    return response()->json(["message" => "User Deselected & Log Changed"]);
-                }
-                return response()->json(["message" => "Device Deselected & Log Not Affected"]);
+                //     return response()->json(["message" => "User Deselected & Log Changed"]);
+                // }
+                // return response()->json(["message" => "Device Deselected & Log Not Affected"]);
+                return response()->json(["message" => "Device Deselected"]);
             }
         } elseif ($req->deselect == "") {
             $device_deselect_period = DeselectPeriod::where('device_id', $req->device_id)->whereNotNull('start_date')->whereNull('end_date')->first();
             if ($device_deselect_period) {
                 $device_deselect_period->update(["end_date" => new Datetime()]);
 
-                $user = User::where('device_id', $req->device_id)->first();   //For Old Device Request Only
-                $Deselect_log = DeselectLog::where('user_id', $user->id)
-                    ->where('finished_watching_at', NULL)->first();
-                if ($Deselect_log) {
-                    $Deselect_log->finished_watching_at = Carbon::now()->toDateTimeString();;
-                    $time = new DateTime($Deselect_log->started_watching_at);
-                    $diff = $time->diff(new DateTime($Deselect_log->finished_watching_at));
-                    $minutes = ($diff->days * 24 * 60) +
-                        ($diff->h * 60) + $diff->i;
-                    $minutes = $minutes > 999 ? 999 : $minutes;
-                    $Deselect_log->duration_minute = $minutes;
-                    $Deselect_log->save();
+                // $user = User::where('device_id', $req->device_id)->first();   //For Old Device Request Only
+                // $Deselect_log = DeselectLog::where('user_id', $user->id)
+                //     ->where('finished_watching_at', NULL)->first();
+                // if ($Deselect_log) {
+                //     $Deselect_log->finished_watching_at = Carbon::now()->toDateTimeString();;
+                //     $time = new DateTime($Deselect_log->started_watching_at);
+                //     $diff = $time->diff(new DateTime($Deselect_log->finished_watching_at));
+                //     $minutes = ($diff->days * 24 * 60) +
+                //         ($diff->h * 60) + $diff->i;
+                //     $minutes = $minutes > 999 ? 999 : $minutes;
+                //     $Deselect_log->duration_minute = $minutes;
+                //     $Deselect_log->save();
 
-                    $var = new ViewLog;
-                    $var->user_id = $user->id;
-                    $var->channel_id = $Deselect_log->channel_id;
-                    $var->started_watching_at = new Datetime();
-                    $var->save();
+                //     $var = new ViewLog;
+                //     $var->user_id = $user->id;
+                //     $var->channel_id = $Deselect_log->channel_id;
+                //     $var->started_watching_at = new Datetime();
+                //     $var->save();
 
-                    return response()->json(["message" => "User Deselection Released & Log Changed"]);
-                }
-                return response()->json(["message" => "Device Deselection Released & Log Not Affected"]);
+                //     return response()->json(["message" => "User Deselection Released & Log Changed"]);
+                // }
+                // return response()->json(["message" => "Device Deselection Released & Log Not Affected"]);
+                return response()->json(["message" => "Device Deselection Released"]);
             }
             return response()->json(["message" => "Already User Deselection Released"]);
         }

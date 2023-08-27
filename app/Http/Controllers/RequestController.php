@@ -108,7 +108,7 @@ class RequestController extends Controller
 
     public function receive(Request $req)
     {
-        //return response()->json(["values" => "kk1"], 200);
+        return response()->json(["values" => "kk1"], 200);
 
         /*$rr = new RawRequest();
         $rr->channel_id = $req->channel_name;

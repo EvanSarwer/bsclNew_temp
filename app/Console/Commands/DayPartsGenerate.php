@@ -7,6 +7,7 @@ use App\Models\ViewLog;
 use App\Models\Channel;
 use App\Models\DayPart;
 use App\Models\DayPartProcess;
+use App\Models\Universe;
 use App\Models\User;
 use DateTime;
 
@@ -86,7 +87,7 @@ class DayPartsGenerate extends Command
             //return response()->json(["time" => $channel->channel_name], 200);
             $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];
             $users = User::all();
-            $numOfUser = $users->count();
+            $numOfUser = Universe::sum('universe')/1000;//$users->count();
             //$numOfUser = $users->count();
             $time = $this->dayrange($req->day, $req->day, ((int)$req->range));
 
@@ -133,13 +134,25 @@ class DayPartsGenerate extends Command
                     $tvrs[$i] = $tvrs[$i] + $watchtime;
                 }
             }
+            /*int total_sample = Samplemax;
+            double total_timespent = time.Sum() / 60;
+            double total_reach = this.get_reach(userss);
+            int total_reachint = (int)total_reach;
+            double total_reachp = total_reach / total_sample * 100;
+            double total_share = (!alltimef) ? ((total_timespent > 0) ? 100 : 0) : ((alltime[allc] == 0) ? 0 : total_timespent / (total_sample * alltime[allc]) * 100);
+            total_timespent = total_timespent / total_sample;
+            double total_tvrp = total_timespent * 100 / timerange;
+            double total_tvr = total_tvrp * total_sample / 100;*/
             for ($i = 0; $i < count($tt); $i++) {
+                $rr=(int)$this->mult_sum($reachs[$i]);
 
-                $reachp[$i] = (count(array_unique($reachs[$i])) * 100) / $numOfUser;
-                $reach0[$i] = count(array_unique($reachs[$i]));
-                $tvr0[$i] = $tvrs[$i] / ($numOfUser * $dd);
-
+                $reachp[$i] = ($rr * 100) / $numOfUser;
+                $reach0[$i] = $rr;
+                
                 $tvrp[$i] = ($tvrs[$i] / ($numOfUser * $dd)) * 100;
+                $tvr0[$i] = $tvrp[$i]*$numOfUser / 100;
+
+                //$tvrp[$i] = ($tvrs[$i] / ($numOfUser * $dd)) * 100;
                 //$mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
                 //$mid = date("H:i:s", $mid);
                 $mid = date("H:i:s", strtotime($time[0][$i]["start"]));
@@ -177,15 +190,67 @@ class DayPartsGenerate extends Command
                 $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
             }
             $watched_sec = $watched_sec / 60;
-            array_push($time, $watched_sec);
-            array_push($view, $v->user_id);
+            $mult=($v->universe/1000)/$v->system;
+            array_push($time, $watched_sec*$mult);
+            array_push($view, ["user_id"=>$v->user_id,"mult"=>$mult]);
         }
 
-        $vv = (object)(array("time" => array_sum($time), "view" => array_unique($view)));
+        $vv = (object)(array("time" => array_sum($time), "view" => $this->array_unique2($view)));
 
         //return response()->json(["values" => $vv], 200);
 
         return $vv;
+    }
+    
+    public function mult_sum($inputArray)
+    {
+        $sums = [];
+
+foreach ($inputArray as $item) {
+    $userId = $item["user_id"];
+    $mult = $item["mult"];
+    
+    // Check if the user ID already exists in the sums array
+    if (isset($sums[$userId])) {
+        // Update the 'mult' value if it's greater than the current value
+        if ($mult > $sums[$userId]["mult"]) {
+            $sums[$userId]["mult"] = $mult;
+        }
+    } else {
+        // If the user ID doesn't exist, add it to the sums array
+        $sums[$userId] = ["user_id" => $userId, "mult" => $mult];
+    }
+}
+
+// Convert the associative array to a sequential array
+$modifiedArray = array_values($sums);
+
+// Calculate the sum of 'mult' values from the modified array
+$sum = 0;
+foreach ($modifiedArray as $item) {
+    $sum += $item["mult"];
+}
+
+return ($sum);
+    }
+    public function array_unique2($inputArray)
+    {
+        $uniqueArray = [];
+
+foreach ($inputArray as $item) {
+    $user_id = $item["user_id"];
+    $mult = $item["mult"];
+    $uniqueKey = $user_id . '-' . $mult;
+
+    if (!isset($uniqueArray[$uniqueKey])) {
+        $uniqueArray[$uniqueKey] = ["user_id" => $user_id, "mult" => $mult];
+    }
+}
+
+// Convert the unique array back to indexed array
+$uniqueArray = array_values($uniqueArray);
+
+return ($uniqueArray);
     }
     public function timeviewed($id, $start, $finish)
     {

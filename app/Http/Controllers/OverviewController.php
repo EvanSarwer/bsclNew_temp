@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ViewLog;
 use App\Models\Channel;
+use App\Models\Universe;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class OverviewController extends Controller
 {
@@ -42,11 +45,28 @@ class OverviewController extends Controller
                 //->whereBetween('age', [$req->age1, $req->age2])
                 ->whereBetween('dob', [$minDate, $maxDate])
                 ->pluck('id')->toArray();
+
+            $age_group = [];
+            for ($i = $req->age1; $i <= $req->age2; $i++) {
+                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
+            }
+
+            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+                ->where('rs', 'like', '%' . $req->socio . '%')
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->where('start', '<=', $startDate)
+                ->where('end', '>=', $finishDate)
+                ->sum(DB::raw('universe / 1000'));
+
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         } else {
             $userids = User::pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
@@ -55,23 +75,41 @@ class OverviewController extends Controller
         //return response()->json(["reachsum" => $ram_logs], 200);
         foreach ($channels as $c) {
 
-            $user_count = $ram_logs->where('channel_id', $c->id)
-
-                ->pluck('user_id')->unique()->count();
+            $user_count = $ram_logs
+                ->where('channel_id', $c->id)
+                ->groupBy('user_id')
+                ->map(function ($groupedLogs) {
+                    return $groupedLogs->max(function ($log) {
+                        return $log->universe / (1000 * $log->system);
+                    });
+                })
+                ->sum();
             //return response()->json(["reachsum" => $viewlogs], 200);
 
             //$user_count = 0;
 
-
-
             array_push($channel_label, $c->channel_name);
             array_push($channel_id, $c->id);
-            array_push($number_of_user, $user_count);
+            array_push($number_of_user, round($user_count));
             $user_count = 0;
         }
 
-        return response()->json(["reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
+        $inputData = new stdClass();
+        $inputData->category = "Reach(000s)";
+        $inputData->start = $req->start;
+        $inputData->finish = $req->finish;
+        $inputData->userType = $req->userType;
+        $inputData->region = $req->region;
+        $inputData->gender = $req->gender;
+        $inputData->economic = $req->economic;
+        $inputData->socio = $req->socio;
+        $inputData->age1 = $req->age1;
+        $inputData->age2 = $req->age2;
+        $inputData->universe = $universe_size;
+        $inputData->sample =  count($userids);
+        return response()->json(["input_data" => $inputData , "reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
     }
+    
     public function reachpercentgraph(Request $req)
     {
         $startDate = substr($req->start, 0, 10);
@@ -80,7 +118,7 @@ class OverviewController extends Controller
         $finishTime = substr($req->finish, 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
-        $total_user = User::count();
+        // $total_user = User::count();
         $channels = Channel::all('id', 'channel_name');
 
         $number_of_user = [];
@@ -98,11 +136,29 @@ class OverviewController extends Controller
                 //->whereBetween('age', [$req->age1, $req->age2])
                 ->whereBetween('dob', [$minDate, $maxDate])
                 ->pluck('id')->toArray();
+
+
+            $age_group = [];
+            for ($i = $req->age1; $i <= $req->age2; $i++) {
+                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
+            }
+
+            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+                ->where('rs', 'like', '%' . $req->socio . '%')
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->where('start', '<=', $startDate)
+                ->where('end', '>=', $finishDate)
+                ->sum(DB::raw('universe / 1000'));
+
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         } else {
             $userids = User::pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
@@ -111,16 +167,22 @@ class OverviewController extends Controller
         //return response()->json(["reachsum" => $ram_logs], 200);
         foreach ($channels as $c) {
 
-            $user_count = $ram_logs->where('channel_id', $c->id)
-
-                ->pluck('user_id')->unique()->count();
+            $user_count = $ram_logs
+                ->where('channel_id', $c->id)
+                ->groupBy('user_id')
+                ->map(function ($groupedLogs) {
+                    return $groupedLogs->max(function ($log) {
+                        return $log->universe / (1000 * $log->system);
+                    });
+                })
+                ->sum();
             //return response()->json(["reachsum" => $viewlogs], 200);
 
             //$user_count = 0;
 
 
 
-            $user_count = ($user_count / $total_user) * 100;
+            $user_count = ($user_count / $universe_size) * 100;
             $user_count = round($user_count, 1);
             array_push($channel_label, $c->channel_name);
             array_push($channel_id, $c->id);
@@ -128,8 +190,22 @@ class OverviewController extends Controller
             $user_count = 0;
         }
 
-        return response()->json(["reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
+        $inputData = new stdClass();
+        $inputData->category = "Reach(%)";
+        $inputData->start = $req->start;
+        $inputData->finish = $req->finish;
+        $inputData->userType = $req->userType;
+        $inputData->region = $req->region;
+        $inputData->gender = $req->gender;
+        $inputData->economic = $req->economic;
+        $inputData->socio = $req->socio;
+        $inputData->age1 = $req->age1;
+        $inputData->age2 = $req->age2;
+        $inputData->universe = $universe_size;
+        $inputData->sample =  count($userids);
+        return response()->json(["input_data" => $inputData, "reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
     }
+
     public function tvrgraphallchannelzero(Request $req)
     {
         $startDate = substr($req->start, 0, 10);
@@ -138,8 +214,7 @@ class OverviewController extends Controller
         $finishTime = substr($req->finish, 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
-        $numOfUser = User::count();
-        //$numOfUser = $users->count();
+
         $channelArray = array();
         $channel_id = [];
         $tvrs = array();
@@ -147,13 +222,8 @@ class OverviewController extends Controller
         $channels = Channel::all('id', 'channel_name');
         $to_time = strtotime($startDateTime);
         $from_time = strtotime($finishDateTime);
-
         $diff = abs($to_time - $from_time) / 60;
-        $tvrs = array();
-        $viewer = array();
-        $number_of_user = [];
-        $channel_label = [];
-        $channel_id = [];
+
         if ($req->userType == "STB") {
             $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
             $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
@@ -166,11 +236,30 @@ class OverviewController extends Controller
                 //->whereBetween('age', [$req->age1, $req->age2])
                 ->whereBetween('dob', [$minDate, $maxDate])
                 ->pluck('id')->toArray();
+
+            $age_group = [];
+            for ($i = $req->age1; $i <= $req->age2; $i++) {
+                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
+            }
+
+            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+                ->where('rs', 'like', '%' . $req->socio . '%')
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->where('start', '<=', $startDate)
+                ->where('end', '>=', $finishDate)
+                ->sum(DB::raw('universe / 1000'));
+
+
+
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         } else {
             $userids = User::pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
@@ -190,13 +279,13 @@ class OverviewController extends Controller
                 $user = (object)$user;
                 //return response()->json(["reachsum" => $user->started_watching_at], 200);
                 if (((strtotime($user->started_watching_at)) < ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
-                    $watched_sec = abs($to_time - $from_time);
+                    $watched_sec = abs($to_time - $from_time) * ($user->universe / (1000 * $user->system));
                 } else if (((strtotime($user->started_watching_at)) < ($to_time)) && ((strtotime($user->finished_watching_at)) <= ($from_time))) {
-                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at));
+                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at))  * ($user->universe / (1000 * $user->system));
                 } else if (((strtotime($user->started_watching_at)) >= ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
-                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time);
+                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time)  * ($user->universe / (1000 * $user->system));
                 } else {
-                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at));
+                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at))  * ($user->universe / (1000 * $user->system));
                 }
                 //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
                 $watched_sec = $watched_sec / 60;
@@ -204,20 +293,33 @@ class OverviewController extends Controller
             }
 
 
-            $tvr = array_sum($viewer) / $numOfUser; ///$numOfUser;
-            //return response()->json(["reachsum" => $tvr], 200);
-            //$tvr=$tvr/60;
-            $tvr = $tvr / $diff;
-            //$tvr=$tvr*100;
+            $timeSpent_universe = array_sum($viewer) / $universe_size;
+            $tvrp = ($timeSpent_universe * 100) / $diff;
+            $tvr0 = ($tvrp * $universe_size) / 100;
+
             unset($viewer);
             $viewer = array();
             array_push($channelArray, $c->channel_name);
-            array_push($tvrs, $tvr);
+            array_push($tvrs, $tvr0);
             array_push($channel_id, $c->id);
         }
 
-        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
+        $inputData = new stdClass();
+        $inputData->category = "TVR(000s)";
+        $inputData->start = $req->start;
+        $inputData->finish = $req->finish;
+        $inputData->userType = $req->userType;
+        $inputData->region = $req->region;
+        $inputData->gender = $req->gender;
+        $inputData->economic = $req->economic;
+        $inputData->socio = $req->socio;
+        $inputData->age1 = $req->age1;
+        $inputData->age2 = $req->age2;
+        $inputData->universe = $universe_size;
+        $inputData->sample =  count($userids);
+        return response()->json(["input_data" => $inputData, "tvrs" => $tvrs, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
     }
+
     public function timespentgraph(Request $req)
     {
         $startDate = substr($req->start, 0, 10);
@@ -226,23 +328,15 @@ class OverviewController extends Controller
         $finishTime = substr($req->finish, 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
-        $numOfUser = User::count();
-        //$numOfUser = $users->count();
+
         $channelArray = array();
         $channel_id = [];
-        $tvrs = array();
+        $total_time = array();
         $viewer = array();
         $channels = Channel::all('id', 'channel_name');
         $to_time = strtotime($startDateTime);
         $from_time = strtotime($finishDateTime);
 
-        $total_time = array();
-        $diff = abs($to_time - $from_time) / 60;
-        $tvrs = array();
-        $viewer = array();
-        $number_of_user = [];
-        $channel_label = [];
-        $channel_id = [];
         if ($req->userType == "STB") {
             $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
             $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
@@ -255,11 +349,30 @@ class OverviewController extends Controller
                 //->whereBetween('age', [$req->age1, $req->age2])
                 ->whereBetween('dob', [$minDate, $maxDate])
                 ->pluck('id')->toArray();
+
+            $age_group = [];
+            for ($i = $req->age1; $i <= $req->age2; $i++) {
+                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
+            }
+
+            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+                ->where('rs', 'like', '%' . $req->socio . '%')
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->where('start', '<=', $startDate)
+                ->where('end', '>=', $finishDate)
+                ->sum(DB::raw('universe / 1000'));
+
+
+
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         } else {
             $userids = User::pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
@@ -279,13 +392,13 @@ class OverviewController extends Controller
                 $user = (object)$user;
                 //return response()->json(["reachsum" => $user->started_watching_at], 200);
                 if (((strtotime($user->started_watching_at)) < ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
-                    $watched_sec = abs($to_time - $from_time);
+                    $watched_sec = abs($to_time - $from_time) * ($user->universe / (1000 * $user->system));
                 } else if (((strtotime($user->started_watching_at)) < ($to_time)) && ((strtotime($user->finished_watching_at)) <= ($from_time))) {
-                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at));
+                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at))  * ($user->universe / (1000 * $user->system));
                 } else if (((strtotime($user->started_watching_at)) >= ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
-                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time);
+                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time)  * ($user->universe / (1000 * $user->system));
                 } else {
-                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at));
+                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at))  * ($user->universe / (1000 * $user->system));
                 }
                 //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
                 $watched_sec = $watched_sec / 60;
@@ -293,22 +406,33 @@ class OverviewController extends Controller
             }
 
 
-            $tvr = array_sum($viewer);//$numOfUser; ///$numOfUser;
-            //return response()->json(["reachsum" => $tvr], 200);
-            //$tvr=$tvr/60;
-            $total_time_viewed = round($tvr);
+            $timeSpent_universe = array_sum($viewer);
+
             unset($viewer);
             $viewer = array();
-            array_push($total_time, $total_time_viewed);
             array_push($channelArray, $c->channel_name);
+            array_push($total_time, $timeSpent_universe);
             array_push($channel_id, $c->id);
-
-            
-            
         }
 
-        return response()->json(["totaltime" => $total_time, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
+        $inputData = new stdClass();
+        $inputData->category = "Time Spent-Universe(minute)";
+        $inputData->start = $req->start;
+        $inputData->finish = $req->finish;
+        $inputData->userType = $req->userType;
+        $inputData->region = $req->region;
+        $inputData->gender = $req->gender;
+        $inputData->economic = $req->economic;
+        $inputData->socio = $req->socio;
+        $inputData->age1 = $req->age1;
+        $inputData->age2 = $req->age2;
+        $inputData->universe = $universe_size;
+        $inputData->sample =  count($userids);
+        return response()->json(["input_data" => $inputData, "totaltime" => $total_time, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
     }
+
+
+
     public function tvrsharegraph(Request $req)
     {
         $startDate = substr($req->start, 0, 10);
@@ -317,8 +441,7 @@ class OverviewController extends Controller
         $finishTime = substr($req->finish, 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
-        $numOfUser = User::count();
-        //$numOfUser = $users->count();
+
         $channelArray = array();
         $channel_id = [];
         $tvrs = array();
@@ -326,15 +449,9 @@ class OverviewController extends Controller
         $channels = Channel::all('id', 'channel_name');
         $to_time = strtotime($startDateTime);
         $from_time = strtotime($finishDateTime);
-
         $diff = abs($to_time - $from_time) / 60;
-        $tvrs = array();
-        $viewer = array();
-        
         $shares = array();
-        $number_of_user = [];
-        $channel_label = [];
-        $channel_id = [];
+
         if ($req->userType == "STB") {
             $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
             $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
@@ -347,11 +464,31 @@ class OverviewController extends Controller
                 //->whereBetween('age', [$req->age1, $req->age2])
                 ->whereBetween('dob', [$minDate, $maxDate])
                 ->pluck('id')->toArray();
+
+
+            $age_group = [];
+            for ($i = $req->age1; $i <= $req->age2; $i++) {
+                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
+            }
+
+            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+                ->where('rs', 'like', '%' . $req->socio . '%')
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->where('start', '<=', $startDate)
+                ->where('end', '>=', $finishDate)
+                ->sum(DB::raw('universe / 1000'));
+
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+
         } else {
             $userids = User::pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
@@ -371,29 +508,27 @@ class OverviewController extends Controller
                 $user = (object)$user;
                 //return response()->json(["reachsum" => $user->started_watching_at], 200);
                 if (((strtotime($user->started_watching_at)) < ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
-                    $watched_sec = abs($to_time - $from_time);
+                    $watched_sec = abs($to_time - $from_time) * ($user->universe / (1000 * $user->system));
                 } else if (((strtotime($user->started_watching_at)) < ($to_time)) && ((strtotime($user->finished_watching_at)) <= ($from_time))) {
-                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at));
+                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at)) * ($user->universe / (1000 * $user->system));
                 } else if (((strtotime($user->started_watching_at)) >= ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
-                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time);
+                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time) * ($user->universe / (1000 * $user->system));
                 } else {
-                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at));
+                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at))  * ($user->universe / (1000 * $user->system));
                 }
                 //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
                 $watched_sec = $watched_sec / 60;
                 array_push($viewer, $watched_sec);
             }
 
+            $timeSpent_universe = array_sum($viewer) / $universe_size;
+            $tvrp = ($timeSpent_universe * 100) / $diff;
+            $tvr0 = ($tvrp * $universe_size) / 100;
 
-            $tvr = array_sum($viewer) / $numOfUser; ///$numOfUser;
-            //return response()->json(["reachsum" => $tvr], 200);
-            //$tvr=$tvr/60;
-            $tvr = $tvr / $diff;
-            //$tvr=$tvr*100;
             unset($viewer);
             $viewer = array();
             array_push($channelArray, $c->channel_name);
-            array_push($tvrs, $tvr);
+            array_push($tvrs, $tvr0);
             array_push($channel_id, $c->id);
         }
         $total_tvr = array_sum($tvrs);
@@ -411,8 +546,22 @@ class OverviewController extends Controller
             array_push($shares, $s);
         }
         //return response()->json(["Total-tvr"=>$total_tvr,"tvrs"=>$tvrs,"total_share"=>$total_share,"share"=>$shares,"channels"=>$channelArray],200);
-        return response()->json(["share" => $shares, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
+        $inputData = new stdClass();
+        $inputData->category = "TVR Share(%)";
+        $inputData->start = $req->start;
+        $inputData->finish = $req->finish;
+        $inputData->userType = $req->userType;
+        $inputData->region = $req->region;
+        $inputData->gender = $req->gender;
+        $inputData->economic = $req->economic;
+        $inputData->socio = $req->socio;
+        $inputData->age1 = $req->age1;
+        $inputData->age2 = $req->age2;
+        $inputData->universe = $universe_size;
+        $inputData->sample =  count($userids);
+        return response()->json(["input_data" => $inputData, "share" => $shares, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
     }
+
     public function tvrgraphallchannelpercent(Request $req)
     {
         $startDate = substr($req->start, 0, 10);
@@ -421,8 +570,7 @@ class OverviewController extends Controller
         $finishTime = substr($req->finish, 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
-        $numOfUser = User::count();
-        //$numOfUser = $users->count();
+        
         $channelArray = array();
         $channel_id = [];
         $tvrs = array();
@@ -430,13 +578,8 @@ class OverviewController extends Controller
         $channels = Channel::all('id', 'channel_name');
         $to_time = strtotime($startDateTime);
         $from_time = strtotime($finishDateTime);
-
         $diff = abs($to_time - $from_time) / 60;
-        $tvrs = array();
-        $viewer = array();
-        $number_of_user = [];
-        $channel_label = [];
-        $channel_id = [];
+
         if ($req->userType == "STB") {
             $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
             $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
@@ -449,11 +592,30 @@ class OverviewController extends Controller
                 //->whereBetween('age', [$req->age1, $req->age2])
                 ->whereBetween('dob', [$minDate, $maxDate])
                 ->pluck('id')->toArray();
+
+            $age_group = [];
+            for ($i = $req->age1; $i <= $req->age2; $i++) {
+                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
+            }
+
+            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+                ->where('rs', 'like', '%' . $req->socio . '%')
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->where('start', '<=', $startDate)
+                ->where('end', '>=', $finishDate)
+                ->sum(DB::raw('universe / 1000'));
+
+
+
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         } else {
             $userids = User::pluck('id')->toArray();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
@@ -473,13 +635,13 @@ class OverviewController extends Controller
                 $user = (object)$user;
                 //return response()->json(["reachsum" => $user->started_watching_at], 200);
                 if (((strtotime($user->started_watching_at)) < ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
-                    $watched_sec = abs($to_time - $from_time);
+                    $watched_sec = abs($to_time - $from_time) * ($user->universe / (1000 * $user->system));
                 } else if (((strtotime($user->started_watching_at)) < ($to_time)) && ((strtotime($user->finished_watching_at)) <= ($from_time))) {
-                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at));
+                    $watched_sec = abs($to_time - strtotime($user->finished_watching_at))  * ($user->universe / (1000 * $user->system));
                 } else if (((strtotime($user->started_watching_at)) >= ($to_time)) && (((strtotime($user->finished_watching_at)) > ($from_time)) || (($user->finished_watching_at) == Null))) {
-                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time);
+                    $watched_sec = abs(strtotime($user->started_watching_at) - $from_time)  * ($user->universe / (1000 * $user->system));
                 } else {
-                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at));
+                    $watched_sec = abs(strtotime($user->finished_watching_at) - strtotime($user->started_watching_at))  * ($user->universe / (1000 * $user->system));
                 }
                 //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
                 $watched_sec = $watched_sec / 60;
@@ -487,19 +649,35 @@ class OverviewController extends Controller
             }
 
 
-            $tvr = array_sum($viewer) / $numOfUser; ///$numOfUser;
+            $timeSpent_universe = array_sum($viewer) / $universe_size;
+            $tvrp = ($timeSpent_universe * 100) / $diff;
+            //$tvr0 = ($tvrp * $universe_size) / 100;
+            // $tvr = array_sum($viewer) ; ///$numOfUser;
             //return response()->json(["reachsum" => $tvr], 200);
             //$tvr=$tvr/60;
-            $tvr = $tvr / $diff;
-            $tvr=$tvr*100;
+            // $tvr = $tvr / $diff;
+            //$tvr=$tvr*100;
             unset($viewer);
             $viewer = array();
             array_push($channelArray, $c->channel_name);
-            array_push($tvrs, $tvr);
+            array_push($tvrs, $tvrp);
             array_push($channel_id, $c->id);
         }
 
-        return response()->json(["tvrs" => $tvrs, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
+        $inputData = new stdClass();
+        $inputData->category = "TVR(%)";
+        $inputData->start = $req->start;
+        $inputData->finish = $req->finish;
+        $inputData->userType = $req->userType;
+        $inputData->region = $req->region;
+        $inputData->gender = $req->gender;
+        $inputData->economic = $req->economic;
+        $inputData->socio = $req->socio;
+        $inputData->age1 = $req->age1;
+        $inputData->age2 = $req->age2;
+        $inputData->universe = $universe_size;
+        $inputData->sample =  count($userids);
+        return response()->json(["input_data" => $inputData, "tvrs" => $tvrs, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
     }
 
     public function reachusergraphs(Request $req)

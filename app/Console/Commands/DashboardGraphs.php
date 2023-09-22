@@ -7,8 +7,11 @@ use App\Models\ViewLog;
 use App\Models\Device;
 use App\Models\Channel;
 use App\Models\DashboardTempData;
+use App\Models\DataCleanse;
+use App\Models\Universe;
 use App\Models\User;
 use stdClass;
+use Illuminate\Support\Facades\DB;
 
 class DashboardGraphs extends Command
 {
@@ -63,13 +66,19 @@ class DashboardGraphs extends Command
             // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
             // $startDateTime = date('Y-m-d H:i:s', $newtimestamp); 
 
+            $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+            ->where('started_watching_at', '<', $finishDateTime)
+            ->get();
 
-            $reach = $this->reachpercentdashboard($startDateTime, $finishDateTime);
-            $reachZero = $this->reachuserdashboard($startDateTime, $finishDateTime);
-            $tvr = $this->tvrgraphdashboard($startDateTime, $finishDateTime);
-            $tvrZero = $this->tvrgraphzerodashboard($startDateTime, $finishDateTime);
-            $share =  $this->sharegraphdashboard($startDateTime, $finishDateTime);
-            $timeSpent = $this->timeSpentUniverse($startDateTime, $finishDateTime);
+            $total_user = User::count();
+            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+
+            $reach = $this->reachpercentdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size);
+            $reachZero = $this->reachuserdashboard($startDateTime, $finishDateTime, $ram_logs);
+            $tvr = $this->tvrgraphdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size);
+            $tvrZero = $this->tvrgraphzerodashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size);
+            $share =  $this->sharegraphdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size);
+            $timeSpent = $this->timeSpentUniverse($startDateTime, $finishDateTime, $ram_logs);
 
 
             $all_graph = [
@@ -89,6 +98,8 @@ class DashboardGraphs extends Command
                 "finish" => $finishDateTime,
                 "top_reach" => $reach->reach_channel[0],
                 "top_tvr" => $tvr->tvr_channel[0],
+                "universe" => $universe_size,
+                "sample" => $total_user,
             ];
 
             $td = new DashboardTempData();
@@ -102,518 +113,419 @@ class DashboardGraphs extends Command
 
     }
 
-    public function reachpercentdashboard($startDateTime, $finishDateTime)
+    public function reachpercentdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size)
     {
-        // $yesterday = date("Y-m-d");
-        // $finishDateTime = $yesterday . " 00:00:00";
-        // //$finishDateTime = date("Y-m-d H:i:s");
-        // $min = 1440;
-        // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-        // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-
         $channels = Channel::whereNotIn('id', [888, 40])
-        ->select('id', 'channel_name')
-        ->get();
-        $total_user = User::count();
+          ->select('id', 'channel_name')
+          ->get();
+        // $total_user = User::count();
+        // $universe_size = Universe::sum(DB::raw('universe / 1000'));
         $channel_info = [];
-
+    
+        // $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+        //         ->where('started_watching_at', '<', $finishDateTime)
+        //         ->get();
+    
         foreach ($channels as $c) {
-        $user_count = 0;
-        $logs = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($startDateTime, $finishDateTime) {
-            $query->where('finished_watching_at', '>', $startDateTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at', '<', $finishDateTime)
-            ->distinct()->get('user_id');
-
-        $viewlogs = count($logs);
-
-        $user_count = ($viewlogs / $total_user) * 100;
-        $channel = [
+          $user_count = $ram_logs
+                    ->where('channel_id', $c->id)
+                    ->groupBy('user_id')
+                    ->map(function ($groupedLogs) {
+                        return $groupedLogs->max(function ($log) {
+                            return $log->universe / (1000 * $log->system);
+                        });
+                    })
+                    ->sum();
+    
+          $user_count = ($user_count / $universe_size) * 100;
+          $user_count = round($user_count, 1);
+                  
+          $channel = [
             "channel_name" => $c->channel_name,
             "users" => $user_count
-        ];
-        array_push($channel_info, $channel);
+          ];
+          array_push($channel_info, $channel);
         }
         array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
         $label = array();
         $value = array();
         for ($i = 0; $i < 10; $i++) {
-        array_push($label, $channel_info[$i]['channel_name']);
-        array_push($value, $channel_info[$i]['users']);
+          array_push($label, $channel_info[$i]['channel_name']);
+          array_push($value, $channel_info[$i]['users']);
         }
-
-        //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+    
         $t_data = new stdClass;
         $t_data->reach_channel = $label;
         $t_data->reach_value = $value;
+        // $t_data->universe = $universe_size;
+        // $t_data->sample = $total_user;
         return $t_data;
     }
 
-    public function reachuserdashboard($startDateTime, $finishDateTime)
+    public function reachuserdashboard($startDateTime, $finishDateTime, $ram_logs)
     {
-        // $yesterday = date("Y-m-d");
-        // $finishDateTime = $yesterday . " 00:00:00";
-        // //$finishDateTime = date("Y-m-d H:i:s");
-        // $min = 1440;
-        // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-        // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-
         $channels = Channel::whereNotIn('id', [888, 40])
-        ->select('id', 'channel_name')
-        ->get();
-        $total_user = User::count();
+          ->select('id', 'channel_name')
+          ->get();
+    
         $channel_info = [];
-
+    
+        // $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+        //         ->where('started_watching_at', '<', $finishDateTime)
+        //         ->get();
+    
         foreach ($channels as $c) {
-        $user_count = 0;
-        $logs = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($startDateTime, $finishDateTime) {
-            $query->where('finished_watching_at', '>', $startDateTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at', '<', $finishDateTime)
-            ->distinct()->get('user_id');
-
-        $viewlogs = count($logs);
-
-        //$user_count = ($viewlogs / $total_user) * 100 ;
-        $channel = [
+          $user_count = $ram_logs
+                    ->where('channel_id', $c->id)
+                    ->groupBy('user_id')
+                    ->map(function ($groupedLogs) {
+                        return $groupedLogs->max(function ($log) {
+                            return $log->universe / (1000 * $log->system);
+                        });
+                    })
+                    ->sum();
+    
+          $channel = [
             "channel_name" => $c->channel_name,
-            "users" => $viewlogs
-        ];
-        array_push($channel_info, $channel);
+            "users" => round($user_count)
+          ];
+          array_push($channel_info, $channel);
         }
         array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
         $label = array();
         $value = array();
         for ($i = 0; $i < 10; $i++) {
-        array_push($label, $channel_info[$i]['channel_name']);
-        array_push($value, $channel_info[$i]['users']);
+          array_push($label, $channel_info[$i]['channel_name']);
+          array_push($value, $channel_info[$i]['users']);
         }
-
-        //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+    
         $t_data = new stdClass;
         $t_data->reachzero_channel = $label;
         $t_data->reachzero_value = $value;
         return $t_data;
     }
 
-    public function tvrgraphdashboard($startDateTime, $finishDateTime)
+    public function tvrgraphdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size)
     {
-
-
-        $channelArray = array();
-        $tvrs = array();
         $temp = array();
         $viewer = array();
-        //$ldate = date('Y-m-d H:i:s');
-        /*if($req->start=="" && $req->finish==""){
-            return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
-            }*/
-        // $yesterday = date("Y-m-d");
-        // $finishDateTime = $yesterday . " 00:00:00";
-        // //$finishDateTime = date("Y-m-d H:i:s");
-        // $min = 1440;
-        // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-        // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    
         $start_range = strtotime($startDateTime);
         $finish_range = strtotime($finishDateTime);
-        $diff = abs($start_range - $finish_range) / 60;
-
-        //return response()->json([$di],200);
-        //return response()->json(["tvr"=>$diff],200);
+        $diff = abs($start_range - $finish_range) / 60;;
+    
+        // $universe_size = Universe::sum(DB::raw('universe / 1000'));
         $channels = Channel::whereNotIn('id', [888, 40])
-        ->select('id', 'channel_name')
-        ->get();
-
-        //return response()->json([$channels],200);
-        $users = User::all();
-        $numOfUser = $users->count();
-        //$all=array();
-
+          ->select('id', 'channel_name')
+          ->get();
+    
+        // $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+        //   ->where('started_watching_at', '<', $finishDateTime)
+        //   ->get();
+    
         foreach ($channels as $c) {
-        $viewers = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($finishDateTime, $startDateTime) {
-            $query->where('finished_watching_at', '>', $startDateTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at', '<', $finishDateTime)
-            ->get();
-        /*$viewers = ViewLog::where('channel_id', $c->id)
-            ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
-            ->where('finished_watching_at','>',date($startDate)." ".$startTime)
-            ->get();*/
-        foreach ($viewers as $v) {
+          $viewers = $ram_logs->where('channel_id', $c->id)
+            ->toArray();
+            
+          foreach ($viewers as $v) {
+            $v = (object)$v;
+    
             if ($v->finished_watching_at == null) {
-            if ((strtotime($v->started_watching_at)) < ($start_range)) {
-                $timeviewd = abs($start_range - strtotime($finishDateTime));
-            } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
-                $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime));
-            }
+              if ((strtotime($v->started_watching_at)) < ($start_range)) {
+                $timeviewd = abs($start_range - strtotime($finishDateTime)) * ($v->universe / (1000 * $v->system));
+              } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
+                $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime)) * ($v->universe / (1000 * $v->system));
+              }
             } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-            $timeviewd = abs($start_range - $finish_range);
+              $timeviewd = abs($start_range - $finish_range) * ($v->universe / (1000 * $v->system));
             } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
-            $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
+              $timeviewd = abs($start_range - strtotime($v->finished_watching_at)) * ($v->universe / (1000 * $v->system));
             } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-            $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
+              $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range) * ($v->universe / (1000 * $v->system));
             } else {
-            $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+              $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at)) * ($v->universe / (1000 * $v->system));
             }
             //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
             $timeviewd = $timeviewd / 60;
             array_push($viewer, $timeviewd);
-        }
-        //return response()->json([$viewer],200);
-        $tvr = array_sum($viewer) / $numOfUser;
-        //$tvr=$tvr/60;
-        $tvr = $tvr / $diff;
-        $tvr = $tvr * 100;
-        unset($viewer);
-        $viewer = array();
-        array_push($channelArray, $c->channel_name);
-        array_push($tvrs, $tvr);
-        $tempc = array(
-
+          }
+    
+          $timeSpent_universe = array_sum($viewer) / $universe_size;
+          $tvrp = ($timeSpent_universe * 100) / $diff;
+    
+          unset($viewer);
+          $viewer = array();
+    
+          $tempc = array(
+    
             "label" => $c->channel_name,
-
-            "value" => $tvr
-
-        );
-        array_push($temp, $tempc);
+    
+            "value" => $tvrp
+    
+          );
+          array_push($temp, $tempc);
         }
-        //return response()->json([$temp],200);
-
+    
         $label = array();
         $value = array();
         array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
         for ($i = 0; $i < 10; $i++) {
-
-        array_push($label, $temp[$i]['label']);
-        array_push($value, $temp[$i]['value']);
+    
+          array_push($label, $temp[$i]['label']);
+          array_push($value, $temp[$i]['value']);
         }
-        /*rsort($temptvr);
-                $rlength=count($tvrs);
-                $cc=0;
-                for($i=0;$i<$rlength && $cc<10;$i++){
-                if($tvrs[$i]>$temptvr[10]){
-                    array_push($nchannelArray,$channelArray[$i]);
-                array_push($ntvrs,$tvrs[$i]);
-                $cc++;
-                }
-                }*/
-
-        //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+    
         $t_data = new stdClass;
         $t_data->tvr_channel = $label;
         $t_data->tvr_value = $value;
         return $t_data;
     }
 
-    public function tvrgraphzerodashboard($startDateTime, $finishDateTime)
+    public function tvrgraphzerodashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size)
     {
-
-
-        $channelArray = array();
-        $tvrs = array();
-
         $temp = array();
         $viewer = array();
-
-        // $yesterday = date("Y-m-d");
-        // $finishDateTime = $yesterday . " 00:00:00";
-        // //$finishDateTime = date("Y-m-d H:i:s");
-        // $min = 1440;
-        // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-        // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    
         $start_range = strtotime($startDateTime);
         $finish_range = strtotime($finishDateTime);
         $diff = abs($start_range - $finish_range) / 60;
+    
+        // $universe_size = Universe::sum(DB::raw('universe / 1000'));
         $channels = Channel::whereNotIn('id', [888, 40])
-        ->select('id', 'channel_name')
-        ->get();
-        $users = User::all();
-        $numOfUser = $users->count();
-
+          ->select('id', 'channel_name')
+          ->get();
+    
+        // $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+        //   ->where('started_watching_at', '<', $finishDateTime)
+        //   ->get();
+    
         foreach ($channels as $c) {
-        $viewers = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($finishDateTime, $startDateTime) {
-            $query->where('finished_watching_at', '>', $startDateTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at', '<', $finishDateTime)
-            ->get();
-        /*$viewers = ViewLog::where('channel_id', $c->id)
-            ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
-            ->where('finished_watching_at','>',date($startDate)." ".$startTime)
-            ->get();*/
-        foreach ($viewers as $v) {
+          $viewers = $ram_logs->where('channel_id', $c->id)
+            ->toArray();
+    
+          foreach ($viewers as $v) {
+            $v = (object)$v;
+    
             if ($v->finished_watching_at == null) {
-            if ((strtotime($v->started_watching_at)) < ($start_range)) {
-                $timeviewd = abs($start_range - strtotime($finishDateTime));
-            } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
-                $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime));
-            }
+              if ((strtotime($v->started_watching_at)) < ($start_range)) {
+                $timeviewd = abs($start_range - strtotime($finishDateTime)) * ($v->universe / (1000 * $v->system));
+              } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
+                $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime)) * ($v->universe / (1000 * $v->system));
+              }
             } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-            $timeviewd = abs($start_range - $finish_range);
+              $timeviewd = abs($start_range - $finish_range) * ($v->universe / (1000 * $v->system));
             } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
-            $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
+              $timeviewd = abs($start_range - strtotime($v->finished_watching_at)) * ($v->universe / (1000 * $v->system));
             } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-            $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
+              $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range) * ($v->universe / (1000 * $v->system));
             } else {
-            $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+              $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at)) * ($v->universe / (1000 * $v->system));
             }
-            //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+           
             $timeviewd = $timeviewd / 60;
             array_push($viewer, $timeviewd);
-        }
-        //return response()->json([$viewer],200);
-        $tvr = array_sum($viewer) / $numOfUser;
-        //$tvr=$tvr/60;
-        $tvr = $tvr / $diff;
-        //$tvr=$tvr*100;
-        unset($viewer);
-        $viewer = array();
-        array_push($channelArray, $c->channel_name);
-        array_push($tvrs, $tvr);
-        $tempc = array(
-
+          }
+    
+          $timeSpent_universe = array_sum($viewer) / $universe_size;
+          $tvrp = ($timeSpent_universe * 100) / $diff;
+          $tvr0 = ($tvrp * $universe_size) / 100;
+          
+          unset($viewer);
+          $viewer = array();
+    
+          $tempc = array(
+    
             "label" => $c->channel_name,
-
-            "value" => $tvr
-
-        );
-        array_push($temp, $tempc);
+    
+            "value" => $tvr0
+    
+          );
+          array_push($temp, $tempc);
         }
+    
         $label = array();
         $value = array();
         array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
-
+    
         for ($i = 0; $i < 10; $i++) {
-
-        array_push($label, $temp[$i]['label']);
-        array_push($value, $temp[$i]['value']);
+    
+          array_push($label, $temp[$i]['label']);
+          array_push($value, $temp[$i]['value']);
         }
-
-        //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+      
         $t_data = new stdClass;
         $t_data->tvrzero_channel = $label;
         $t_data->tvrzero_value = $value;
         return $t_data;
     }
 
-    public function sharegraphdashboard($startDateTime, $finishDateTime)
+    public function sharegraphdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size)
     {
-        // $yesterday = date("Y-m-d");
-        // $finishDateTime = $yesterday . " 00:00:00";
-        // //$finishDateTime = date("Y-m-d H:i:s");
-        // $min = 1440;
-        // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-        // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-
         $temp = array();
-        $to_time = strtotime($startDateTime);
-        $from_time = strtotime($finishDateTime);
-        $diff = abs($to_time - $from_time) / 60;
-        $users = User::all();
-        $numOfUser = $users->count();
-
+        $viewer = array();
+    
+        $start_range = strtotime($startDateTime);
+        $finish_range = strtotime($finishDateTime);
+        $diff = abs($start_range - $finish_range) / 60;
+    
         $channelArray = array();
         $shares = array();
         $all_tvr = array();
-
+    
+        // $universe_size = Universe::sum(DB::raw('universe / 1000'));
         $channels = Channel::whereNotIn('id', [888, 40])
-        ->select('id', 'channel_name')
-        ->get();
+          ->select('id', 'channel_name')
+          ->get();
+    
+        // $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+        //   ->where('started_watching_at', '<', $finishDateTime)
+        //   ->get();
+        
         foreach ($channels as $c) {
-        $tvr = 0;
-        $viewelogs = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($finishDateTime, $startDateTime) {
-            $query->where('finished_watching_at', '>', $startDateTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at', '<', $finishDateTime)
-            ->get();
-        $total_time_viewed = 0;
-        foreach ($viewelogs as $v) {
-
-            if (((strtotime($v->started_watching_at)) < ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
-            $watched_sec = abs($to_time - $from_time);
-            } else if (((strtotime($v->started_watching_at)) < ($to_time)) && ((strtotime($v->finished_watching_at)) <= ($from_time))) {
-            $watched_sec = abs($to_time - strtotime($v->finished_watching_at));
-            } else if (((strtotime($v->started_watching_at)) >= ($to_time)) && (((strtotime($v->finished_watching_at)) > ($from_time)) || (($v->finished_watching_at) == Null))) {
-            $watched_sec = abs(strtotime($v->started_watching_at) - $from_time);
+          $viewelogs = $ram_logs->where('channel_id', $c->id)
+            ->toArray();
+            
+          foreach ($viewelogs as $v) {
+            $v = (object)$v;
+    
+            if ($v->finished_watching_at == null) {
+              if ((strtotime($v->started_watching_at)) < ($start_range)) {
+                $timeviewd = abs($start_range - strtotime($finishDateTime)) * ($v->universe / (1000 * $v->system));
+              } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
+                $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime)) * ($v->universe / (1000 * $v->system));
+              }
+            } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
+              $timeviewd = abs($start_range - $finish_range) * ($v->universe / (1000 * $v->system));
+            } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
+              $timeviewd = abs($start_range - strtotime($v->finished_watching_at)) * ($v->universe / (1000 * $v->system));
+            } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
+              $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range) * ($v->universe / (1000 * $v->system));
             } else {
-            $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+              $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at)) * ($v->universe / (1000 * $v->system));
             }
-            $total_time_viewed = $total_time_viewed + $watched_sec;
-            //$timeviewed = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at))/60;
-
-        }
-        $total_time_viewed = ($total_time_viewed) / 60;
-        $tvr = $total_time_viewed / $diff;
-        $tvr = $tvr / $numOfUser;
-        $tvr = $tvr * 100;
-        $tvr = round($tvr, 4);
-
-        array_push($all_tvr, $tvr);
-        array_push($channelArray, $c->channel_name);
+           
+            $timeviewd = $timeviewd / 60;
+            array_push($viewer, $timeviewd);
+          }
+    
+          $timeSpent_universe = array_sum($viewer) / $universe_size;
+          $tvrp = ($timeSpent_universe * 100) / $diff;
+          //$tvr0 = ($tvrp * $universe_size) / 100;
+    
+          array_push($all_tvr, $tvrp);
+          array_push($channelArray, $c->channel_name);
         }
         $total_tvr = array_sum($all_tvr);
         $total_tvr = round($total_tvr, 5);
-
+    
         $total_share = 0;
         for ($i = 0; $i < count($all_tvr); $i++) {
-            if($total_tvr == 0){
-                $s = 0;
-            }else{
-                $s = ($all_tvr[$i] / $total_tvr) * 100;
-            }
-        
-            $total_share = $total_share + $s;
-            array_push($shares, $s);
+          if($total_tvr == 0){
+            $s = 0;
+          }else{
+              $s = ($all_tvr[$i] / $total_tvr) * 100;
+          }
+          $total_share = $total_share + $s;
+          array_push($shares, $s);
         }
         for ($i = 0; $i < count($all_tvr); $i++) {
-        $tempc = array(
-
+          $tempc = array(
+    
             "label" => $channelArray[$i],
-
+    
             "value" => $shares[$i]
-
-        );
-        array_push($temp, $tempc);
+    
+          );
+          array_push($temp, $tempc);
         }
         $label = array();
         $value = array();
         array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
-
+    
         for ($i = 0; $i < 10; $i++) {
-
-        array_push($label, $temp[$i]['label']);
-        array_push($value, $temp[$i]['value']);
+    
+          array_push($label, $temp[$i]['label']);
+          array_push($value, $temp[$i]['value']);
         }
-        //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
-        //return response()->json(["share"=>$shares,"channels"=>$channelArray],200);
+
         $t_data = new stdClass;
         $t_data->share_channel = $label;
         $t_data->share_value = $value;
         return $t_data;
     }
 
-    public function timeSpentUniverse($startDateTime, $finishDateTime)
+    public function timeSpentUniverse($startDateTime, $finishDateTime, $ram_logs)
     {
-
-
-        $channelArray = array();
-        $tvrs = array();
-
         $temp = array();
         $viewer = array();
-        /*if($req->start=="" && $req->finish==""){
-        return response()->json(["value"=>$reachs,"label"=>$channelArray],200);
-        }*/
-        // $yesterday = date("Y-m-d");
-        // $finishDateTime = $yesterday . " 00:00:00";
-        // //$finishDateTime = date("Y-m-d H:i:s");
-        // $min = 1440;
-        // $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-        // $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+    
         $start_range = strtotime($startDateTime);
         $finish_range = strtotime($finishDateTime);
-        $diff = abs($start_range - $finish_range) / 60;
-
-        //return response()->json([$di],200);
-        //return response()->json(["tvr"=>$diff],200);
+    
         $channels = Channel::whereNotIn('id', [888, 40])
-        ->select('id', 'channel_name')
-        ->get();
-        $users = User::all();
-        $numOfUser = $users->count();
-        //$all=array();
-
+          ->select('id', 'channel_name')
+          ->get();
+    
+        // $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
+        //   ->where('started_watching_at', '<', $finishDateTime)
+        //   ->get();
+    
         foreach ($channels as $c) {
-        $viewers = ViewLog::where('channel_id', $c->id)
-            ->where(function ($query) use ($finishDateTime, $startDateTime) {
-            $query->where('finished_watching_at', '>', $startDateTime)
-                ->orWhereNull('finished_watching_at');
-            })
-            ->where('started_watching_at', '<', $finishDateTime)
-            ->get();
-        /*$viewers = ViewLog::where('channel_id', $c->id)
-        ->where('started_watching_at','<',date($finishDate)." ".$finishTime)
-        ->where('finished_watching_at','>',date($startDate)." ".$startTime)
-        ->get();*/
-        foreach ($viewers as $v) {
+          $viewers = $ram_logs->where('channel_id', $c->id)
+            ->toArray();
+    
+          foreach ($viewers as $v) {
+            $v = (object)$v;
+    
             if ($v->finished_watching_at == null) {
-            if ((strtotime($v->started_watching_at)) < ($start_range)) {
-                $timeviewd = abs($start_range - strtotime($finishDateTime));
-            } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
-                $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime));
-            }
+              if ((strtotime($v->started_watching_at)) < ($start_range)) {
+                $timeviewd = abs($start_range - strtotime($finishDateTime)) * ($v->universe / (1000 * $v->system));
+              } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
+                $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($finishDateTime)) * ($v->universe / (1000 * $v->system));
+              }
             } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-            $timeviewd = abs($start_range - $finish_range);
+              $timeviewd = abs($start_range - $finish_range) * ($v->universe / (1000 * $v->system));
             } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
-            $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
+              $timeviewd = abs($start_range - strtotime($v->finished_watching_at)) * ($v->universe / (1000 * $v->system));
             } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-            $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
+              $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range) * ($v->universe / (1000 * $v->system));
             } else {
-            $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+              $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at)) * ($v->universe / (1000 * $v->system));
             }
-            //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+            
             $timeviewd = $timeviewd / 60;
             array_push($viewer, $timeviewd);
-        }
-        //return response()->json([$viewer],200);
-        $tvr = array_sum($viewer); ///$numOfUser;
-        //$tvr=$tvr/60;
-        //$tvr=$tvr/$diff;
-        //$tvr=$tvr*100;
-        unset($viewer);
-        $viewer = array();
-        array_push($channelArray, $c->channel_name);
-        array_push($tvrs, $tvr);
-        $tempc = array(
-
+          }
+    
+          $timeSpent_universe = array_sum($viewer);
+    
+          unset($viewer);
+          $viewer = array();
+    
+          $tempc = array(
+    
             "label" => $c->channel_name,
-
-            "value" => $tvr
-
-        );
-        array_push($temp, $tempc);
+    
+            "value" => $timeSpent_universe
+    
+          );
+          array_push($temp, $tempc);
         }
         $label = array();
         $value = array();
         array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
-
+    
         for ($i = 0; $i < 10; $i++) {
-
-        array_push($label, $temp[$i]['label']);
-        array_push($value, $temp[$i]['value']);
+    
+          array_push($label, $temp[$i]['label']);
+          array_push($value, $temp[$i]['value']);
         }
-        // $temptvr=$tvrs;
-        // $ntvrs=array();
-        // $nchannelArray=array();
-        // rsort($temptvr);
-        // $rlength=count($tvrs);
-        // $cc=0;
-        // for($i=0;$i<$rlength && $cc<10;$i++){
-        //   if($tvrs[$i]>$temptvr[10]){
-        //     array_push($nchannelArray,$channelArray[$i]);
-        // array_push($ntvrs,$tvrs[$i]);
-        // $cc++;
-        //   }
-        // }
-
-
-        //return response()->json(["value" => $value, "label" => $label, "start" => $startDateTime, "finish" => $finishDateTime], 200);
+    
         $t_data = new stdClass;
         $t_data->timeSpent_channel = $label;
         $t_data->timeSpent_value = $value;
         return $t_data;
     }
-
-
 
 
 

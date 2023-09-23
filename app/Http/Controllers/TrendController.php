@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ViewLog;
+use App\Models\Universe;
 use App\Models\Channel;
 use App\Models\User;
 use Carbon\Carbon;
@@ -13,136 +14,168 @@ class TrendController extends Controller
 {
     public function trendGeneralAll(Request $req)
     {
-      $userids=User::where('type', 'like', '%' . $req->type . '%')
-      ->pluck('id')->toArray();
-      $fweek = false;
-      $weekdays = array("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
-      $time = array();
-      $length = 12;
-      if ($req->time == "Weekly") {
-        $fweek = true;
-        $tstring = "w";
-        $inc = -174;  //weekly
-        $length = 7;
-        for ($i = 0; $i < 15; $i++) {
-          $inc = $inc + 24;
-          //echo "".$inc;
-          array_push($time, ((string)$inc) . " hours");
-        }
-      } elseif ($req->time == "Monthly") {
-        $tstring = "d";
-        $inc = -750;  //monthly
-        $length = 31;
-        for ($i = 0; $i < 32; $i++) {
-          $inc = $inc + 24;
-          //echo "".$inc;
-          array_push($time, ((string)$inc) . " hours");
-        }
-      } elseif ($req->time == "Yearly") {
-        $tstring = "y-M";
-        $inc = -13;  //yearly
+        $userids = User::where('type', 'like', '%' . $req->type . '%')
+            ->pluck('id')->toArray();
+        $fweek = false;
+        $weekdays = array("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat");
+        $time = array();
         $length = 12;
-        for ($i = 0; $i < 13; $i++) {
-          $inc = $inc + 1;
-          //echo "".$inc;
-          array_push($time, ((string)$inc) . " months");
+        if ($req->time == "Weekly") {
+            $fweek = true;
+            $tstring = "w";
+            $inc = -174;  //weekly
+            $length = 7;
+            for ($i = 0; $i < 15; $i++) {
+                $inc = $inc + 24;
+                //echo "".$inc;
+                array_push($time, ((string)$inc) . " hours");
+            }
+        } elseif ($req->time == "Monthly") {
+            $tstring = "d";
+            $inc = -750;  //monthly
+            $length = 31;
+            for ($i = 0; $i < 32; $i++) {
+                $inc = $inc + 24;
+                //echo "".$inc;
+                array_push($time, ((string)$inc) . " hours");
+            }
+        } elseif ($req->time == "Yearly") {
+            $tstring = "y-M";
+            $inc = -13;  //yearly
+            $length = 12;
+            for ($i = 0; $i < 13; $i++) {
+                $inc = $inc + 1;
+                //echo "".$inc;
+                array_push($time, ((string)$inc) . " months");
+            }
+        } else {
+            $inc = -20; //daily
+            $tstring = "h A";
+            for ($i = 0; $i < 13; $i++) {
+                $inc = $inc + 2;
+                //echo "".$inc;
+                array_push($time, ((string)$inc) . " hours");
+            }
         }
-      } else {
-        $inc = -20; //daily
-        $tstring = "h A";
-        for ($i = 0; $i < 13; $i++) {
-          $inc = $inc + 2;
-          //echo "".$inc;
-          array_push($time, ((string)$inc) . " hours");
-        }
-      }
-      $ldate = date('Y-m-d H:i:s');
-      $tvrps = array();
-      $tvr0s = array();
-      $label = array();
-      $reachps = array();
-      $reach0s = array();
-      $totalReachs = array();
-      $watchtime = array();
-      $reacht = array();
-      /*if($req->start=="" && $req->finish==""){
+        $ldate = date('Y-m-d H:i:s');
+        $tvrps = array();
+        $tvr0s = array();
+        $label = array();
+        $reachps = array();
+        $reach0s = array();
+        $totalReachs = array();
+        $watchtime = array();
+        $reacht = array();
+        /*if($req->start=="" && $req->finish==""){
       return response()->json(["reach"=>$reachs,"channels"=>$label],200);
       }
       $startDate=date('Y-m-d',strtotime("-1 days"));
       $startTime="00:00:00";
       $finishDate=date('Y-m-d',strtotime("-1 days"));
       $finishTime="23:59:59";*/
-      //$channels = Channel::all('id', 'channel_name');
-      $users = User::all();
-      $numOfUser = $users->count();
-      //return response()->json(["reachsum" => array_sum($reachllistnew), "reach" => $reachllistnew, "channels" => $channellistnew], 200);
-  
-      //$all=array();
-      for ($i = 0; $i < $length; $i++) {
-  
-        $viewers = ViewLog::where('channel_id', $req->id)
-          ->where(function ($query) use ($time, $i) {
-            $query->where('finished_watching_at', '>', date("Y-m-d H:i:s", strtotime($time[$i])))
-              ->orWhereNull('finished_watching_at');
-          })
-          ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i + 1])))
-          ->whereIn('user_id', $userids)
-          ->get();
-  
-        foreach ($viewers as $v) {
-          if ($v->finished_watching_at == null) {
-            if ((strtotime($v->started_watching_at)) < (strtotime($time[$i]))) {
-              $timeviewd = abs(strtotime($time[$i]) - strtotime($ldate));
-            } else if ((strtotime($v->started_watching_at)) >= (strtotime($time[$i]))) {
-              $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
+        //$channels = Channel::all('id', 'channel_name');
+        $users = User::all();
+        $numOfUser = Universe::sum('universe') / 1000;
+        //$numOfUser = $users->count();
+        //return response()->json(["reachsum" => array_sum($reachllistnew), "reach" => $reachllistnew, "channels" => $channellistnew], 200);
+
+        //$all=array();
+        for ($i = 0; $i < $length; $i++) {
+
+            $viewers = ViewLog::where('channel_id', $req->id)
+                ->where(function ($query) use ($time, $i) {
+                    $query->where('finished_watching_at', '>', date("Y-m-d H:i:s", strtotime($time[$i])))
+                        ->orWhereNull('finished_watching_at');
+                })
+                ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i + 1])))
+                ->whereIn('user_id', $userids)
+                ->get();
+
+            foreach ($viewers as $v) {
+                if ($v->finished_watching_at == null) {
+                    if ((strtotime($v->started_watching_at)) < (strtotime($time[$i]))) {
+                        $timeviewd = abs(strtotime($time[$i]) - strtotime($ldate));
+                    } else if ((strtotime($v->started_watching_at)) >= (strtotime($time[$i]))) {
+                        $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
+                    }
+                } else if (((strtotime($v->started_watching_at)) < (strtotime($time[$i]))) && ((strtotime($v->finished_watching_at)) > (strtotime($time[$i + 1])))) {
+                    $timeviewd = abs(strtotime($time[$i]) - strtotime($time[$i + 1]));
+                } else if (((strtotime($v->started_watching_at)) < (strtotime($time[$i]))) && ((strtotime($v->finished_watching_at)) <= (strtotime($time[$i + 1])))) {
+                    $timeviewd = abs(strtotime($time[$i]) - strtotime($v->finished_watching_at));
+                } else if (((strtotime($v->started_watching_at)) >= (strtotime($time[$i]))) && ((strtotime($v->finished_watching_at)) > (strtotime($time[$i + 1])))) {
+                    $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($time[$i + 1]));
+                } else {
+                    $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
+                }
+                //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
+                $timeviewd = $timeviewd / 60;
+                $mult = ($v->universe / 1000) / $v->system;
+                array_push($watchtime, $timeviewd * $mult);
+                array_push($reacht, ["user_id" => $v->user_id, "mult" => $mult]);
+                
             }
-          } else if (((strtotime($v->started_watching_at)) < (strtotime($time[$i]))) && ((strtotime($v->finished_watching_at)) > (strtotime($time[$i + 1])))) {
-            $timeviewd = abs(strtotime($time[$i]) - strtotime($time[$i + 1]));
-          } else if (((strtotime($v->started_watching_at)) < (strtotime($time[$i]))) && ((strtotime($v->finished_watching_at)) <= (strtotime($time[$i + 1])))) {
-            $timeviewd = abs(strtotime($time[$i]) - strtotime($v->finished_watching_at));
-          } else if (((strtotime($v->started_watching_at)) >= (strtotime($time[$i]))) && ((strtotime($v->finished_watching_at)) > (strtotime($time[$i + 1])))) {
-            $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($time[$i + 1]));
-          } else {
-            $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
-          }
-          //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-          $timeviewd = $timeviewd / 60;
-          array_push($watchtime, $timeviewd);
-          array_push($reacht, $v->user_id);
-        }
-        $tvr = array_sum($watchtime) / $numOfUser;
-        //$tvr=$tvr/60;
-        $diff = (strtotime(date("Y-m-d H:i:s", strtotime($time[$i + 1]))) - strtotime(date("Y-m-d H:i:s", strtotime($time[$i])))) / 60;
-        $tvr = $tvr / $diff;
-        array_push($tvr0s, $tvr);
-        $tvr = $tvr * 100;
-        array_push($tvrps, $tvr);
-        unset($watchtime);
-        $watchtime = array();
+            $tvr = array_sum($watchtime) / $numOfUser;
+            //$tvr=$tvr/60;
+            $diff = (strtotime(date("Y-m-d H:i:s", strtotime($time[$i + 1]))) - strtotime(date("Y-m-d H:i:s", strtotime($time[$i])))) / 60;
+            $tvr = $tvr / $diff;
+            array_push($tvr0s, $tvr);
+            $tvr = ($tvr * 100)/$numOfUser;
+            array_push($tvrps, $tvr);
+            unset($watchtime);
+            $watchtime = array();
 
-        $reach = count(array_unique($reacht));
-        array_push($reach0s, $reach);
-        $reach = $reach / $numOfUser;
-        array_push($reachps, $reach);
-        unset($reacht);
-        $reacht = array();
+            $reach = (int)$this->mult_sum($reacht);
+            array_push($reach0s, $reach);
+            $reach = $reach*100 / $numOfUser;
+            array_push($reachps, $reach);
+            unset($reacht);
+            $reacht = array();
+            if ($fweek) {
+                array_push($label, $weekdays[(int)date($tstring, strtotime($time[$i]))]);
+            } else {
+                array_push($label, date($tstring, strtotime($time[$i])));
+            }
+            //array_push($label, date("Y-m-d H:i:s", strtotime($time[$i]))."-".date("Y-m-d H:i:s", strtotime($time[$i+1])));
+            //      array_push($reachs, $reach);
+            //array_push($reachs,$reach);
 
-        //    array_push($label, $c->channel_name);
-        
-        if ($fweek) {
-          array_push($label, $weekdays[(int)date($tstring, strtotime($time[$i]))]);
-        } else {
-          array_push($label, date($tstring, strtotime($time[$i])));
         }
-        //array_push($label, date("Y-m-d H:i:s", strtotime($time[$i]))."-".date("Y-m-d H:i:s", strtotime($time[$i+1])));
-        //      array_push($reachs, $reach);
-        //array_push($reachs,$reach);
-  
-      }
-  
-  
-      return response()->json([ "reachp" => $reachps,"reach0" => $reach0s,"tvrp" => $tvrps,"tvr0" => $tvr0s, "label" => $label], 200);
+
+
+        return response()->json(["reachp" => $reachps, "reach0" => $reach0s, "tvrp" => $tvrps, "tvr0" => $tvr0s, "label" => $label], 200);
     }
+    public function mult_sum($inputArray)
+    {
+        $sums = [];
+
+foreach ($inputArray as $item) {
+    $userId = $item["user_id"];
+    $mult = $item["mult"];
+
+    // Check if the user ID already exists in the sums array
+    if (isset($sums[$userId])) {
+        // Update the 'mult' value if it's greater than the current value
+        if ($mult > $sums[$userId]["mult"]) {
+            $sums[$userId]["mult"] = $mult;
+        }
+    } else {
+        // If the user ID doesn't exist, add it to the sums array
+        $sums[$userId] = ["user_id" => $userId, "mult" => $mult];
+    }
+}
+
+// Convert the associative array to a sequential array
+$modifiedArray = array_values($sums);
+
+// Calculate the sum of 'mult' values from the modified array
+$sum = 0;
+foreach ($modifiedArray as $item) {
+    $sum += $item["mult"];
+}
+
+return ($sum);
+    }
+    
 
     public function dayrangedtrendreach0(Request $req)
     {
@@ -189,11 +222,11 @@ class TrendController extends Controller
         //   return response()->json(["time" => $time], 200);
         if (((int)$req->range) == 30) {
             $m = 900;
-            $dd=30*count($time);
+            $dd = 30 * count($time);
             $reachs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         } else {
             $m = 450;
-            $dd=15*count($time);
+            $dd = 15 * count($time);
             $reachs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
         //return response()->json(["time" => count($reachs)], 200);
@@ -201,14 +234,13 @@ class TrendController extends Controller
         foreach ($time as $tt) {
             for ($i = 0; $i < count($tt); $i++) {
                 $viewers = $this->timeviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
-                
-                
-                    $reachs[$i] = $reachs[$i]+$viewers;
-                
+
+
+                $reachs[$i] = $reachs[$i] + $viewers;
             }
         }
         for ($i = 0; $i < count($tt); $i++) {
-            $reachs[$i] = $reachs[$i]/($numOfUser*$dd);
+            $reachs[$i] = $reachs[$i] / ($numOfUser * $dd);
             $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
             $mid = date("H:i:s", $mid);
             array_push($label, $mid);
@@ -226,11 +258,11 @@ class TrendController extends Controller
         //   return response()->json(["time" => $time], 200);
         if (((int)$req->range) == 30) {
             $m = 900;
-            $dd=30*count($time);
+            $dd = 30 * count($time);
             $reachs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         } else {
             $m = 450;
-            $dd=15*count($time);
+            $dd = 15 * count($time);
             $reachs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
         //return response()->json(["time" => count($reachs)], 200);
@@ -238,14 +270,13 @@ class TrendController extends Controller
         foreach ($time as $tt) {
             for ($i = 0; $i < count($tt); $i++) {
                 $viewers = $this->timeviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
-                
-                
-                    $reachs[$i] = $reachs[$i]+$viewers;
-                
+
+
+                $reachs[$i] = $reachs[$i] + $viewers;
             }
         }
         for ($i = 0; $i < count($tt); $i++) {
-            $reachs[$i] = ($reachs[$i]/($numOfUser*$dd))*100;
+            $reachs[$i] = ($reachs[$i] / ($numOfUser * $dd)) * 100;
             $mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
             $mid = date("H:i:s", $mid);
             array_push($label, $mid);
@@ -291,7 +322,7 @@ class TrendController extends Controller
     }
 
 
-    
+
     public function views($id, $start, $finish)
     {
         //$id=36;$start="2022-08-12 00:00:00" ;$finish="2022-08-12 00:30:00";
@@ -316,37 +347,32 @@ class TrendController extends Controller
         //$id=36;$start="2022-08-12 00:00:00" ;$finish="2022-08-12 00:30:00";
         $viewer = array();
         $viewers = ViewLog::where('channel_id', $id)
-                ->where(function ($query) use ($start) {
+            ->where(function ($query) use ($start) {
                 $query->where('finished_watching_at', '>', $start)
                     ->orWhereNull('finished_watching_at');
-                })
-                ->where('started_watching_at', '<', $finish)
-                ->get();
-            
-            foreach ($viewers as $v) {
-                
-                    if(((strtotime($v->started_watching_at)) < (strtotime($start))) && (((strtotime($v->finished_watching_at)) > (strtotime($finish))) || (($v->finished_watching_at) == Null ) )){
-                        $watched_sec = abs(strtotime($start) - strtotime($finish));
-                    }
-                    else if(((strtotime($v->started_watching_at)) < (strtotime($start))) && ((strtotime($v->finished_watching_at)) <= (strtotime($finish)))){
-                        $watched_sec = abs(strtotime($start) - strtotime($v->finished_watching_at));
-                    }
-                    else if(((strtotime($v->started_watching_at)) >= (strtotime($start))) && (((strtotime($v->finished_watching_at)) > (strtotime($finish))) || (($v->finished_watching_at) == Null ) )){
-                        $watched_sec = abs(strtotime($v->started_watching_at) - strtotime($finish));
-                    }
-                    else{
-                        $watched_sec = abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-                    }
-                    $watched_sec = $watched_sec / 60;
-                    array_push($viewer, $watched_sec);
-                
+            })
+            ->where('started_watching_at', '<', $finish)
+            ->get();
 
+        foreach ($viewers as $v) {
+
+            if (((strtotime($v->started_watching_at)) < (strtotime($start))) && (((strtotime($v->finished_watching_at)) > (strtotime($finish))) || (($v->finished_watching_at) == Null))) {
+                $watched_sec = abs(strtotime($start) - strtotime($finish));
+            } else if (((strtotime($v->started_watching_at)) < (strtotime($start))) && ((strtotime($v->finished_watching_at)) <= (strtotime($finish)))) {
+                $watched_sec = abs(strtotime($start) - strtotime($v->finished_watching_at));
+            } else if (((strtotime($v->started_watching_at)) >= (strtotime($start))) && (((strtotime($v->finished_watching_at)) > (strtotime($finish))) || (($v->finished_watching_at) == Null))) {
+                $watched_sec = abs(strtotime($v->started_watching_at) - strtotime($finish));
+            } else {
+                $watched_sec = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
             }
+            $watched_sec = $watched_sec / 60;
+            array_push($viewer, $watched_sec);
+        }
 
-            $vv = array_sum($viewer);
-            
+        $vv = array_sum($viewer);
+
         //return response()->json(["values" => $vv], 200);
-        
+
         return $vv;
     }
     public function dayrange($s, $f, $d)

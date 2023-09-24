@@ -405,7 +405,7 @@ class OverviewController extends Controller
             }
 
 
-            $timeSpent_universe = array_sum($viewer);
+            $timeSpent_universe = array_sum($viewer) / $universe_size;
 
             unset($viewer);
             $viewer = array();

@@ -269,7 +269,6 @@ class OverviewController extends Controller
         foreach ($channels as $c) {
 
             $users = $ram_logs->where('channel_id', $c->id)
-
                 ->toArray();
             //return response()->json(["reachsum" => $users], 200);
 

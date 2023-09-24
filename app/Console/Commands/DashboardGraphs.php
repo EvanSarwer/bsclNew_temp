@@ -78,7 +78,7 @@ class DashboardGraphs extends Command
             $tvr = $this->tvrgraphdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size);
             $tvrZero = $this->tvrgraphzerodashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size);
             $share =  $this->sharegraphdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size);
-            $timeSpent = $this->timeSpentUniverse($startDateTime, $finishDateTime, $ram_logs);
+            $timeSpent = $this->timeSpentUniverse($startDateTime, $finishDateTime, $ram_logs, $universe_size);
 
 
             $all_graph = [
@@ -410,9 +410,9 @@ class DashboardGraphs extends Command
     
           $timeSpent_universe = array_sum($viewer) / $universe_size;
           $tvrp = ($timeSpent_universe * 100) / $diff;
-          //$tvr0 = ($tvrp * $universe_size) / 100;
+          $tvr0 = ($tvrp * $universe_size) / 100;
     
-          array_push($all_tvr, $tvrp);
+          array_push($all_tvr, $tvr0);
           array_push($channelArray, $c->channel_name);
         }
         $total_tvr = array_sum($all_tvr);
@@ -454,7 +454,7 @@ class DashboardGraphs extends Command
         return $t_data;
     }
 
-    public function timeSpentUniverse($startDateTime, $finishDateTime, $ram_logs)
+    public function timeSpentUniverse($startDateTime, $finishDateTime, $ram_logs, $universe_size)
     {
         $temp = array();
         $viewer = array();
@@ -497,7 +497,7 @@ class DashboardGraphs extends Command
             array_push($viewer, $timeviewd);
           }
     
-          $timeSpent_universe = array_sum($viewer);
+          $timeSpent_universe = array_sum($viewer) / $universe_size;
     
           unset($viewer);
           $viewer = array();

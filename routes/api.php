@@ -226,6 +226,7 @@ Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.u
 
 Route::post('/datafix',[RequestController::class,'datafix']);
 Route::post('/receive',[RequestController::class,'receive']);
+Route::post('/deselect',[RequestController::class,'deselect']);
 Route::get('/receive',[RequestController::class,'receive']);
 Route::post('/receiveoutside',[RequestController::class,'receiveoutside']);
 

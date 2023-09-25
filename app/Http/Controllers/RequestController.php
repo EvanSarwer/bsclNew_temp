@@ -202,7 +202,8 @@ class RequestController extends Controller
 
     public function get_universe($id)
     {
-
+        $user_deselected = DeselectPeriod::whereNotNull('start_date')->whereNull('end_date')->pluck('device_id')->toArray();
+        $user_deselected=User::whereIn('device_id',$user_deselected)->pluck('id')->toArray();
         $user = User::where('id', $id)->first();
 
         $startDate = new DateTime($user->dob);
@@ -239,7 +240,7 @@ class RequestController extends Controller
             where('address', 'like', '%' . $user->address . '%')
             ->where('gender', 'like', '%' . $user->gender . '%')
             ->where('economic_status', 'like', '%' . $user->economic_status . '%')
-            //->where('socio_status', 'like', '%' . $user->socio_status . '%')
+            ->whereNotIn('id', $user_deselected)
             //->whereBetween('age', [$req->age1, $req->age2])
             ->whereBetween('dob', [$minDate, $maxDate]) //->get();
             ->count();
@@ -451,6 +452,14 @@ class RequestController extends Controller
         return $ot;
     }
 
+    public function deselect()
+    {
+       
+        $user_deselected = DeselectPeriod::whereNotNull('start_date')->whereNull('end_date')->pluck('device_id')->toArray();
+        $user_deselected=User::whereIn('device_id',$user_deselected)->pluck('id')->toArray();
+        
+        return response()->json(["response" => $user_deselected], 200);
+    }
     public function logs($id)
     {
         $data = ViewLog::where('user_id', $id)->orderBy('id', 'DESC')->get();

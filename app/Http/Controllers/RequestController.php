@@ -272,7 +272,7 @@ class RequestController extends Controller
         //return response()->json(["values" => $finishDateTime], 200);
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
         ->where('started_watching_at', '<', $finishDateTime)
-        ->where('universe', '=', 1)
+        //->where('universe', '=', 1)
 
             ->get();
             foreach ($ram_logs as $ram_log) {

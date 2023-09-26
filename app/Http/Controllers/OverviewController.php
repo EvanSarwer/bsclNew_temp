@@ -497,7 +497,6 @@ class OverviewController extends Controller
         foreach ($channels as $c) {
 
             $users = $ram_logs->where('channel_id', $c->id)
-
                 ->toArray();
             //return response()->json(["reachsum" => $users], 200);
 
@@ -533,7 +532,7 @@ class OverviewController extends Controller
         $total_tvr = array_sum($tvrs);
         $total_tvr = round($total_tvr, 5);
 
-        $total_share = 0;
+        //$total_share = 0;
         for ($i = 0; $i < count($tvrs); $i++) {
             if ($total_tvr != 0) {
                 $s = ($tvrs[$i] / $total_tvr) * 100;
@@ -541,7 +540,7 @@ class OverviewController extends Controller
                 $s = 0;
             }
             //$s = ($tvrs[$i] / $total_tvr) * 100;
-            $total_share = $total_share + $s;
+            //$total_share = $total_share + $s;
             array_push($shares, $s);
         }
         //return response()->json(["Total-tvr"=>$total_tvr,"tvrs"=>$tvrs,"total_share"=>$total_share,"share"=>$shares,"channels"=>$channelArray],200);

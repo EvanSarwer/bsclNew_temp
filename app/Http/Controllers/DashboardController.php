@@ -94,134 +94,9 @@ class DashboardController extends Controller
     return $t_data;
   }
 
-  public function CurrentStatusTopReach()
-  {
-    $finishDateTime = date("Y-m-d H:i:s");
-    $min = 1440;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
+  
 
-    $channels = Channel::whereNotIn('id', [888, 39])
-      ->select('id', 'channel_name')
-      ->get();
-    $total_user = User::count();
-    $channel_info = [];
-
-    foreach ($channels as $c) {
-      $user_count = 0;
-      $logs = ViewLog::where('channel_id', $c->id)
-        ->where(function ($query) use ($startDateTime, $finishDateTime) {
-          $query->where('finished_watching_at', '>', $startDateTime)
-            ->orWhereNull('finished_watching_at');
-        })
-        ->where('started_watching_at', '<', $finishDateTime)
-        ->distinct()->get('user_id');
-
-      $viewlogs = count($logs);
-
-      $user_count = ($viewlogs / $total_user) * 100;
-      $channel = [
-        "channel_name" => $c->channel_name,
-        "users" => $user_count
-      ];
-      array_push($channel_info, $channel);
-    }
-    array_multisort(array_column($channel_info, 'users'), SORT_DESC, $channel_info);
-
-    //return response()->json(["top_reach" => $channel_info[0]['channel_name']], 200);
-    return $channel_info[0]['channel_name'];
-  }
-
-  public function CurrentStatusTopTvr()
-  {
-    $channelArray = array();
-    $tvrs = array();
-    $viewer = array();
-    $ldate = date('Y-m-d H:i:s');
-    /*if($req->start=="" && $req->finish==""){
-    return response()->json(["reach"=>$reachs,"channels"=>$channelArray],200);
-    }*/
-    $finishDateTime = date("Y-m-d H:i:s");
-    $min = 1439;
-    $newtimestamp = strtotime("{$finishDateTime} - {$min} minute");
-    $startDateTime = date('Y-m-d H:i:s', $newtimestamp);
-    $start_range = strtotime($startDateTime);
-    $finish_range = strtotime($finishDateTime);
-    $diff = abs($start_range - $finish_range) / 60;
-
-    //return response()->json([$di],200);
-    //return response()->json(["tvr"=>$diff],200);
-    $channels = Channel::whereNotIn('id', [888, 39])
-      ->select('id', 'channel_name')
-      ->get();
-    //return response()->json(["top_tvr" => $channels], 200);
-    $users = User::all();
-    $numOfUser = $users->count();
-    //$all=array();
-
-    foreach ($channels as $c) {
-      $viewers = ViewLog::where('channel_id', $c->id)
-        ->where(function ($query) use ($finishDateTime, $startDateTime) {
-          $query->where('finished_watching_at', '>', $startDateTime)
-            ->orWhereNull('finished_watching_at');
-        })
-        ->where('started_watching_at', '<', $finishDateTime)
-        ->get();
-
-      foreach ($viewers as $v) {
-
-        if ($v->finished_watching_at == null) {
-          if ((strtotime($v->started_watching_at)) < ($start_range)) {
-            $timeviewd = abs($start_range - strtotime($ldate));
-          } else if ((strtotime($v->started_watching_at)) >= ($start_range)) {
-            $timeviewd = abs(strtotime($v->started_watching_at) - strtotime($ldate));
-          }
-        } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-          $timeviewd = abs($start_range - $finish_range);
-        } else if (((strtotime($v->started_watching_at)) < ($start_range)) && ((strtotime($v->finished_watching_at)) <= ($finish_range))) {
-          $timeviewd = abs($start_range - strtotime($v->finished_watching_at));
-        } else if (((strtotime($v->started_watching_at)) >= ($start_range)) && ((strtotime($v->finished_watching_at)) > ($finish_range))) {
-          $timeviewd = abs(strtotime($v->started_watching_at) - $finish_range);
-        } else {
-          $timeviewd = abs(strtotime($v->finished_watching_at) - strtotime($v->started_watching_at));
-        }
-        //$timeviewd=abs(strtotime($v->finished_watching_at)-strtotime($v->started_watching_at));
-        $timeviewd = $timeviewd / 60;
-        array_push($viewer, $timeviewd);
-      }
-      //return response()->json([$viewer],200);
-      $tvr = array_sum($viewer) / $numOfUser;
-      //$tvr=$tvr/60;
-      $tvr = $tvr / $diff;
-      $tvr = $tvr * 100;
-      unset($viewer);
-      $viewer = array();
-      $chnl = [
-        "channel_name" => $c->channel_name,
-        "tvr" => $tvr
-      ];
-
-      array_push($channelArray, $chnl);
-    }
-    array_multisort(array_column($channelArray, 'tvr'), SORT_DESC, $channelArray);
-
-    //return response()->json(["tvr"=>$tvr],200);
-    //return response()->json(["top_tvr" => $channelArray[0]['channel_name']], 200);
-
-    return $channelArray[0]['channel_name'];
-  }
-
-  public function CurrentStatusTopTvrReach()
-  {
-
-    $topReach = $this->CurrentStatusTopReach();
-    $topTVR = $this->CurrentStatusTopTvr();
-    //return response()->json(["top_reach" => $channel_info[0]['channel_name']], 200);
-    //return response()->json(["top_tvr" => $channelArray[0]['channel_name']], 200);
-    return response()->json(["top_reach" => $topReach, "top_tvr" => $topTVR], 200);
-  }
-
-
+  
   //   public function reachpercentdashboard(){
 
   //     $startDate=date('Y-m-d',strtotime("-7 days"));
@@ -268,7 +143,7 @@ class DashboardController extends Controller
 
   public function reachpercentdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size)
   {
-    $channels = Channel::whereNotIn('id', [888, 40])
+    $channels = Channel::whereNotIn('id', [888])
       ->select('id', 'channel_name')
       ->get();
     // $total_user = User::count();
@@ -317,7 +192,7 @@ class DashboardController extends Controller
 
   public function reachuserdashboard($startDateTime, $finishDateTime, $ram_logs)
   {
-    $channels = Channel::whereNotIn('id', [888, 40])
+    $channels = Channel::whereNotIn('id', [888])
       ->select('id', 'channel_name')
       ->get();
 
@@ -369,7 +244,7 @@ class DashboardController extends Controller
     $diff = abs($start_range - $finish_range) / 60;;
 
     // $universe_size = Universe::sum(DB::raw('universe / 1000'));
-    $channels = Channel::whereNotIn('id', [888, 40])
+    $channels = Channel::whereNotIn('id', [888])
       ->select('id', 'channel_name')
       ->get();
 
@@ -447,7 +322,7 @@ class DashboardController extends Controller
     $diff = abs($start_range - $finish_range) / 60;
 
     // $universe_size = Universe::sum(DB::raw('universe / 1000'));
-    $channels = Channel::whereNotIn('id', [888, 40])
+    $channels = Channel::whereNotIn('id', [888])
       ->select('id', 'channel_name')
       ->get();
 
@@ -526,13 +401,15 @@ class DashboardController extends Controller
     $diff = abs($start_range - $finish_range) / 60;
 
     $channelArray = array();
-    $shares = array();
+    //$shares = array();
     $all_tvr = array();
 
     // $universe_size = Universe::sum(DB::raw('universe / 1000'));
-    $channels = Channel::whereNotIn('id', [888, 40])
+
+    $channels = Channel::whereNotIn('id', [888])
       ->select('id', 'channel_name')
       ->get();
+    
 
     // $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
     //   ->where('started_watching_at', '<', $finishDateTime)
@@ -569,32 +446,34 @@ class DashboardController extends Controller
       $tvrp = ($timeSpent_universe * 100) / $diff;
       $tvr0 = ($tvrp * $universe_size) / 100;
 
+      unset($viewer);
+      $viewer = array();
+
       array_push($all_tvr, $tvr0);
       array_push($channelArray, $c->channel_name);
     }
     $total_tvr = array_sum($all_tvr);
     $total_tvr = round($total_tvr, 5);
 
-    $total_share = 0;
+    //$total_share = 0;
     for ($i = 0; $i < count($all_tvr); $i++) {
-      if($total_tvr == 0){
-        $s = 0;
+      if($total_tvr != 0){
+        $s = ($all_tvr[$i] / $total_tvr) * 100;
       }else{
-          $s = ($all_tvr[$i] / $total_tvr) * 100;
+        $s = 0;
       }
-      $total_share = $total_share + $s;
-      array_push($shares, $s);
-    }
-    for ($i = 0; $i < count($all_tvr); $i++) {
+      //$total_share = $total_share + $s;
+      //array_push($shares, $s);
       $tempc = array(
 
         "label" => $channelArray[$i],
 
-        "value" => $shares[$i]
+        "value" => $s,
 
       );
       array_push($temp, $tempc);
     }
+
     $label = array();
     $value = array();
     array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
@@ -619,7 +498,7 @@ class DashboardController extends Controller
     $start_range = strtotime($startDateTime);
     $finish_range = strtotime($finishDateTime);
 
-    $channels = Channel::whereNotIn('id', [888, 40])
+    $channels = Channel::whereNotIn('id', [888])
       ->select('id', 'channel_name')
       ->get();
 

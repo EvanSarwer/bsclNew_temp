@@ -401,7 +401,6 @@ class DashboardController extends Controller
     $diff = abs($start_range - $finish_range) / 60;
 
     $channelArray = array();
-    //$shares = array();
     $all_tvr = array();
 
     // $universe_size = Universe::sum(DB::raw('universe / 1000'));
@@ -455,15 +454,13 @@ class DashboardController extends Controller
     $total_tvr = array_sum($all_tvr);
     $total_tvr = round($total_tvr, 5);
 
-    //$total_share = 0;
     for ($i = 0; $i < count($all_tvr); $i++) {
       if($total_tvr != 0){
         $s = ($all_tvr[$i] / $total_tvr) * 100;
       }else{
         $s = 0;
       }
-      //$total_share = $total_share + $s;
-      //array_push($shares, $s);
+
       $tempc = array(
 
         "label" => $channelArray[$i],

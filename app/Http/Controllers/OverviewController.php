@@ -12,6 +12,7 @@ use DateTime;
 use Illuminate\Support\Facades\DB;
 use stdClass;
 
+
 class OverviewController extends Controller
 {
     //
@@ -51,23 +52,111 @@ class OverviewController extends Controller
                 $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
             }
 
-            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+            
+
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
                 ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
-                ->where('start', '<=', $startDate)
-                ->where('end', '>=', $finishDate)
-                ->sum(DB::raw('universe / 1000'));
+                ->get();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
+            // $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+            //     ->where('rs', 'like', '%' . $req->socio . '%')
+            //     ->where('sec', 'like', '%' . $req->economic . '%')
+            //     ->where('gender', 'like', '%' . $req->gender . '%')
+            //     ->where('region', 'like', '%' . $req->region . '%')
+            //     ->where('start', '<=', $startDate)
+            //     ->where('end', '>=', $finishDate)
+            //     ->sum(DB::raw('universe / 1000'));
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
+            // $universe_size = Universe::sum(DB::raw('universe / 1000'));
         } else {
             $userids = User::pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+            // $universe_size = Universe::sum(DB::raw('universe / 1000'));
         }
+
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
             ->whereIn('user_id', $userids)
@@ -143,22 +232,96 @@ class OverviewController extends Controller
                 $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
             }
 
-            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
                 ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
-                ->where('start', '<=', $startDate)
-                ->where('end', '>=', $finishDate)
-                ->sum(DB::raw('universe / 1000'));
+                ->get();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
         } else {
             $userids = User::pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
@@ -242,24 +405,98 @@ class OverviewController extends Controller
                 $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
             }
 
-            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
                 ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
-                ->where('start', '<=', $startDate)
-                ->where('end', '>=', $finishDate)
-                ->sum(DB::raw('universe / 1000'));
+                ->get();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
 
 
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
         } else {
             $userids = User::pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
@@ -354,24 +591,98 @@ class OverviewController extends Controller
                 $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
             }
 
-            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
                 ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
-                ->where('start', '<=', $startDate)
-                ->where('end', '>=', $finishDate)
-                ->sum(DB::raw('universe / 1000'));
+                ->get();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
 
 
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
         } else {
             $userids = User::pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
@@ -470,23 +781,95 @@ class OverviewController extends Controller
                 $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
             }
 
-            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
                 ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
-                ->where('start', '<=', $startDate)
-                ->where('end', '>=', $finishDate)
-                ->sum(DB::raw('universe / 1000'));
+                ->get();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
 
         } else {
             $userids = User::pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
 
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
@@ -596,24 +979,98 @@ class OverviewController extends Controller
                 $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
             }
 
-            $universe_size = Universe::whereIn('age_group', array_unique($age_group))
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
                 ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
-                ->where('start', '<=', $startDate)
-                ->where('end', '>=', $finishDate)
-                ->sum(DB::raw('universe / 1000'));
+                ->get();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
 
 
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
         } else {
             $userids = User::pluck('id')->toArray();
-            $universe_size = Universe::sum(DB::raw('universe / 1000'));
+            
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->startDate);
+            $endDate_ = Carbon::parse($req->finishDate);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::all();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)

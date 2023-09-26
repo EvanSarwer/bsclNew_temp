@@ -115,7 +115,7 @@ class DashboardGraphs extends Command
 
     public function reachpercentdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size)
     {
-        $channels = Channel::whereNotIn('id', [888, 40])
+        $channels = Channel::whereNotIn('id', [888])
           ->select('id', 'channel_name')
           ->get();
         // $total_user = User::count();
@@ -164,7 +164,7 @@ class DashboardGraphs extends Command
 
     public function reachuserdashboard($startDateTime, $finishDateTime, $ram_logs)
     {
-        $channels = Channel::whereNotIn('id', [888, 40])
+        $channels = Channel::whereNotIn('id', [888])
           ->select('id', 'channel_name')
           ->get();
     
@@ -215,7 +215,7 @@ class DashboardGraphs extends Command
         $diff = abs($start_range - $finish_range) / 60;;
     
         // $universe_size = Universe::sum(DB::raw('universe / 1000'));
-        $channels = Channel::whereNotIn('id', [888, 40])
+        $channels = Channel::whereNotIn('id', [888])
           ->select('id', 'channel_name')
           ->get();
     
@@ -291,7 +291,7 @@ class DashboardGraphs extends Command
         $diff = abs($start_range - $finish_range) / 60;
     
         // $universe_size = Universe::sum(DB::raw('universe / 1000'));
-        $channels = Channel::whereNotIn('id', [888, 40])
+        $channels = Channel::whereNotIn('id', [888])
           ->select('id', 'channel_name')
           ->get();
     
@@ -369,11 +369,10 @@ class DashboardGraphs extends Command
         $diff = abs($start_range - $finish_range) / 60;
     
         $channelArray = array();
-        $shares = array();
         $all_tvr = array();
     
         // $universe_size = Universe::sum(DB::raw('universe / 1000'));
-        $channels = Channel::whereNotIn('id', [888, 40])
+        $channels = Channel::whereNotIn('id', [888])
           ->select('id', 'channel_name')
           ->get();
     
@@ -411,33 +410,33 @@ class DashboardGraphs extends Command
           $timeSpent_universe = array_sum($viewer) / $universe_size;
           $tvrp = ($timeSpent_universe * 100) / $diff;
           $tvr0 = ($tvrp * $universe_size) / 100;
+
+          unset($viewer);
+          $viewer = array();
     
           array_push($all_tvr, $tvr0);
           array_push($channelArray, $c->channel_name);
         }
         $total_tvr = array_sum($all_tvr);
         $total_tvr = round($total_tvr, 5);
-    
-        $total_share = 0;
+
         for ($i = 0; $i < count($all_tvr); $i++) {
-          if($total_tvr == 0){
-            $s = 0;
+          if($total_tvr != 0){
+            $s = ($all_tvr[$i] / $total_tvr) * 100;
           }else{
-              $s = ($all_tvr[$i] / $total_tvr) * 100;
+            $s = 0;
           }
-          $total_share = $total_share + $s;
-          array_push($shares, $s);
-        }
-        for ($i = 0; $i < count($all_tvr); $i++) {
+
           $tempc = array(
-    
+
             "label" => $channelArray[$i],
     
-            "value" => $shares[$i]
+            "value" => $s,
     
           );
           array_push($temp, $tempc);
         }
+        
         $label = array();
         $value = array();
         array_multisort(array_column($temp, 'value'), SORT_DESC, $temp);
@@ -462,7 +461,7 @@ class DashboardGraphs extends Command
         $start_range = strtotime($startDateTime);
         $finish_range = strtotime($finishDateTime);
     
-        $channels = Channel::whereNotIn('id', [888, 40])
+        $channels = Channel::whereNotIn('id', [888])
           ->select('id', 'channel_name')
           ->get();
     

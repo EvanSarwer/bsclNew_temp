@@ -655,7 +655,9 @@ class DashboardController extends Controller
             ->get();
 
         $total_user = User::count();
-        $universe_size = Universe::sum(DB::raw('universe / 1000'));
+        $universe_size = Universe::where('start', '<=', $startDateTime)
+                ->where('end', '>=', $startDateTime)
+                ->sum(DB::raw('universe / 1000'));
 
         $reach = $this->reachpercentdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size);
         $reachZero = $this->reachuserdashboard($startDateTime, $finishDateTime, $ram_logs);
@@ -723,7 +725,9 @@ class DashboardController extends Controller
                     ->get();
 
                 $total_user = User::count();
-                $universe_size = Universe::sum(DB::raw('universe / 1000'));
+                $universe_size = Universe::where('start', '<=', $startDateTime)
+                ->where('end', '>=', $startDateTime)
+                ->sum(DB::raw('universe / 1000'));
     
                 $reach = $this->reachpercentdashboard($startDateTime, $finishDateTime, $ram_logs, $universe_size);
                 $reachZero = $this->reachuserdashboard($startDateTime, $finishDateTime, $ram_logs);

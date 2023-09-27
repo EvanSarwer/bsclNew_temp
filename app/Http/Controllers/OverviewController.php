@@ -56,8 +56,8 @@ class OverviewController extends Controller
 
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -101,8 +101,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -131,8 +131,8 @@ class OverviewController extends Controller
 
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -234,8 +234,8 @@ class OverviewController extends Controller
 
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -269,8 +269,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -298,8 +298,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -407,8 +407,8 @@ class OverviewController extends Controller
 
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -444,8 +444,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -473,8 +473,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -593,8 +593,8 @@ class OverviewController extends Controller
 
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -630,8 +630,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -659,8 +659,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -783,8 +783,8 @@ class OverviewController extends Controller
 
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -818,8 +818,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -847,8 +847,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -981,8 +981,8 @@ class OverviewController extends Controller
 
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -1018,8 +1018,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();
@@ -1047,8 +1047,8 @@ class OverviewController extends Controller
             
             // Create an array of DateOnly objects
             $dates = [];
-            $startDate_ = Carbon::parse($req->startDate);
-            $endDate_ = Carbon::parse($req->finishDate);
+            $startDate_ = Carbon::parse($startDate);
+            $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
                 $dates[] = $date->toDateString();

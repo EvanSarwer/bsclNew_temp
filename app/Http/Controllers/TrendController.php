@@ -75,7 +75,32 @@ class TrendController extends Controller
       $finishTime="23:59:59";*/
         //$channels = Channel::all('id', 'channel_name');
         $users = User::all();
-        $numOfUser = Universe::sum('universe') / 1000;
+        // Create an array of DateOnly objects
+        $dates = [];
+        $startDate_ = Carbon::parse($time[0]);
+        $endDate_ = Carbon::parse($time[$length]);
+
+        for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+            $dates[] = $date->toDateString();
+        }
+
+        // Query the database using Eloquent
+        $allUniverses = Universe::get();
+
+        $suniverses = [];
+        foreach ($dates as $date) {
+            $uCount = $allUniverses->where('start', '<=', $date)
+                ->where('end', '>=', $date)
+                ->sum('universe');
+
+            $suniverses[] = [
+                'date' => $date,
+                'unum' => $uCount / 1000,
+            ];
+        }
+
+        $universe_size = max(array_column($suniverses, 'unum'));
+        $numOfUser = $universe_size;//Universe::sum('universe') / 1000;
         //$numOfUser = $users->count();
         //return response()->json(["reachsum" => array_sum($reachllistnew), "reach" => $reachllistnew, "channels" => $channellistnew], 200);
 

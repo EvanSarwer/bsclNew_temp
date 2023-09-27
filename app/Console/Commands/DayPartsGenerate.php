@@ -9,6 +9,7 @@ use App\Models\DayPart;
 use App\Models\DayPartProcess;
 use App\Models\Universe;
 use App\Models\User;
+use Carbon\Carbon;
 use DateTime;
 
 class DayPartsGenerate extends Command
@@ -87,6 +88,32 @@ class DayPartsGenerate extends Command
             //return response()->json(["time" => $channel->channel_name], 200);
             $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];
             $users = User::all();
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->day);
+            $endDate_ = Carbon::parse($req->day);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::
+                get();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
             $numOfUser = Universe::sum('universe')/1000;//$users->count();
             //$numOfUser = $users->count();
             $time = $this->dayrange($req->day, $req->day, ((int)$req->range));

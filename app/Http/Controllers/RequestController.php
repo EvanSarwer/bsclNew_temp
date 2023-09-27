@@ -244,9 +244,10 @@ class RequestController extends Controller
             //->whereBetween('age', [$req->age1, $req->age2])
             ->whereBetween('dob', [$minDate, $maxDate]) //->get();
             ->count();
-        $universe = Universe:: //where('type', $req->userType)
-            //->
-            where('region', 'like', '%' . strtolower($user->address) . '%')
+            $startDateTime=date("Y-m-d");
+        $universe = Universe::where('start', '<=', $startDateTime)
+                ->where('end', '>=', $startDateTime)
+            ->where('region', 'like', '%' . strtolower($user->address) . '%')
             ->where('gender', 'like', '%' . $user->gender . '%')
             ->where('sec', 'like', '%' . $user->economic_status . '%')
             ->where('age_group', $age_group)->first();

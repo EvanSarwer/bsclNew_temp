@@ -15,6 +15,7 @@ use App\Models\Channel;
 use App\Models\DataReliability;
 use App\Models\DeselectPeriod;
 use App\Models\DeselectLog;
+use App\Models\DeviceBox;
 use App\Models\Notification;
 use App\Models\RawRequest;
 use App\Models\TempData;
@@ -133,19 +134,19 @@ class RequestController extends Controller
             $channel_id = 888;
         }
 
+        $hasDeviceBox = DeviceBox::where('id', $req->device_id)->first();
+        if ($hasDeviceBox && $hasDeviceBox->device != null){
 
-        $hasDevice = Device::where('id', $req->device_id)->first();
-        if ($hasDevice) {
             $last_req_time = Carbon::now()->toDateTimeString();
-            $this->updateDeviceLastReq($req->device_id, $last_req_time);
+            $this->updateDeviceLastReq($hasDeviceBox->device->id, $last_req_time);
 
             $hasChannel = Channel::where('id', $channel_id)->first();
 
             if (($channel_id == 999)) {
-                $hasDevice->tvoff = 0;
-                $hasDevice->save();
+                $hasDeviceBox->device->tvoff = 0;
+                $hasDeviceBox->device->save();
                 //$users = 
-                User::where('device_id', $req->device_id)->update(['tvoff' => 0]);
+                User::where('device_id', $hasDeviceBox->device->id)->update(['tvoff' => 0]);
                 // foreach ($users as $i) {
                 //     $i->tvoff = 0;
                 //     $i->save();
@@ -154,17 +155,17 @@ class RequestController extends Controller
 
 
             } else if (($hasChannel && $channel_id != 999)) {
-                $hasDevice->tvoff = 1;
-                $hasDevice->save();
-                User::where('device_id', $req->device_id)->update(['tvoff' => 1]);
+                $hasDeviceBox->device->tvoff = 1;
+                $hasDeviceBox->device->save();
+                User::where('device_id', $hasDeviceBox->device->id)->update(['tvoff' => 1]);
                 for ($i = 0; $i < strlen($req->people); $i++) {
-                    $index = User::where('device_id', $req->device_id)->where('user_index', $i)->first();
+                    $index = User::where('device_id', $hasDeviceBox->device->id)->where('user_index', $i)->first();
                     //array_push($arr,$index);
                     //return response()->json(["ranges" => $index], 200);
                     if ($index) {
                         if ($req->people[$i] === '1') {
 
-                            $ob = array("device_id" => $req->device_id, "user_id" => $index->id, "channel_name" => $channel_id, "start" => $req->start, "finish" => $req->finish, "error_msg" => $req->error);
+                            $ob = array("device_id" => $hasDeviceBox->device->id, "user_id" => $index->id, "channel_name" => $channel_id, "start" => $req->start, "finish" => $req->finish, "error_msg" => $req->error);
                             $this->receiver((object)$ob);
                         }
                     }
@@ -173,9 +174,53 @@ class RequestController extends Controller
 
 
             if ($req->temp && (substr($req->temp, 0, -2)) > 80) {
-                $this->check_temperature($req->device_id, $hasDevice->device_name, $req->temp);
+                $this->check_temperature($hasDeviceBox->device->id, $hasDeviceBox->device->device_name, $req->temp);
             }
+
         }
+
+        // $hasDevice = Device::where('id', $req->device_id)->first();
+        // if ($hasDevice) {
+        //     $last_req_time = Carbon::now()->toDateTimeString();
+        //     $this->updateDeviceLastReq($req->device_id, $last_req_time);
+
+        //     $hasChannel = Channel::where('id', $channel_id)->first();
+
+        //     if (($channel_id == 999)) {
+        //         $hasDevice->tvoff = 0;
+        //         $hasDevice->save();
+        //         //$users = 
+        //         User::where('device_id', $req->device_id)->update(['tvoff' => 0]);
+        //         // foreach ($users as $i) {
+        //         //     $i->tvoff = 0;
+        //         //     $i->save();
+        //         // }
+
+
+
+        //     } else if (($hasChannel && $channel_id != 999)) {
+        //         $hasDevice->tvoff = 1;
+        //         $hasDevice->save();
+        //         User::where('device_id', $req->device_id)->update(['tvoff' => 1]);
+        //         for ($i = 0; $i < strlen($req->people); $i++) {
+        //             $index = User::where('device_id', $req->device_id)->where('user_index', $i)->first();
+        //             //array_push($arr,$index);
+        //             //return response()->json(["ranges" => $index], 200);
+        //             if ($index) {
+        //                 if ($req->people[$i] === '1') {
+
+        //                     $ob = array("device_id" => $req->device_id, "user_id" => $index->id, "channel_name" => $channel_id, "start" => $req->start, "finish" => $req->finish, "error_msg" => $req->error);
+        //                     $this->receiver((object)$ob);
+        //                 }
+        //             }
+        //         }
+        //     }
+
+
+        //     if ($req->temp && (substr($req->temp, 0, -2)) > 80) {
+        //         $this->check_temperature($req->device_id, $hasDevice->device_name, $req->temp);
+        //     }
+        // }
     }
 
     public function check_temperature($d_id, $d_name, $d_temp)

@@ -90,7 +90,9 @@ Route::post('/device/delete',[DeviceController::class,'deleteDevice'])->middlewa
 Route::get('/device/get/{device_id}',[DeviceController::class,'getDevice'])->middleware('auth.admin.deployer');
 Route::post('/device/edit',[DeviceController::class,'editDevice'])->middleware('auth.admin.deployer');
 Route::post('/device/deselect',[DeviceController::class,'deselectDevice'])->middleware('auth.admin');
-
+Route::get('/device/available-boxes',[DeviceController::class,'availableBoxList'])->middleware('auth.admin');
+Route::post('/device/update-box-id',[DeviceController::class,'updateBoxId'])->middleware('auth.admin');
+Route::post('/device/new-box-id',[DeviceController::class,'NewBoxIdAssign'])->middleware('auth.admin');
 
 Route::get('/device/tvoff', [DeviceController::class, 'tvoff'])->middleware('auth.admin.deployer');
 Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff'])->middleware('auth.admin.deployer');
@@ -226,8 +228,8 @@ Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.u
 
 Route::post('/datafix',[RequestController::class,'datafix']);
 Route::post('/receive',[RequestController::class,'receive']);
-Route::post('/deselect',[RequestController::class,'deselect']);
 Route::get('/receive',[RequestController::class,'receive']);
+Route::post('/deselect',[RequestController::class,'deselect']);
 Route::post('/receiveoutside',[RequestController::class,'receiveoutside']);
 
 Route::post('/receive/reliabilitylog',[RequestController::class,'receiveReliabilityLog']);

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\DeselectPeriod;
 use App\Models\RawRequest;
+use App\Models\DeviceBox;
 
 class Device extends Model
 {
@@ -26,6 +27,11 @@ class Device extends Model
 
     public function rawRequests(){
         return $this->hasMany(RawRequest::class, 'device_id');
+    }
+
+    public function deviceBox()
+    {
+        return $this->hasOne(DeviceBox::class, 'device_id');
     }
 
 

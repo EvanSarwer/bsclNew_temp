@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Device;
 use App\Models\DeselectPeriod;
 use App\Models\DeselectLog;
+use App\Models\DeviceBox;
 use App\Models\ViewLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -100,6 +101,7 @@ class DeviceController extends Controller
             }
 
             $d->users = $d->users;
+            $d->deviceBoxId = $d->deviceBox->id ?? null;
         }
         return response()->json($data);
     }
@@ -255,6 +257,7 @@ class DeviceController extends Controller
         $device = Device::where('id', $device_id)->first();
         //$dUser = $device->users;
         //$deviceUser = $dUser->sortBy('user_index');
+        $device->deviceBoxId = $device->deviceBox->id ?? null;
         $deviceUser = array();
 
         foreach ($device->users as $du) {
@@ -494,5 +497,74 @@ class DeviceController extends Controller
             "device_id" => "required",
             "user_index" => "required"
         ];
+    }
+
+    public function availableBoxList()
+    {
+        $deselect_device_ids = DeselectPeriod::whereNotNull('start_date')->whereNull('end_date')->distinct()->get('device_id');
+
+        $available_boxes = DeviceBox::where('device_id', null)->orWhereIn('device_id', $deselect_device_ids)->orWhereDoesntHave('device')->get();
+        return response()->json($available_boxes);
+    }
+
+    public function updateBoxId(Request $req)
+    {
+        // Validation
+        $req->validate([
+            'device_id' => 'required',
+            'device_box_id' => 'required|integer',
+        ]);
+
+        // Update
+        $device_box = DeviceBox::where('id', $req->device_box_id)->first();
+        if ($device_box) {
+            if ($device_box->device_id != null && $device_box->device != null) {
+                $deselect_device = DeselectPeriod::where('device_id', $device_box->device_id)->whereNotNull('start_date')->whereNull('end_date')->first();
+                if ($deselect_device) {
+                    //device previous box id free
+                    $device_previous_box = DeviceBox::where('device_id', $req->device_id)->first();
+                    if ($device_previous_box && $device_previous_box->id != $req->device_box_id) {
+                        $device_previous_box->device_id = null;
+                        $device_previous_box->save();
+                    }
+                    // device box id update
+                    $device_box->device_id = $req->device_id;
+                    $device_box->save();
+                    return response()->json(["device_box_id"=> $device_box->id,"message" => "Device Box Updated Successfully"]);
+                } else {
+                    return response()->json(["error_message" => 'Device Box Already Assigned (Device Name: ' . $device_box->device->device_name .')'], 423);
+                }
+                
+            } else {
+                //device previous box id free
+                $device_previous_box = DeviceBox::where('device_id', $req->device_id)->first();
+                if ($device_previous_box && $device_previous_box->id != $req->device_box_id) {
+                    $device_previous_box->device_id = null;
+                    $device_previous_box->save();
+                }
+                // device box id update
+                $device_box->device_id = $req->device_id;
+                $device_box->save();
+                return response()->json(["device_box_id"=> $device_box->id,"message" => "Device Box Updated Successfully"]);
+            }
+        } else {
+            return response()->json(["error_message" => "Device Box Not Found"], 423);
+        }
+    }
+
+    public function NewBoxIdAssign(Request $req){
+
+        $device_previous_box = DeviceBox::where('device_id', $req->device_id)->first();
+        if ($device_previous_box) {
+            $device_previous_box->device_id = null;
+            $device_previous_box->save();
+        }
+
+        $device_box = new DeviceBox();
+        $device_box->device_id = $req->device_id;
+        $device_box->save();
+
+        return response()->json(["device_box_id"=> $device_box->id,"message" => "New Device Box Added Successfully"]);
+
     }
 }

@@ -53,7 +53,7 @@ class DashboardGraphs extends Command
 
         $lastCleanedUpdatedDate = DataCleanse::where('status',1)->latest('id')->first();
         
-        if ($lastCleanedUpdatedDate >= $yesterday) {
+        if ($lastCleanedUpdatedDate->date >= $yesterday) {
 
 
         // $y_data = DashboardTempData::where('date', $yesterday)->first();

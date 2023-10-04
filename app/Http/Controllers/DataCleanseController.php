@@ -57,4 +57,9 @@ class DataCleanseController extends Controller
         return response()->json("Cleaned");
 
     }
+
+    public function lastCleanedDate(){
+        $lastCleanedDate = DataCleanse::where('status',1)->latest('id')->first();
+        return response()->json(["lastCleanedDate"=>$lastCleanedDate?->date],200);
+    }
 }

@@ -248,3 +248,5 @@ Route::get("/data/cleanse/alldates",[DataCleanseController::class,'index'])->nam
 Route::get("/viewlog/{id}",[DataCleanseController::class,'getViewlog'])->middleware('auth.admin');;
 Route::get("/clean/data/{id}",[DataCleanseController::class,'cleanData'])->middleware('auth.admin');
 Route::get("/cleaning/data/date/{id}",[DataCleanseController::class,'cleaningData_Date'])->middleware('auth.admin');
+
+Route::get("/lastCleanedDate",[DataCleanseController::class,'lastCleanedDate']);

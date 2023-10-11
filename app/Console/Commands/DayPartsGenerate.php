@@ -7,6 +7,7 @@ use App\Models\ViewLog;
 use App\Models\Channel;
 use App\Models\DayPart;
 use App\Models\DayPartProcess;
+use App\Models\DataCleanse;
 use App\Models\Universe;
 use App\Models\User;
 use Carbon\Carbon;
@@ -47,15 +48,32 @@ class DayPartsGenerate extends Command
     {
         $type=['','stb','ott'];
         $ranges=[30,15];
-        $day=date("Y-m-d", strtotime('-1 days'));
+        $endDate = DataCleanse::where('status',1)->latest('id')->first()->date;
+        $startDate = DayPartProcess::max('day');
+        $dates = $this->getDatesBetween($startDate, $endDate);
+        //$day=date("Y-m-d", strtotime('-1 days'));
+        
+        foreach($dates as $day){
         foreach($type as $t){
             foreach($ranges as $r){
                 $this->dayrangedtrendsave((object)['type'=>$t,'range'=>$r,'day'=>$day]);
             }
-        }
+        }}
         return 0;
     }
-
+    function getDatesBetween($startDate, $endDate) {
+        $dateArray = array();
+    
+        $currentDate = new DateTime($startDate);
+        $endDate = new DateTime($endDate);
+    
+        while ($currentDate <= $endDate) {
+            $dateArray[] = $currentDate->format('Y-m-d');
+            $currentDate->modify('+1 day');
+        }
+    
+        return $dateArray;
+    }
 
     public function dayrangedtrendsave($req)
     {
@@ -64,11 +82,12 @@ class DayPartsGenerate extends Command
             $type = "all";
         }
         $channel = Channel::all();
+        //$channel=Channel::where('id',1)->get();
         $c_count = $channel->count();
         $count = 0;
         $pcount = 0;
         foreach ($channel as $c) {
-            $daypartcheck = DayPartProcess::where('channel_id', $c->id)
+            $daypartcheck = DayPart::where('channel_id', $c->id)
                 ->where('type', 'like', '%' . $type . '%')
                 ->where('time_range', $req->range)
                 ->where('day', $req->day)
@@ -81,8 +100,9 @@ class DayPartsGenerate extends Command
                 continue;
             } else {
 
-                DayPartProcess::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all")]);
+                //DayPartProcess::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all")]);
             }
+            
             $userids = User::where('type', 'like', '%' . $req->type . '%')
                 ->pluck('id')->toArray();
             //return response()->json(["time" => $channel->channel_name], 200);
@@ -145,8 +165,6 @@ class DayPartsGenerate extends Command
             foreach ($time as $tt) {
                 for ($i = 0; $i < count($tt); $i++) {
 
-                    // $viewers = $this->views($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
-                    // $watchtime = $this->timeviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
 
                     $timeandviewers = $this->timeandviewed($c->id, $userids, $tt[$i]["start"], $tt[$i]["finish"]);
                     $viewers = $timeandviewers->view;
@@ -161,15 +179,7 @@ class DayPartsGenerate extends Command
                     $tvrs[$i] = $tvrs[$i] + $watchtime;
                 }
             }
-            /*int total_sample = Samplemax;
-            double total_timespent = time.Sum() / 60;
-            double total_reach = this.get_reach(userss);
-            int total_reachint = (int)total_reach;
-            double total_reachp = total_reach / total_sample * 100;
-            double total_share = (!alltimef) ? ((total_timespent > 0) ? 100 : 0) : ((alltime[allc] == 0) ? 0 : total_timespent / (total_sample * alltime[allc]) * 100);
-            total_timespent = total_timespent / total_sample;
-            double total_tvrp = total_timespent * 100 / timerange;
-            double total_tvr = total_tvrp * total_sample / 100;*/
+            
             for ($i = 0; $i < count($tt); $i++) {
                 $rr=(int)$this->mult_sum($reachs[$i]);
 
@@ -179,14 +189,12 @@ class DayPartsGenerate extends Command
                 $tvrp[$i] = ($tvrs[$i] / ($numOfUser * $dd)) * 100;
                 $tvr0[$i] = $tvrp[$i]*$numOfUser / 100;
 
-                //$tvrp[$i] = ($tvrs[$i] / ($numOfUser * $dd)) * 100;
-                //$mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
-                //$mid = date("H:i:s", $mid);
                 $mid = date("H:i:s", strtotime($time[0][$i]["start"]));
                 array_push($label, $mid);
                 array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
             }
-            DayPart::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all"), "data" => json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))]);
+            
+        DayPart::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all"), "data" => json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))]);
             $count++;
         }
     }

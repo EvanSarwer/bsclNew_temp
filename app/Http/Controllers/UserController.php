@@ -14,6 +14,10 @@ use App\Models\UserDataFilter;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
+use App\Models\DayPartProcess;
+use App\Models\DayPart;
+use App\Models\DataCleanse;
+
 
 class UserController extends Controller
 {
@@ -765,59 +769,172 @@ class UserController extends Controller
     }
 
 
-
+    function getDatesBetween($startDate, $endDate) {
+        $dateArray = array();
+    
+        $currentDate = new DateTime($startDate);
+        $endDate = new DateTime($endDate);
+    
+        while ($currentDate <= $endDate) {
+            $dateArray[] = $currentDate->format('Y-m-d');
+            $currentDate->modify('+1 day');
+        }
+    
+        return $dateArray;
+    }
     function demo_test()
     {
 
-        $user = User::where('id', 11560)->first();
-                
-                $startDate = new DateTime($user->dob);
-$endDate = new DateTime();
-
-$interval = $startDate->diff($endDate);
-
-$years = $interval->y;
-$age_group_string = array("0-14", "15-24", "25-34", "35-44", "45 & Above");
-if ($years <= 14) {
-    $minDate = Carbon::today()->subYears(14 + 1); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(0)->endOfDay();
-    $age_group = $age_group_string[0];
-} elseif ($years >= 15 && $years <= 24) {
-    $minDate = Carbon::today()->subYears(24 + 1); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(15)->endOfDay();
-    $age_group = $age_group_string[1];
-} elseif ($years >= 25 && $years <= 34) {
-    $minDate = Carbon::today()->subYears(34 + 1); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(25)->endOfDay();
-    $age_group = $age_group_string[2];
-} elseif ($years >= 35 && $years <= 44) {
-    $minDate = Carbon::today()->subYears(44 + 1); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(35)->endOfDay();
-    $age_group = $age_group_string[3];
-} elseif ($years >= 45) {
-    $minDate = Carbon::today()->subYears(150); // make sure to use Carbon\Carbon in the class
-    $maxDate = Carbon::today()->subYears(45)->endOfDay();
-    $age_group = $age_group_string[4];
-}
-
-$systemUniverse = User:://where('type', $req->userType)
-//->
-where('address', 'like', '%' . $user->address . '%')
-->where('gender', 'like', '%' . $user->gender . '%')
-->where('economic_status', 'like', '%' . $user->economic_status . '%')
-//->where('socio_status', 'like', '%' . $user->socio_status . '%')
-//->whereBetween('age', [$req->age1, $req->age2])
-->whereBetween('dob', [$minDate, $maxDate])//->get();
-->count();
-$universe = Universe:://where('type', $req->userType)
-    //->
-    where('region', 'like', '%' . strtolower($user->address) . '%')
-    ->where('gender', 'like', '%' . $user->gender . '%')
-    ->where('sec', 'like', '%' . $user->economic_status . '%')
-    ->where('age_group', $age_group)->first()->universe;
-    //->count();
-                
+        $type=['','stb','ott'];
+        $ranges=[30,15];
+        $endDate = DataCleanse::where('status',1)->latest('id')->first()->date;
+        $startDate = DayPartProcess::max('day');
+        $dates = $this->getDatesBetween($startDate, $endDate);
+        //$day=date("Y-m-d", strtotime('-1 days'));
+        
+        foreach($dates as $day){
+        foreach($type as $t){
+            foreach($ranges as $r){
+                $this->dayrangedtrendsave((object)['type'=>$t,'range'=>$r,'day'=>$day]);
+            }
+        }}
+        return response()->json(["data" => $dates,"start"=>$startDate,"end"=>$endDate], 200);
         //return $hash;
-        return response()->json(["systemUniverse" => $systemUniverse,"mindate"=>$minDate,"maxdate"=>$maxDate,"a"=>$age_group,"u"=>$universe], 200);
+        //return response()->json(["systemUniverse" => $systemUniverse,"mindate"=>$minDate,"maxdate"=>$maxDate,"a"=>$age_group,"u"=>$universe], 200);
+    }
+    public function dayrangedtrendsave($req)
+    {
+        $type = $req->type;
+        if ($req->type == "") {
+            $type = "all";
+        }
+        $channel = Channel::all();
+        $c_count = $channel->count();
+        $count = 0;
+        $pcount = 0;
+        foreach ($channel as $c) {
+            $daypartcheck = DayPartProcess::where('channel_id', $c->id)
+                ->where('type', 'like', '%' . $type . '%')
+                ->where('time_range', $req->range)
+                ->where('day', $req->day)
+                ->first();
+            //return response()->json(["done" => $daypartcheck], 200);
+            if ($daypartcheck) {
+
+                $pcount++;
+
+                continue;
+            } else {
+
+                DayPartProcess::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all")]);
+            }
+            /*
+            $userids = User::where('type', 'like', '%' . $req->type . '%')
+                ->pluck('id')->toArray();
+            //return response()->json(["time" => $channel->channel_name], 200);
+            $all = [["Time-Frame", "Reach(000)", "Reach(%)", "TVR(000)", "TVR(%)"]];
+            $users = User::all();
+            // Create an array of DateOnly objects
+            $dates = [];
+            $startDate_ = Carbon::parse($req->day);
+            $endDate_ = Carbon::parse($req->day);
+
+            for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
+                $dates[] = $date->toDateString();
+            }
+
+            // Query the database using Eloquent
+            $allUniverses = Universe::
+                get();
+
+            $suniverses = [];
+            foreach ($dates as $date) {
+                $uCount = $allUniverses->where('start', '<=', $date)
+                    ->where('end', '>=', $date)
+                    ->sum('universe');
+
+                $suniverses[] = [
+                    'date' => $date,
+                    'unum' => $uCount / 1000,
+                ];
+            }
+
+            $universe_size = max(array_column($suniverses, 'unum'));
+            $numOfUser = Universe::sum('universe')/1000;//$users->count();
+            //$numOfUser = $users->count();
+            $time = $this->dayrange($req->day, $req->day, ((int)$req->range));
+
+            //   return response()->json(["time" => $time], 200);
+            if (((int)$req->range) == 30) {
+                $dd = 30 * count($time);
+                $m = 900;
+                $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+                $reachp = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+                $reach0 = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+
+                $tvrs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                $tvrp = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                $tvr0 = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            } else {
+                $dd = 15 * count($time);
+                $m = 450;
+                $reachs = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+                $reachp = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+                $reach0 = array([], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []);
+
+                $tvrs = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                $tvrp = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                $tvr0 = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            }
+            //return response()->json(["time" => count($reachs)], 200);
+            $label = array();
+            foreach ($time as $tt) {
+                for ($i = 0; $i < count($tt); $i++) {
+
+                    // $viewers = $this->views($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
+                    // $watchtime = $this->timeviewed($req->id, $tt[$i]["start"], $tt[$i]["finish"]);
+
+                    $timeandviewers = $this->timeandviewed($c->id, $userids, $tt[$i]["start"], $tt[$i]["finish"]);
+                    $viewers = $timeandviewers->view;
+                    $watchtime = $timeandviewers->time;
+                    //return response()->json(["ok"=>"ss","time" => $viewers ], 200);
+                    //return response()->json(["time" => $viewers], 200);
+                    if (!empty($viewers)) {
+
+                        $reachs[$i] = array_merge($reachs[$i], $viewers);
+                    }
+
+                    $tvrs[$i] = $tvrs[$i] + $watchtime;
+                }
+            }
+            /*int total_sample = Samplemax;
+            double total_timespent = time.Sum() / 60;
+            double total_reach = this.get_reach(userss);
+            int total_reachint = (int)total_reach;
+            double total_reachp = total_reach / total_sample * 100;
+            double total_share = (!alltimef) ? ((total_timespent > 0) ? 100 : 0) : ((alltime[allc] == 0) ? 0 : total_timespent / (total_sample * alltime[allc]) * 100);
+            total_timespent = total_timespent / total_sample;
+            double total_tvrp = total_timespent * 100 / timerange;
+            double total_tvr = total_tvrp * total_sample / 100;*/
+            /*
+            for ($i = 0; $i < count($tt); $i++) {
+                $rr=(int)$this->mult_sum($reachs[$i]);
+
+                $reachp[$i] = ($rr * 100) / $numOfUser;
+                $reach0[$i] = $rr;
+                
+                $tvrp[$i] = ($tvrs[$i] / ($numOfUser * $dd)) * 100;
+                $tvr0[$i] = $tvrp[$i]*$numOfUser / 100;
+
+                //$tvrp[$i] = ($tvrs[$i] / ($numOfUser * $dd)) * 100;
+                //$mid = strtotime("+" . $m . " seconds", strtotime($time[0][$i]["start"]));
+                //$mid = date("H:i:s", $mid);
+                $mid = date("H:i:s", strtotime($time[0][$i]["start"]));
+                array_push($label, $mid);
+                array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
+            }*/
+        DayPart::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all"), "data" => "dd"/*json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))*/]);
+            $count++;
+        }
     }
 }

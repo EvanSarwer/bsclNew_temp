@@ -200,6 +200,8 @@ Route::post('trend/dayrangedreach0', [TrendController::class, 'dayrangedtrendrea
 Route::post('trend/dayrangedtvr0', [TrendController::class, 'dayrangedtrendtvr0'])->middleware('auth.admin.user');
 Route::post('trend/dayrangedtvrp', [TrendController::class, 'dayrangedtrendtvrp'])->middleware('auth.admin.user');
 Route::post('trend/dayrangedreachp', [TrendController::class, 'dayrangedtrendreachp'])->middleware('auth.admin.user');
+
+Route::get('daypart_date', [DayPartsController::class, 'daypart_date']);
 Route::post('dayparts/all', [DayPartsController::class, 'dayrangedtrendall'])->middleware('auth.admin.user');
 Route::post('dayparts/save', [DayPartsController::class, 'dayrangedtrendsave'])->middleware('auth.admin.user');//->middleware('auth.admin.user.deployer');
 Route::get('demov', [TrendController::class, 'views'])->middleware('auth.admin.user');

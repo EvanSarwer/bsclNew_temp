@@ -15,6 +15,11 @@ use DateTime;
 class DayPartsController extends Controller
 {
     //
+    public function daypart_date()
+    {
+        $startDate = DayPart::max('day');
+        return response()->json(["date" => $startDate], 200);
+    }
     public function dayrangedtrendsave(Request $req)
     {
         $type=['','stb','ott'];

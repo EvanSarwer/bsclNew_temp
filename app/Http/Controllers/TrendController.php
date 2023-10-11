@@ -10,10 +10,15 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 
+use App\Models\DataCleanse;
 class TrendController extends Controller
 {
     public function trendGeneralAll(Request $req)
     {
+        $str1 =strtotime(DataCleanse::where('status',1)->latest('id')->first()->date);
+        //$str1 = strtotime("2023-10-9");
+        $str2 = strtotime(date("Y-m-d"));
+        $n = $str2 - $str1;
         $userids = User::where('type', 'like', '%' . $req->type . '%')
             ->pluck('id')->toArray();
         $fweek = false;
@@ -28,7 +33,7 @@ class TrendController extends Controller
             for ($i = 0; $i < 15; $i++) {
                 $inc = $inc + 24;
                 //echo "".$inc;
-                array_push($time, ((string)$inc) . " hours");
+                array_push($time, ((string)$inc) . " hours"." -" . $n . " seconds");
             }
         } elseif ($req->time == "Monthly") {
             $tstring = "d";
@@ -37,7 +42,7 @@ class TrendController extends Controller
             for ($i = 0; $i < 32; $i++) {
                 $inc = $inc + 24;
                 //echo "".$inc;
-                array_push($time, ((string)$inc) . " hours");
+                array_push($time, ((string)$inc) . " hours"." -" . $n . " seconds");
             }
         } elseif ($req->time == "Yearly") {
             $tstring = "y-M";
@@ -46,7 +51,7 @@ class TrendController extends Controller
             for ($i = 0; $i < 13; $i++) {
                 $inc = $inc + 1;
                 //echo "".$inc;
-                array_push($time, ((string)$inc) . " months");
+                array_push($time, ((string)$inc) . " months"." -" . $n . " seconds");
             }
         } else {
             $inc = -20; //daily
@@ -54,9 +59,14 @@ class TrendController extends Controller
             for ($i = 0; $i < 13; $i++) {
                 $inc = $inc + 2;
                 //echo "".$inc;
-                array_push($time, ((string)$inc) . " hours");
+                array_push($time, ((string)$inc) . " hours"." -" . $n . " seconds");
             }
         }
+        $time1 = array();
+        for ($i = 0; $i < count($time); $i++) {
+            $time1[$i] = date("Y-m-d H:i:s", strtotime($time[$i]));
+        }
+        //return response()->json(["time" => $time1], 200);
         $ldate = date('Y-m-d H:i:s');
         $tvrps = array();
         $tvr0s = array();
@@ -100,7 +110,7 @@ class TrendController extends Controller
         }
 
         $universe_size = max(array_column($suniverses, 'unum'));
-        $numOfUser = $universe_size;//Universe::sum('universe') / 1000;
+        $numOfUser = $universe_size; //Universe::sum('universe') / 1000;
         //$numOfUser = $users->count();
         //return response()->json(["reachsum" => array_sum($reachllistnew), "reach" => $reachllistnew, "channels" => $channellistnew], 200);
 
@@ -137,21 +147,20 @@ class TrendController extends Controller
                 $mult = ($v->universe / 1000) / $v->system;
                 array_push($watchtime, $timeviewd * $mult);
                 array_push($reacht, ["user_id" => $v->user_id, "mult" => $mult]);
-                
             }
             $tvr = array_sum($watchtime) / $numOfUser;
             //$tvr=$tvr/60;
             $diff = (strtotime(date("Y-m-d H:i:s", strtotime($time[$i + 1]))) - strtotime(date("Y-m-d H:i:s", strtotime($time[$i])))) / 60;
             $tvr = $tvr / $diff;
             array_push($tvr0s, $tvr);
-            $tvr = ($tvr * 100)/$numOfUser;
+            $tvr = ($tvr * 100) / $numOfUser;
             array_push($tvrps, $tvr);
             unset($watchtime);
             $watchtime = array();
 
             $reach = (int)$this->mult_sum($reacht);
             array_push($reach0s, $reach);
-            $reach = $reach*100 / $numOfUser;
+            $reach = $reach * 100 / $numOfUser;
             array_push($reachps, $reach);
             unset($reacht);
             $reacht = array();
@@ -173,34 +182,34 @@ class TrendController extends Controller
     {
         $sums = [];
 
-foreach ($inputArray as $item) {
-    $userId = $item["user_id"];
-    $mult = $item["mult"];
+        foreach ($inputArray as $item) {
+            $userId = $item["user_id"];
+            $mult = $item["mult"];
 
-    // Check if the user ID already exists in the sums array
-    if (isset($sums[$userId])) {
-        // Update the 'mult' value if it's greater than the current value
-        if ($mult > $sums[$userId]["mult"]) {
-            $sums[$userId]["mult"] = $mult;
+            // Check if the user ID already exists in the sums array
+            if (isset($sums[$userId])) {
+                // Update the 'mult' value if it's greater than the current value
+                if ($mult > $sums[$userId]["mult"]) {
+                    $sums[$userId]["mult"] = $mult;
+                }
+            } else {
+                // If the user ID doesn't exist, add it to the sums array
+                $sums[$userId] = ["user_id" => $userId, "mult" => $mult];
+            }
         }
-    } else {
-        // If the user ID doesn't exist, add it to the sums array
-        $sums[$userId] = ["user_id" => $userId, "mult" => $mult];
+
+        // Convert the associative array to a sequential array
+        $modifiedArray = array_values($sums);
+
+        // Calculate the sum of 'mult' values from the modified array
+        $sum = 0;
+        foreach ($modifiedArray as $item) {
+            $sum += $item["mult"];
+        }
+
+        return ($sum);
     }
-}
 
-// Convert the associative array to a sequential array
-$modifiedArray = array_values($sums);
-
-// Calculate the sum of 'mult' values from the modified array
-$sum = 0;
-foreach ($modifiedArray as $item) {
-    $sum += $item["mult"];
-}
-
-return ($sum);
-    }
-    
 
     public function dayrangedtrendreach0(Request $req)
     {

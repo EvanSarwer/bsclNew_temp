@@ -49,7 +49,7 @@ class DayPartsGenerate extends Command
         $type=['','stb','ott'];
         $ranges=[30,15];
         $endDate = DataCleanse::where('status',1)->latest('id')->first()->date;
-        $startDate = DayPart::max('day');
+        $startDate = DayPartProcess::max('day');
         $dates = $this->getDatesBetween($startDate, $endDate);
         //$day=date("Y-m-d", strtotime('-1 days'));
         

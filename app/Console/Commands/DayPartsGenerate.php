@@ -87,7 +87,7 @@ class DayPartsGenerate extends Command
         $count = 0;
         $pcount = 0;
         foreach ($channel as $c) {
-            $daypartcheck = DayPart::where('channel_id', $c->id)
+            $daypartcheck = DayPartProcess::where('channel_id', $c->id)
                 ->where('type', 'like', '%' . $type . '%')
                 ->where('time_range', $req->range)
                 ->where('day', $req->day)
@@ -100,7 +100,7 @@ class DayPartsGenerate extends Command
                 continue;
             } else {
 
-                //DayPartProcess::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all")]);
+                DayPartProcess::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all")]);
             }
             
             $userids = User::where('type', 'like', '%' . $req->type . '%')

@@ -652,6 +652,7 @@ class UserController extends Controller
 
 
         $user->age = Carbon::parse($user->dob)->diff(Carbon::now())->y;
+        $user->box_id=$user->device->deviceBox->id;
 
         return response()->json(["user" => $user], 200);
     }

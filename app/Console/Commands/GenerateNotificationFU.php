@@ -66,7 +66,7 @@ class GenerateNotificationFU extends Command
 
         $users = User::where('device_id', $d->id)->pluck('id')->toArray();
         $viewererror = (int)(ViewLog::selectRaw("sum(TIMESTAMPDIFF(SECOND,started_watching_at,finished_watching_at)) as 'sec'")
-          ->whereIn('user_id', $users)->whereIn('channel_id', [39, 888])->where('started_watching_at', '>', $day5Before)->first()->sec);
+          ->whereIn('user_id', $users)->whereIn('channel_id', [888])->where('started_watching_at', '>', $day5Before)->first()->sec);
         $viewertotal = (int)(ViewLog::selectRaw("sum(TIMESTAMPDIFF(SECOND,started_watching_at,finished_watching_at)) as 'sec'")
           ->whereIn('user_id', $users)->where('started_watching_at', '>', $day5Before)->first()->sec);
         //return response()->json(["total" => $viewertotal,"error" => $viewererror/$viewertotal,"ok"=>"not"], 200);

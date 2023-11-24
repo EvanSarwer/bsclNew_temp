@@ -38,6 +38,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 //////////////Playout////////////////////
 Route::post('playout/receive', [PlayoutController::class, 'receive']);
+Route::post('ad/receive', [PlayoutController::class, 'adlog']);
+Route::post('program/receive', [PlayoutController::class, 'programlog']);
 //////////////Playout////////////////////
 //////////////Adtrp////////////////////
 
@@ -174,6 +176,7 @@ Route::post('/livechannel/activechannellistgraphfast',[LiveChannelController::cl
 ///////////END////////////////
 
 //////////Trend////////////
+Route::get('/channels', [ChannelController::class, 'channels']);//->middleware('auth.admin.user');
 Route::get('trend/channels', [ChannelController::class, 'trendchannel'])->middleware('auth.admin.user');
 Route::post('trend/reach/zero', [ChannelController::class, 'reachtrend'])->middleware('auth.admin.user');
 Route::post('trend/reach/percent', [ChannelController::class, 'reachpercenttrend'])->middleware('auth.admin.user');

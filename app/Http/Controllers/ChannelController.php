@@ -19,7 +19,10 @@ class ChannelController extends Controller
 
 
  
-
+public function channels(){
+  $channels = Channel::select('id', 'tmp_channel_name as channelName')->get();
+  return response()->json(["channels" => $channels], 200);
+}
   public function definedtrendreachp(Request $req)
   {
     $tv = 0;

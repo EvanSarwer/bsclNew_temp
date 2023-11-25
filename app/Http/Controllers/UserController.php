@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Universe;
 use Carbon\Carbon;
 use DateTime;
+
 use App\Mail\SendMail;
 use App\Models\UserDataFilter;
 use Illuminate\Support\Facades\Mail;
@@ -17,7 +18,9 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\DayPartProcess;
 use App\Models\DayPart;
 use App\Models\DataCleanse;
-
+use App\Models\DeselectPeriod;
+use App\Models\Device;
+use App\Models\SystemUniverse;
 
 class UserController extends Controller
 {
@@ -652,7 +655,7 @@ class UserController extends Controller
 
 
         $user->age = Carbon::parse($user->dob)->diff(Carbon::now())->y;
-        $user->box_id=$user->device->deviceBox->id;
+        $user->box_id = $user->device->deviceBox->id;
 
         return response()->json(["user" => $user], 200);
     }
@@ -671,7 +674,7 @@ class UserController extends Controller
                 $d->gender = "Male";
             } elseif ($d->gender == "f") {
                 $d->gender = "Female";
-            }else{
+            } else {
                 $d->gender = "All";
             }
         }
@@ -739,67 +742,110 @@ class UserController extends Controller
                 ->where('users.gender', 'like', '%' . $d->gender . '%')
                 ->whereBetween('users.dob', [$minDate, $maxDate])
                 ->join('users', 'users.id', '=', 'view_logs.user_id')
-                ->select('users.id','users.user_name','users.device_id')
+                ->select('users.id', 'users.user_name', 'users.device_id')
                 ->distinct('view_logs.user_id')->get();
-            
+
             //$logs->gid = $d->id;
-            if(count($logs)>0){
+            if (count($logs) > 0) {
                 $d->generate_flag = 1;
                 $d->generated_data = json_encode($logs);
                 $d->save();
-            }else{
+            } else {
                 $d->generate_flag = 1;
                 //$d->generated_data = json_encode($logs);
                 $d->save();
             }
-            
+
             //array_push($all_data, $logs);
 
         }
         return response()->json(["Data" => "data"], 200);
     }
 
-    function getUserFilter_generatedData($view_id){
+    function getUserFilter_generatedData($view_id)
+    {
 
-        $data = UserDataFilter::where('id',$view_id)->where('generate_flag', 1)->first();
-        if($data){
+        $data = UserDataFilter::where('id', $view_id)->where('generate_flag', 1)->first();
+        if ($data) {
             $data->generated_data = json_decode($data->generated_data);
             return response()->json(["data" => $data->generated_data], 200);
         }
-
     }
 
 
-    function getDatesBetween($startDate, $endDate) {
+    function getDatesBetween($startDate, $endDate)
+    {
         $dateArray = array();
-    
+
         $currentDate = new DateTime($startDate);
         $endDate = new DateTime($endDate);
-    
+
         while ($currentDate <= $endDate) {
             $dateArray[] = $currentDate->format('Y-m-d');
             $currentDate->modify('+1 day');
         }
-    
+
         return $dateArray;
     }
     function demo_test()
     {
 
-        $type=['','stb','ott'];
-        $ranges=[30,15];
-        $endDate = DataCleanse::where('status',1)->latest('id')->first()->date;
-        $startDate = DayPartProcess::max('day');
-        $dates = $this->getDatesBetween($startDate, $endDate);
-        //$day=date("Y-m-d", strtotime('-1 days'));
-        
-        foreach($dates as $day){
-        foreach($type as $t){
-            foreach($ranges as $r){
-                $this->dayrangedtrendsave((object)['type'=>$t,'range'=>$r,'day'=>$day]);
+        $deselectedIds = DeselectPeriod::where('end_date', null)->pluck('device_id')->toArray();
+        //return response()->json(["data" => count($deselectedIds)], 200);
+
+        $list = [];
+        $divisions = ["dhaka", "barishal", "chattogram", "khulna", "mymensingh", "rajshahi", "rangpur", "sylhet"];
+        $genders = ["m", "f"];
+        $ageGroups = ["0-14", "15-24", "25-34", "35-44", "45 & Above"];
+        $secs = ["a", "b", "c", "d", "e"];
+        $ageGroupListNumRange = [
+            [0, 14],
+            [15, 24],
+            [25, 34],
+            [35, 44],
+            [45, 150],
+        ];
+        $cc = 0;
+        foreach ($divisions as $division) {
+            $deviceIds = Device::where('district', strtolower($division))
+                ->whereNotIn('Id', $deselectedIds)
+                ->pluck('Id')
+                ->toArray();
+                //return response()->json(["data" => count($deviceIds)], 200);
+
+            foreach ($genders as $gender) {
+                foreach ($ageGroups as $i => $ageGroup) {
+                    foreach ($secs as $s) {
+                        //return response()->json(["data" => $ageGroupListNumRange[$i][1]], 200);
+                        $minDate = now()->subYears($ageGroupListNumRange[$i][1])->endOfDay();
+                        $maxDate = now()->subYears($ageGroupListNumRange[$i][0])->endOfDay();
+                        $noOfUsers = User::whereIn('Device_Id', $deviceIds)
+                            ->where('economic_status', $s)
+                            ->where('Gender', $gender)
+                            ->whereBetween('dob', [$minDate, $maxDate])
+                            ->count();
+                        $cc = $cc + $noOfUsers;
+                        //$list[]
+                        $obj = new SystemUniverse([
+                            'date_of_gen' => now()->toDateString(),
+                            'Gender' => $gender,
+                            'Region' => $division,
+                            'Sec' => $s,
+                            'Age_Group' => $ageGroup,
+                            'Universe' => $noOfUsers,
+                        ]);
+                        $obj->save();
+                    }
+                }
             }
-        }}
-        return response()->json(["data" => $dates,"start"=>$startDate,"end"=>$endDate], 200);
+        }
+
+        try {
+            //SystemUniverse::insert($list);
+            return response()->json(['message' => 'done', 'count' => $cc]);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
         //return $hash;
         //return response()->json(["systemUniverse" => $systemUniverse,"mindate"=>$minDate,"maxdate"=>$maxDate,"a"=>$age_group,"u"=>$universe], 200);
     }
@@ -934,7 +980,7 @@ class UserController extends Controller
                 array_push($label, $mid);
                 array_push($all, [$mid, $reach0[$i], $reachp[$i], $tvr0[$i], $tvrp[$i]]);
             }*/
-        DayPart::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all"), "data" => "dd"/*json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))*/]);
+            DayPart::create(["channel_id" => $c->id, "day" => $req->day, "time_range" => $req->range, "type" => (($type != "") ? $type : "all"), "data" => "dd"/*json_encode(((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp])))*/]);
             $count++;
         }
     }

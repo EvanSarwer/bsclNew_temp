@@ -789,10 +789,8 @@ class UserController extends Controller
     }
     function demo_test()
     {
-
         $deselectedIds = DeselectPeriod::where('end_date', null)->pluck('device_id')->toArray();
-        //return response()->json(["data" => count($deselectedIds)], 200);
-
+        //return response()->json(["data" => $deselectedIds], 200);
         $list = [];
         $divisions = ["dhaka", "barishal", "chattogram", "khulna", "mymensingh", "rajshahi", "rangpur", "sylhet"];
         $genders = ["m", "f"];
@@ -811,18 +809,19 @@ class UserController extends Controller
                 ->whereNotIn('Id', $deselectedIds)
                 ->pluck('Id')
                 ->toArray();
-                //return response()->json(["data" => count($deviceIds)], 200);
+            //return response()->json(["data" => count($deviceIds)], 200);
 
             foreach ($genders as $gender) {
                 foreach ($ageGroups as $i => $ageGroup) {
                     foreach ($secs as $s) {
-                        //return response()->json(["data" => $ageGroupListNumRange[$i][1]], 200);
-                        $minDate = now()->subYears($ageGroupListNumRange[$i][1])->endOfDay();
-                        $maxDate = now()->subYears($ageGroupListNumRange[$i][0])->endOfDay();
+                        $minDate = Carbon::today()->subYears($ageGroupListNumRange[$i][1]); // make sure to use Carbon\Carbon in the class
+                        $maxDate = Carbon::today()->subYears($ageGroupListNumRange[$i][0])->endOfDay();
                         $noOfUsers = User::whereIn('Device_Id', $deviceIds)
-                            ->where('economic_status', $s)
-                            ->where('Gender', $gender)
-                            ->whereBetween('dob', [$minDate, $maxDate])
+                            ->where('economic_status', 'like', '%' .  $s. '%')
+                            ->where('gender', 'like', '%' .  $gender. '%')
+                            ->where('address', 'like', '%' . $division . '%')
+                            ->where('dob', '>=',$minDate)
+                            ->where('dob', '<=',$maxDate)
                             ->count();
                         $cc = $cc + $noOfUsers;
                         //$list[]

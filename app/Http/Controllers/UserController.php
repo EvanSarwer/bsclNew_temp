@@ -21,6 +21,7 @@ use App\Models\DataCleanse;
 use App\Models\DeselectPeriod;
 use App\Models\Device;
 use App\Models\SystemUniverse;
+use App\Models\SystemUniverseAll;
 
 class UserController extends Controller
 {
@@ -773,24 +774,35 @@ class UserController extends Controller
     }
 
 
-    function getDatesBetween($startDate, $endDate)
-    {
+    
+    function getDatesBetween($startDate, $endDate) {
         $dateArray = array();
-
+    
         $currentDate = new DateTime($startDate);
         $endDate = new DateTime($endDate);
-
-        while ($currentDate <= $endDate) {
-            $dateArray[] = $currentDate->format('Y-m-d');
+    
+        while ($currentDate < $endDate) {
+            
             $currentDate->modify('+1 day');
+            $dateArray[] = $currentDate->format('Y-m-d');
         }
-
+    
         return $dateArray;
     }
     function demo_test()
     {
+        $this->systemUniverse();
+        $this->systemUniverseAll();
+        return response()->json(["data" => "done"], 200);
+        $endDate = DataCleanse::where('status',1)->latest('id')->first()->date;
+        $startDate = systemUniverse::max('date_of_gen');
+        $dates = $this->getDatesBetween($startDate, $endDate);
+        return response()->json(["data" => $dates], 200);
+    }
+    function systemUniverse()
+    {
         $deselectedIds = DeselectPeriod::where('end_date', null)->pluck('device_id')->toArray();
-        //return response()->json(["data" => $deselectedIds], 200);
+        $dids = Device::pluck('id')->toArray();
         $list = [];
         $divisions = ["dhaka", "barishal", "chattogram", "khulna", "mymensingh", "rajshahi", "rangpur", "sylhet"];
         $genders = ["m", "f"];
@@ -803,29 +815,96 @@ class UserController extends Controller
             [35, 44],
             [45, 150],
         ];
+        
         $cc = 0;
         foreach ($divisions as $division) {
             $deviceIds = Device::where('district', strtolower($division))
                 ->whereNotIn('Id', $deselectedIds)
                 ->pluck('Id')
                 ->toArray();
-            //return response()->json(["data" => count($deviceIds)], 200);
 
+            
             foreach ($genders as $gender) {
                 foreach ($ageGroups as $i => $ageGroup) {
                     foreach ($secs as $s) {
-                        $minDate = Carbon::today()->subYears($ageGroupListNumRange[$i][1]); // make sure to use Carbon\Carbon in the class
-                        $maxDate = Carbon::today()->subYears($ageGroupListNumRange[$i][0])->endOfDay();
                         $noOfUsers = User::whereIn('Device_Id', $deviceIds)
                             ->where('economic_status', 'like', '%' .  $s. '%')
                             ->where('gender', 'like', '%' .  $gender. '%')
                             ->where('address', 'like', '%' . $division . '%')
-                            ->where('dob', '>=',$minDate)
-                            ->where('dob', '<=',$maxDate)
+                            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) >= ?', [$ageGroupListNumRange[$i][0]])
+                            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) <= ?', [$ageGroupListNumRange[$i][1]])
+                            ->whereNotNull('dob')
+                            ->whereNotNull('economic_status')
+                            ->whereNotNull('gender')
+                            ->whereNotNull('address')
                             ->count();
                         $cc = $cc + $noOfUsers;
                         //$list[]
                         $obj = new SystemUniverse([
+                            'date_of_gen' => now()->toDateString(),
+                            'Gender' => $gender,
+                            'Region' => $division,
+                            'Sec' => $s,
+                            'Age_Group' => $ageGroup,
+                            'Universe' => $noOfUsers,
+                        ]);
+                        $obj->save();
+                    }
+                }
+            }
+        }
+
+        try {
+            //SystemUniverse::insert($list);
+            return response()->json(['message' => 'done', 'count' => $cc]);
+        } catch (\Exception $ex) {
+            return response()->json(['error' => $ex->getMessage()]);
+        }
+        //return $hash;
+        //return response()->json(["systemUniverse" => $systemUniverse,"mindate"=>$minDate,"maxdate"=>$maxDate,"a"=>$age_group,"u"=>$universe], 200);
+    }
+    function systemUniverseAll()
+    {
+        //$deselectedIds = DeselectPeriod::where('end_date', null)->pluck('device_id')->toArray();
+        $dids = Device::pluck('id')->toArray();
+        $list = [];
+        $divisions = ["dhaka", "barishal", "chattogram", "khulna", "mymensingh", "rajshahi", "rangpur", "sylhet"];
+        $genders = ["m", "f"];
+        $ageGroups = ["0-14", "15-24", "25-34", "35-44", "45 & Above"];
+        $secs = ["a", "b", "c", "d", "e"];
+        $ageGroupListNumRange = [
+            [0, 14],
+            [15, 24],
+            [25, 34],
+            [35, 44],
+            [45, 150],
+        ];
+        
+        $cc = 0;
+        foreach ($divisions as $division) {
+            $deviceIds = Device::where('district', strtolower($division))
+                //->whereNotIn('Id', $deselectedIds)
+                ->pluck('Id')
+                ->toArray();
+
+            
+            foreach ($genders as $gender) {
+                foreach ($ageGroups as $i => $ageGroup) {
+                    foreach ($secs as $s) {
+                        $noOfUsers = User::whereIn('Device_Id', $deviceIds)
+                            ->where('economic_status', 'like', '%' .  $s. '%')
+                            ->where('gender', 'like', '%' .  $gender. '%')
+                            ->where('address', 'like', '%' . $division . '%')
+                            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) >= ?', [$ageGroupListNumRange[$i][0]])
+                            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) <= ?', [$ageGroupListNumRange[$i][1]])
+                            ->whereNotNull('dob')
+                            ->whereNotNull('economic_status')
+                            ->whereNotNull('gender')
+                            ->whereNotNull('address')
+                            ->count();
+                        $cc = $cc + $noOfUsers;
+                        //$list[]
+                        $obj = new SystemUniverseAll([
                             'date_of_gen' => now()->toDateString(),
                             'Gender' => $gender,
                             'Region' => $division,

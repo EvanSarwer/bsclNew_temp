@@ -67,9 +67,10 @@ class DayPartsGenerate extends Command
         $currentDate = new DateTime($startDate);
         $endDate = new DateTime($endDate);
     
-        while ($currentDate <= $endDate) {
-            $dateArray[] = $currentDate->format('Y-m-d');
+        while ($currentDate < $endDate) {
+            
             $currentDate->modify('+1 day');
+            $dateArray[] = $currentDate->format('Y-m-d');
         }
     
         return $dateArray;

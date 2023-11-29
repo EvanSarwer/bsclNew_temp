@@ -791,7 +791,7 @@ class UserController extends Controller
     }
     function demo_test()
     {
-        $this->systemUniverse();
+        //$this->systemUniverse();
         $this->systemUniverseAll();
         return response()->json(["data" => "done"], 200);
         $endDate = DataCleanse::where('status',1)->latest('id')->first()->date;

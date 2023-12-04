@@ -13,6 +13,7 @@ class PlayoutController extends Controller
 {
     public function adlog(Request $req)
     {
+        return response()->json(["status" =>$req ], 200);
         $ids=array();
         foreach ($req->data as $logs) {
             $logs=(object)$logs;

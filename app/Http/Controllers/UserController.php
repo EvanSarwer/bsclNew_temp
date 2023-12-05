@@ -634,7 +634,7 @@ class UserController extends Controller
     {
         $user = User::where('id', $req->user)->first();
         $user->device_name = $user->device->device_name;
-        $user->device_id = $user->device->id;
+        $user->device_box_id = $user->device->deviceBox->id;
 
         if ($user->gender == "m") {
             $user->gender = "Male";
@@ -643,15 +643,17 @@ class UserController extends Controller
         }
 
         if ($user->device->economic_status == "a") {
-            $user->economic_status = "Poorest";
+            $user->economic_status = "SEC A";
         } elseif ($user->device->economic_status == "b") {
-            $user->economic_status = "Poorer";
+            $user->economic_status = "SEC B";
         } elseif ($user->device->economic_status == "c") {
-            $user->economic_status = "Middle";
+            $user->economic_status = "SEC C";
         } elseif ($user->device->economic_status == "d") {
-            $user->economic_status = "Richer";
+            $user->economic_status = "SEC D";
         } elseif ($user->device->economic_status == "e") {
-            $user->economic_status = "Richest";
+            $user->economic_status = "SEC E";
+        }else{
+            $user->economic_status = $user->device->economic_status;
         }
 
 

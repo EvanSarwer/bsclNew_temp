@@ -83,15 +83,15 @@ class DeviceController extends Controller
             }
 
             if ($d->economic_status == "a") {
-                $d->economic_status = "Poorest";
+                $d->economic_status = "SEC A";
             } elseif ($d->economic_status == "b") {
-                $d->economic_status = "Poorer";
+                $d->economic_status = "SEC B";
             } elseif ($d->economic_status == "c") {
-                $d->economic_status = "Middle";
+                $d->economic_status = "SEC C";
             } elseif ($d->economic_status == "d") {
-                $d->economic_status = "Richer";
+                $d->economic_status = "SEC D";
             } elseif ($d->economic_status == "e") {
-                $d->economic_status = "Richest";
+                $d->economic_status = "SEC E";
             }
 
             if ($d->socio_status == "u") {
@@ -149,83 +149,85 @@ class DeviceController extends Controller
         }
 
 
-        if ($req->socio_status == "u") {
-            if ($req->household_condition == "Flat owner / Flat in apartment") {
-                if ($req->monthly_income == "a") {
-                    $req->economic_status = "b";
-                } else if ($req->monthly_income == "b") {
-                    $req->economic_status = "c";
-                } else if ($req->monthly_income == "c") {
-                    $req->economic_status = "d";
-                } else if ($req->monthly_income == "d") {
-                    $req->economic_status = "d";
-                } else if ($req->monthly_income == "e") {
-                    $req->economic_status = "e";
-                }
-            } else if ($req->household_condition == "Rented flat / Non-Flat apartment where there is no security guard and parking") {
-                if ($req->monthly_income == "a") {
-                    $req->economic_status = "a";
-                } else if ($req->monthly_income == "b") {
-                    $req->economic_status = "b";
-                } else if ($req->monthly_income == "c") {
-                    $req->economic_status = "c";
-                } else if ($req->monthly_income == "d") {
-                    $req->economic_status = "d";
-                } else if ($req->monthly_income == "e") {
-                    $req->economic_status = "d";
-                }
-            } else if ($req->household_condition == "Lower tier house") {
-                if ($req->monthly_income == "a") {
-                    $req->economic_status = "a";
-                } else if ($req->monthly_income == "b") {
-                    $req->economic_status = "a";
-                } else if ($req->monthly_income == "c") {
-                    $req->economic_status = "b";
-                } else if ($req->monthly_income == "d") {
-                    $req->economic_status = "c";
-                } else if ($req->monthly_income == "e") {
-                    $req->economic_status = "d";
-                }
-            }
-        } else if ($req->socio_status == "r") {
-            if ($req->household_condition == "Full Concrete house (wall, floor and roof)") {
-                if ($req->monthly_income == "a") {
-                    $req->economic_status = "b";
-                } else if ($req->monthly_income == "b") {
-                    $req->economic_status = "c";
-                } else if ($req->monthly_income == "c") {
-                    $req->economic_status = "d";
-                } else if ($req->monthly_income == "d") {
-                    $req->economic_status = "d";
-                } else if ($req->monthly_income == "e") {
-                    $req->economic_status = "e";
-                }
-            } else if ($req->household_condition == "Semi Concrete house (wall and floor concrete but the roof is made by Tin)") {
-                if ($req->monthly_income == "a") {
-                    $req->economic_status = "a";
-                } else if ($req->monthly_income == "b") {
-                    $req->economic_status = "b";
-                } else if ($req->monthly_income == "c") {
-                    $req->economic_status = "c";
-                } else if ($req->monthly_income == "d") {
-                    $req->economic_status = "d";
-                } else if ($req->monthly_income == "e") {
-                    $req->economic_status = "d";
-                }
-            } else if ($req->household_condition == "Non-Concrete (Made by Tin/Wood/Bamboo etc.)") {
-                if ($req->monthly_income == "a") {
-                    $req->economic_status = "a";
-                } else if ($req->monthly_income == "b") {
-                    $req->economic_status = "a";
-                } else if ($req->monthly_income == "c") {
-                    $req->economic_status = "b";
-                } else if ($req->monthly_income == "d") {
-                    $req->economic_status = "c";
-                } else if ($req->monthly_income == "e") {
-                    $req->economic_status = "d";
-                }
-            }
-        }
+        // if ($req->socio_status == "u") {
+        //     if ($req->household_condition == "Flat owner / Flat in apartment") {
+        //         if ($req->monthly_income == "a") {
+        //             $req->economic_status = "b";
+        //         } else if ($req->monthly_income == "b") {
+        //             $req->economic_status = "c";
+        //         } else if ($req->monthly_income == "c") {
+        //             $req->economic_status = "d";
+        //         } else if ($req->monthly_income == "d") {
+        //             $req->economic_status = "d";
+        //         } else if ($req->monthly_income == "e") {
+        //             $req->economic_status = "e";
+        //         }
+        //     } else if ($req->household_condition == "Rented flat / Non-Flat apartment where there is no security guard and parking") {
+        //         if ($req->monthly_income == "a") {
+        //             $req->economic_status = "a";
+        //         } else if ($req->monthly_income == "b") {
+        //             $req->economic_status = "b";
+        //         } else if ($req->monthly_income == "c") {
+        //             $req->economic_status = "c";
+        //         } else if ($req->monthly_income == "d") {
+        //             $req->economic_status = "d";
+        //         } else if ($req->monthly_income == "e") {
+        //             $req->economic_status = "d";
+        //         }
+        //     } else if ($req->household_condition == "Lower tier house") {
+        //         if ($req->monthly_income == "a") {
+        //             $req->economic_status = "a";
+        //         } else if ($req->monthly_income == "b") {
+        //             $req->economic_status = "a";
+        //         } else if ($req->monthly_income == "c") {
+        //             $req->economic_status = "b";
+        //         } else if ($req->monthly_income == "d") {
+        //             $req->economic_status = "c";
+        //         } else if ($req->monthly_income == "e") {
+        //             $req->economic_status = "d";
+        //         }
+        //     }
+        // } else if ($req->socio_status == "r") {
+        //     if ($req->household_condition == "Full Concrete house (wall, floor and roof)") {
+        //         if ($req->monthly_income == "a") {
+        //             $req->economic_status = "b";
+        //         } else if ($req->monthly_income == "b") {
+        //             $req->economic_status = "c";
+        //         } else if ($req->monthly_income == "c") {
+        //             $req->economic_status = "d";
+        //         } else if ($req->monthly_income == "d") {
+        //             $req->economic_status = "d";
+        //         } else if ($req->monthly_income == "e") {
+        //             $req->economic_status = "e";
+        //         }
+        //     } else if ($req->household_condition == "Semi Concrete house (wall and floor concrete but the roof is made by Tin)") {
+        //         if ($req->monthly_income == "a") {
+        //             $req->economic_status = "a";
+        //         } else if ($req->monthly_income == "b") {
+        //             $req->economic_status = "b";
+        //         } else if ($req->monthly_income == "c") {
+        //             $req->economic_status = "c";
+        //         } else if ($req->monthly_income == "d") {
+        //             $req->economic_status = "d";
+        //         } else if ($req->monthly_income == "e") {
+        //             $req->economic_status = "d";
+        //         }
+        //     } else if ($req->household_condition == "Non-Concrete (Made by Tin/Wood/Bamboo etc.)") {
+        //         if ($req->monthly_income == "a") {
+        //             $req->economic_status = "a";
+        //         } else if ($req->monthly_income == "b") {
+        //             $req->economic_status = "a";
+        //         } else if ($req->monthly_income == "c") {
+        //             $req->economic_status = "b";
+        //         } else if ($req->monthly_income == "d") {
+        //             $req->economic_status = "c";
+        //         } else if ($req->monthly_income == "e") {
+        //             $req->economic_status = "d";
+        //         }
+        //     }
+        // }
+
+        $req->economic_status = "OO";
 
 
         $device->update([

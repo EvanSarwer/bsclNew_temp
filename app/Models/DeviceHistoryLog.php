@@ -4,23 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\DeviceBox;
 use App\Models\Device;
-use App\Models\DeviceHistoryLog;
 
-class DeviceBox extends Model
+class DeviceHistoryLog extends Model
 {
     use HasFactory;
-    protected $table = 'device_boxes';
+    protected $table = 'device_history_log';
     public $timestamps = false;
     protected $guarded = [];
 
 
-    public function device(){
+    public function device()
+    {
         return $this->belongsTo(Device::class, 'device_id');
     }
 
-    public function deviceHistoryLogs()
+    public function deviceBox()
     {
-        return $this->hasMany(DeviceHistoryLog::class, 'box_id');
+        return $this->belongsTo(DeviceBox::class, 'box_id');
     }
 }

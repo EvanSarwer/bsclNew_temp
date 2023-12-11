@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\DeselectPeriod;
 use App\Models\RawRequest;
 use App\Models\DeviceBox;
+use App\Models\DeviceHistoryLog;
 
 class Device extends Model
 {
@@ -32,6 +33,11 @@ class Device extends Model
     public function deviceBox()
     {
         return $this->hasOne(DeviceBox::class, 'device_id');
+    }
+
+    public function deviceHistoryLogs()
+    {
+        return $this->hasMany(DeviceHistoryLog::class, 'device_id');
     }
 
 

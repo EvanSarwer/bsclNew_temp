@@ -7,6 +7,9 @@ use App\Models\Device;
 use App\Models\DeselectPeriod;
 use App\Models\DeselectLog;
 use App\Models\DeviceBox;
+use App\Models\DeviceHistoryLog;
+use App\Models\Login;
+use App\Models\Token;
 use App\Models\ViewLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -515,26 +518,66 @@ class DeviceController extends Controller
             'device_box_id' => 'required|integer',
         ]);
 
+        $token = $req->header('Authorization');
+        $userToken = Token::where('token', $token)->first();
+        if (!$userToken) return response()->json(["data" => null, "error" => "Invalid Token"], 404);
+        $authUser = $userToken->login;
+        if (!$authUser) return response()->json(["data" => null, "error" => "Invalid Token"], 404);
+
         // Update
         $device_box = DeviceBox::where('id', $req->device_box_id)->first();
         if ($device_box) {
+            
             if ($device_box->device_id != null && $device_box->device != null) {
-                $deselect_device = DeselectPeriod::where('device_id', $device_box->device_id)->whereNotNull('start_date')->whereNull('end_date')->first();
-                if ($deselect_device) {
-                    //device previous box id free
-                    $device_previous_box = DeviceBox::where('device_id', $req->device_id)->first();
-                    if ($device_previous_box && $device_previous_box->id != $req->device_box_id) {
-                        $device_previous_box->device_id = null;
-                        $device_previous_box->save();
+                if($device_box->device_id != $req->device_id){
+
+                    $deselect_device = DeselectPeriod::where('device_id', $device_box->device_id)->whereNotNull('start_date')->whereNull('end_date')->first();
+                    if ($deselect_device) {
+                        //device previous box id free
+                        $device_previous_box = DeviceBox::where('device_id', $req->device_id)->first();
+                        if ($device_previous_box && $device_previous_box->id != $req->device_box_id) {
+                            $device_previous_box->device_id = null;
+                            $device_previous_box->save(); 
+                        }
+                        // device previous with another box id history disconnected
+                        $device_previous_box_history = DeviceHistoryLog::where('device_id', $req->device_id)->where('box_id', '<>' , $req->device_box_id)->whereNull('disconnected_at')->first();
+                        if ($device_previous_box_history) {
+                            $device_previous_box_history->disconnected_at = new Datetime();
+                            $device_previous_box_history->disconnected_by = $authUser->id;
+                            $device_previous_box_history->save();
+                        }
+
+                        // Box with previous device id history disconnected
+                        $box_previous_device_history = DeviceHistoryLog::where('device_id', $device_box->device_id)->where('box_id', $req->device_box_id)->whereNull('disconnected_at')->first();
+                        if ($box_previous_device_history) {
+                            $box_previous_device_history->disconnected_at = new Datetime();
+                            $box_previous_device_history->disconnected_by = $authUser->id;
+                            $box_previous_device_history->save();
+                        }
+
+                        // device box id update
+                        $device_box->device_id = $req->device_id;
+                        $device_box->save();
+
+                        // device with new box id connected history
+                        $device_box_history = new DeviceHistoryLog();
+                        $device_box_history->box_id = $req->device_box_id;
+                        $device_box_history->device_id = $req->device_id;
+                        $device_box_history->connected_at = new Datetime();
+                        $device_box_history->connected_by = $authUser->id;
+                        $device_info = Device::where('id', $req->device_id)->first();
+                        $device_info->users = $device_info->users;
+                        $device_box_history->device_data = json_encode($device_info);
+                        $device_box_history->save();
+                        return response()->json(["device_box_id"=> $device_box->id,"message" => "Device Box Updated Successfully"]);
+                    } else {
+                        return response()->json(["error_message" => 'Device Box Already Assigned (Device Name: ' . $device_box->device->device_name .')'], 423);
                     }
-                    // device box id update
-                    $device_box->device_id = $req->device_id;
-                    $device_box->save();
-                    return response()->json(["device_box_id"=> $device_box->id,"message" => "Device Box Updated Successfully"]);
-                } else {
-                    return response()->json(["error_message" => 'Device Box Already Assigned (Device Name: ' . $device_box->device->device_name .')'], 423);
+
+                }else{
+                    return response()->json(["error_message" => "Device Box Already Assigned"], 423);
                 }
-                
+                    
             } else {
                 //device previous box id free
                 $device_previous_box = DeviceBox::where('device_id', $req->device_id)->first();
@@ -542,11 +585,33 @@ class DeviceController extends Controller
                     $device_previous_box->device_id = null;
                     $device_previous_box->save();
                 }
+
+                // device previous with another box id history disconnected
+                $device_previous_box_history = DeviceHistoryLog::where('device_id', $req->device_id)->where('box_id', '<>' ,$req->device_box_id)->whereNull('disconnected_at')->first();
+                if ($device_previous_box_history) {
+                    $device_previous_box_history->disconnected_at = new Datetime();
+                    $device_previous_box_history->disconnected_by = $authUser->id;
+                    $device_previous_box_history->save();
+                }
+
                 // device box id update
                 $device_box->device_id = $req->device_id;
                 $device_box->save();
+
+                // device with new box id connected history
+                $device_box_history = new DeviceHistoryLog();
+                $device_box_history->box_id = $req->device_box_id;
+                $device_box_history->device_id = $req->device_id;
+                $device_box_history->connected_at = new Datetime();
+                $device_box_history->connected_by = $authUser->id;
+                $device_info = Device::where('id', $req->device_id)->first();
+                $device_info->users = $device_info->users;
+                $device_box_history->device_data = json_encode($device_info);
+                $device_box_history->save();
                 return response()->json(["device_box_id"=> $device_box->id,"message" => "Device Box Updated Successfully"]);
             }
+            
+        
         } else {
             return response()->json(["error_message" => "Device Box Not Found"], 423);
         }
@@ -554,17 +619,61 @@ class DeviceController extends Controller
 
     public function NewBoxIdAssign(Request $req){
 
+        $token = $req->header('Authorization');
+        $userToken = Token::where('token', $token)->first();
+        if (!$userToken) return response()->json(["data" => null, "error" => "Invalid Token"], 404);
+        $authUser = $userToken->login;
+        if (!$authUser) return response()->json(["data" => null, "error" => "Invalid Token"], 404);
+
+
+
+        //device previous box id free
         $device_previous_box = DeviceBox::where('device_id', $req->device_id)->first();
         if ($device_previous_box) {
             $device_previous_box->device_id = null;
             $device_previous_box->save();
         }
 
+        // device previous with another box id history disconnected
+        $device_previous_box_history = DeviceHistoryLog::where('device_id', $req->device_id)->whereNull('disconnected_at')->first();
+        if ($device_previous_box_history) {
+            $device_previous_box_history->disconnected_at = new Datetime();
+            $device_previous_box_history->disconnected_by = $authUser->id;
+            $device_previous_box_history->save();
+        }
+
+        // device new box id assigned
         $device_box = new DeviceBox();
         $device_box->device_id = $req->device_id;
         $device_box->save();
 
+        // device with new box id connected history
+        $device_box_history = new DeviceHistoryLog();
+        $device_box_history->box_id = $device_box->id;
+        $device_box_history->device_id = $req->device_id;
+        $device_box_history->connected_at = new Datetime();
+        $device_box_history->connected_by = $authUser->id;
+        $device_info = Device::where('id', $req->device_id)->first();
+        $device_info->users = $device_info->users;
+        $device_box_history->device_data = json_encode($device_info);
+        $device_box_history->save();
+
         return response()->json(["device_box_id"=> $device_box->id,"message" => "New Device Box Added Successfully"]);
 
     }
+
+
+    public function getDeviceBoxHistoryLog($device_id){
+        $device = Device::where('id', $device_id)->first();
+        $device_box_history_logs = DeviceHistoryLog::where('device_id', $device_id)->orderBy('id', 'desc')->get();
+        foreach ($device_box_history_logs as $d) {
+            $d->connected_by_user = Login::where('id', $d->connected_by)->first();
+            if($d->disconnected_by != null){
+                $d->disconnected_by_user = Login::where('id', $d->disconnected_by)->first();
+            }
+        }
+        return response()->json(["device" => $device, "device_box_history_logs" => $device_box_history_logs],200);
+    }
+
+   
 }

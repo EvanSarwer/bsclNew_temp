@@ -90,11 +90,13 @@ Route::get('/device/list',[DeviceController::class,'deviceList'])->middleware('a
 Route::post('/device/create',[DeviceController::class,'addDevice'])->middleware('auth.admin');
 Route::post('/device/delete',[DeviceController::class,'deleteDevice'])->middleware('auth.admin');
 Route::get('/device/get/{device_id}',[DeviceController::class,'getDevice'])->middleware('auth.admin.deployer');
+Route::get('/device/box/history/{device_id}',[DeviceController::class,'getDeviceBoxHistoryLog'])->middleware('auth.admin');
 Route::post('/device/edit',[DeviceController::class,'editDevice'])->middleware('auth.admin.deployer');
 Route::post('/device/deselect',[DeviceController::class,'deselectDevice'])->middleware('auth.admin');
 Route::get('/device/available-boxes',[DeviceController::class,'availableBoxList'])->middleware('auth.admin');
 Route::post('/device/update-box-id',[DeviceController::class,'updateBoxId'])->middleware('auth.admin');
 Route::post('/device/new-box-id',[DeviceController::class,'NewBoxIdAssign'])->middleware('auth.admin');
+
 
 Route::get('/device/tvoff', [DeviceController::class, 'tvoff'])->middleware('auth.admin.deployer');
 Route::get('/device/deviceoff', [DeviceController::class, 'deviceOff'])->middleware('auth.admin.deployer');

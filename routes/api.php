@@ -243,6 +243,8 @@ Route::post('/receive/reliabilitylog',[RequestController::class,'receiveReliabil
 Route::get('/receive/reliabilitylog',[RequestController::class,'receiveReliabilityLog']);
 //////////END/////////////////
 
+Route::get("/systemUniverseAll",[UserController::class,'systemUniverseAll']);
+Route::get("/systemUniverse",[UserController::class,'systemUniverse']);
 Route::get("/test",[UserController::class,'demo_test']);
 Route::get("/git_id",[AuthController::class,'git_id']);
 

@@ -252,31 +252,33 @@ class RequestController extends Controller
         $user = User::where('id', $id)->first();
 
         $startDate = new DateTime($user->dob);
-        $endDate = new DateTime();
+$endDate = new DateTime();
 
-        $interval = $startDate->diff($endDate);
+$diffInYears = $endDate->format('Y') - $startDate->format('Y');
 
-        $years = $interval->y;
+        $years = $diffInYears;
+        $ageGroupListNumRange = [
+            [0, 14],
+            [15, 24],
+            [25, 34],
+            [35, 44],
+            [45, 150],
+        ];
         $age_group_string = array("0-14", "15-24", "25-34", "35-44", "45 & Above");
         if ($years <= 14) {
-            $minDate = Carbon::today()->subYears(14 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears(0)->endOfDay();
+            $age_range=$ageGroupListNumRange[0];
             $age_group = $age_group_string[0];
         } elseif ($years >= 15 && $years <= 24) {
-            $minDate = Carbon::today()->subYears(24 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears(15)->endOfDay();
+            $age_range=$ageGroupListNumRange[1];
             $age_group = $age_group_string[1];
         } elseif ($years >= 25 && $years <= 34) {
-            $minDate = Carbon::today()->subYears(34 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears(25)->endOfDay();
+            $age_range=$ageGroupListNumRange[2];
             $age_group = $age_group_string[2];
         } elseif ($years >= 35 && $years <= 44) {
-            $minDate = Carbon::today()->subYears(44 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears(35)->endOfDay();
+            $age_range=$ageGroupListNumRange[3];
             $age_group = $age_group_string[3];
         } elseif ($years >= 45) {
-            $minDate = Carbon::today()->subYears(150); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears(45)->endOfDay();
+            $age_range=$ageGroupListNumRange[4];
             $age_group = $age_group_string[4];
         }
 
@@ -287,7 +289,12 @@ class RequestController extends Controller
             ->where('economic_status', 'like', '%' . $user->economic_status . '%')
             ->whereNotIn('id', $user_deselected)
             //->whereBetween('age', [$req->age1, $req->age2])
-            ->whereBetween('dob', [$minDate, $maxDate]) //->get();
+                            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) >= ?', [$age_range[0]])
+                            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) <= ?', [$age_range[1]])
+                            ->whereNotNull('dob')
+                            ->whereNotNull('economic_status')
+                            ->whereNotNull('gender')
+                            ->whereNotNull('address')
             ->count();
             $startDateTime=date("Y-m-d");
         $universe = Universe::where('start', '<=', $startDateTime)

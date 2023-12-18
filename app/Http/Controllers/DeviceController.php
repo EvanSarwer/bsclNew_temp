@@ -662,6 +662,40 @@ class DeviceController extends Controller
 
     }
 
+    public function DisconnectBoxId(Request $req){
+        // Validation
+        $req->validate([
+            'device_id' => 'required',
+            'device_box_id' => 'required|integer',
+        ]);
+
+        $token = $req->header('Authorization');
+        $userToken = Token::where('token', $token)->first();
+        if (!$userToken) return response()->json(["data" => null, "error" => "Invalid Token"], 404);
+        $authUser = $userToken->login;
+        if (!$authUser) return response()->json(["data" => null, "error" => "Invalid Token"], 404);
+
+        // disconnect box id
+        $device_box = DeviceBox::where('id', $req->device_box_id)->where('device_id', $req->device_id)->first();
+        if($device_box){
+            $device_box->device_id = null;
+            $device_box->save();     
+
+        }
+
+        // device with new box id connected history disconnected
+        $device_box_history = DeviceHistoryLog::where('device_id', $req->device_id)->where('box_id', $req->device_box_id)->whereNull('disconnected_at')->first();
+        if ($device_box_history) {
+            $device_box_history->disconnected_at = new Datetime();
+            $device_box_history->disconnected_by = $authUser->id;
+            $device_box_history->save();
+        }
+
+        return response()->json(["message" => "Device Box Disconnected Successfully"]);
+
+
+    }
+
 
     public function getDeviceBoxHistoryLog($device_id){
         $device = Device::where('id', $device_id)->first();

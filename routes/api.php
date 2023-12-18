@@ -96,6 +96,8 @@ Route::post('/device/deselect',[DeviceController::class,'deselectDevice'])->midd
 Route::get('/device/available-boxes',[DeviceController::class,'availableBoxList'])->middleware('auth.admin');
 Route::post('/device/update-box-id',[DeviceController::class,'updateBoxId'])->middleware('auth.admin');
 Route::post('/device/new-box-id',[DeviceController::class,'NewBoxIdAssign'])->middleware('auth.admin');
+Route::post('/device/disconnect-box-id',[DeviceController::class,'DisconnectBoxId'])->middleware('auth.admin');
+
 
 
 Route::get('/device/tvoff', [DeviceController::class, 'tvoff'])->middleware('auth.admin.deployer');

@@ -227,7 +227,7 @@ Route::post('/appuser/create',[AppUserController::class,'store'])->middleware('a
 Route::post('/appuser/edit',[AppUserController::class,'edit'])->middleware('auth.admin');
 Route::post('/appuser/delete',[AppUserController::class,'delete'])->middleware('auth.admin');
 Route::any('/appuser/activate',[AppUserController::class,'activateDeactivate'])->middleware('auth.admin');
-Route::get('/appuser/list',[AppUserController::class,'list'])->middleware('auth.admin');   //->middleware('auth.admin')
+Route::get('/appuser/list',[AppUserController::class,'list'])->middleware('auth.admin');   //->middleware('auth.atcleadmin')
 Route::get('/appuser/get/{user_name}',[AppUserController::class,'get'])->middleware('auth.admin');
 Route::get("/appuser/{username}",[AppUserController::class,'getAppUser'])->middleware('auth.admin');
 Route::post('/appuser/resetpass', [AppUserController::class, 'resetPass'])->middleware('auth.admin');
@@ -245,8 +245,8 @@ Route::post('/receive/reliabilitylog',[RequestController::class,'receiveReliabil
 Route::get('/receive/reliabilitylog',[RequestController::class,'receiveReliabilityLog']);
 //////////END/////////////////
 
-Route::get("/systemUniverseAll",[UserController::class,'systemUniverseAll']);
-Route::get("/systemUniverse",[UserController::class,'systemUniverse']);
+Route::get("/systemuniverseall",[UserController::class,'systemUniverseAll']);
+Route::get("/systemuniverse",[UserController::class,'systemUniverse']);
 Route::get("/test",[UserController::class,'demo_test']);
 Route::get("/git_id",[AuthController::class,'git_id']);
 

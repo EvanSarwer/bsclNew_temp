@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\AppUser;
 use App\Models\DeployerInfo;
 use App\Models\Login;
-
+use App\Models\UserLoginSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Datetime;
@@ -234,6 +234,23 @@ class AppUserController extends Controller
             return response()->json(["err" =>"PASSWORD Reset Faild."], 422);
         }
         return response()->json(["err" =>"User Not Found"], 422);
+    }
+
+
+    public function getUserLoginSessions($user_id){
+        $userData = Login::where('id', $user_id)->first();
+        $user_login_sessions = UserLoginSession::where('user_id', $user_id)->orderBy('start', 'desc')->get();
+        foreach ($user_login_sessions as $session) {
+            if($session->end){
+                $session->duration = abs(strtotime($session->start) - strtotime($session->end)) / 60;
+                $session->duration = number_format($session->duration, 2, '.', '');
+            }else{
+                $session->duration = abs(strtotime($session->start) - strtotime(date('Y-m-d H:i:s'))) / 60;
+                $session->duration = number_format($session->duration, 2, '.', '');
+            }
+            
+        }
+        return response()->json(["userData" => $userData, "user_login_sessions" => $user_login_sessions],200);
     }
 
 

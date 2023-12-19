@@ -13,6 +13,7 @@ use App\Models\Login;
 use App\Models\PasswordReset;
 use App\Mail\SendMail;
 use App\Models\EmailVerification;
+use App\Models\UserLoginSession;
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -24,6 +25,14 @@ class AuthController extends Controller
         if ($user) {
             $old_tokens = Token::where('user_id',$user->id)->delete();
             if($user->active == 1){
+                // User Login Old Session End
+                $userLoginSession = UserLoginSession::where('user_id', $user->id)->whereNull('end')->first();
+                if($userLoginSession){
+                    $userLoginSession->end = date('Y-m-d H:i:s');
+                    $userLoginSession->save();
+                }
+
+                // User Login Token Create & Save
                 $tokenGen = bin2hex(random_bytes(37));
                 $token = new Token();
                 $token->value = md5($tokenGen);
@@ -33,6 +42,14 @@ class AuthController extends Controller
                 $data = array("role"=>$user->role,"username"=>$user->user_name,"token"=>$tokenGen);
                 $user->try_time = 0;
                 $user->save();
+
+                // User Login Session Create
+                $userLoginSession = new UserLoginSession();
+                $userLoginSession->user_id = $user->id;
+                $userLoginSession->start = date('Y-m-d H:i:s');
+                $userLoginSession->token = $tokenGen;
+                $userLoginSession->save();
+
                 return response()->json(["data" => (object)$data, "error" => null], 201);
             } else {
                 return response()->json(["data" => null, "error" => "Account Is Deactive"], 423);
@@ -169,7 +186,17 @@ class AuthController extends Controller
     }
     function logout(Request $req){
         $token = $req->header('Authorization');
-        $userToken = Token::where('token', $token)->first()->delete();
+        $userToken = Token::where('token', $token)->first();
+        if (!$userToken) return response()->json(["data" => null, "error" => "Invalid Token"], 404);
+        $userToken->delete();
+
+        // User Login Session End
+        $userLoginSession = UserLoginSession::where('user_id', $userToken->user_id)->where('token', $token)->whereNull('end')->first();
+        if($userLoginSession){
+            $userLoginSession->end = date('Y-m-d H:i:s');
+            $userLoginSession->save();
+        }
+
         return response()->json(["msg"=>"Logged Out"],200);
 
     }

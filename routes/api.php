@@ -231,6 +231,7 @@ Route::get('/appuser/list',[AppUserController::class,'list'])->middleware('auth.
 Route::get('/appuser/get/{user_name}',[AppUserController::class,'get'])->middleware('auth.admin');
 Route::get("/appuser/{username}",[AppUserController::class,'getAppUser'])->middleware('auth.admin');
 Route::post('/appuser/resetpass', [AppUserController::class, 'resetPass'])->middleware('auth.admin');
+Route::get('/appuser/login/sessions/{user_id}',[AppUserController::class,'getUserLoginSessions'])->middleware('auth.admin');
 
 
 Route::get('/logout',[AuthController::class,'logout'])->middleware('auth.admin.user.deployer');

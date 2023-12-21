@@ -41,7 +41,10 @@ class AuthController extends Controller
                 $token->save();
                 $data = array("role"=>$user->role,"username"=>$user->user_name,"token"=>$tokenGen);
                 $user->try_time = 0;
+                $user->last_request = date('Y-m-d H:i:s');
                 $user->save();
+
+
 
                 // User Login Session Create
                 $userLoginSession = new UserLoginSession();
@@ -188,6 +191,7 @@ class AuthController extends Controller
         $token = $req->header('Authorization');
         $userToken = Token::where('token', $token)->first();
         if (!$userToken) return response()->json(["data" => null, "error" => "Invalid Token"], 404);
+        Login::where('id', $userToken->user_id)->update(['last_request' => date('Y-m-d H:i:s')]);       //record user last response time
         $userToken->delete();
 
         // User Login Session End

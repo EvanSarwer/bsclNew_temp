@@ -32,7 +32,7 @@ class DeviceController extends Controller
         if ($devices) {
             foreach ($devices as $d) {
                 if (abs(strtotime($d->last_request) - strtotime($ldate)) <= 30) {
-                    $d->box_id = $d->deviceBox->id;
+                    $d->box_id = $d->deviceBox->id ?? null;
                     array_push($tvOff, $d);
                 }
             }
@@ -50,7 +50,7 @@ class DeviceController extends Controller
         if ($devices) {
             foreach ($devices as $d) {
                 if (abs(strtotime($d->last_request) - strtotime($ldate)) > 30 || $d->last_request == null) {
-                    $d->box_id = $d->deviceBox->id;
+                    $d->box_id = $d->deviceBox->id ?? null;
                     array_push($offdevice, $d);
                 }
             }
@@ -67,7 +67,7 @@ class DeviceController extends Controller
         if ($devices) {
             foreach ($devices as $d) {
                 if (abs(strtotime($d->last_request) - strtotime($ldate)) <= 27) {
-                    $d->box_id = $d->deviceBox->id;
+                    $d->box_id = $d->deviceBox->id ?? null;
                     array_push($cw, $d);
                 }
             }

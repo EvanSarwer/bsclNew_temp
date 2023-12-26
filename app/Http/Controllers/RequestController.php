@@ -135,7 +135,7 @@ class RequestController extends Controller
         }
 
         $hasDeviceBox = DeviceBox::where('id', $req->device_id)->first();
-        if ($hasDeviceBox && $hasDeviceBox->device != null){
+        if ($hasDeviceBox && $hasDeviceBox->device != null) {
 
             $last_req_time = Carbon::now()->toDateTimeString();
             $this->updateDeviceLastReq($hasDeviceBox->device->id, $last_req_time);
@@ -176,7 +176,6 @@ class RequestController extends Controller
             if ($req->temp && (substr($req->temp, 0, -2)) > 80) {
                 $this->check_temperature($hasDeviceBox->device->id, $hasDeviceBox->device->device_name, $req->temp);
             }
-
         }
 
         // $hasDevice = Device::where('id', $req->device_id)->first();
@@ -234,11 +233,11 @@ class RequestController extends Controller
         foreach ($appUser as $au) {
             $noti = new Notification();
             $noti->user_id = $au->id;
-            $noti->flag = 3;                                   //    Device Temperature is above 80'C
+            $noti->flag = 3;
             $noti->status = 'unseen';
             $noti->du_id = $d_id;
             $noti->du_name = $d_name;
-            $noti->details = " temperature is Now " . $d_temp;                       //" temperature is Now ".$d_temp;
+            $noti->details = " temperature is Now " . $d_temp;
             $noti->created_at = new Datetime();
             $noti->save();
         }
@@ -247,14 +246,20 @@ class RequestController extends Controller
 
     public function get_universe($id)
     {
-        $user_deselected = DeselectPeriod::whereNotNull('start_date')->whereNull('end_date')->pluck('device_id')->toArray();
-        $user_deselected=User::whereIn('device_id',$user_deselected)->pluck('id')->toArray();
+        $User_deSelected = DeselectPeriod::whereNotNull('start_date')->whereNull('end_date')->pluck('device_id')->toArray();
+        $User_selected = Device::whereNotNull('contact_person')
+            ->whereNotNull('contact_email')
+            ->whereNotNull('contact_number')
+            ->whereNotIn('id', $User_deSelected)
+            ->pluck('Id')
+            ->toArray();
+        $User_selected = User::whereIn('device_id', $User_selected)->pluck('id')->toArray();
         $user = User::where('id', $id)->first();
 
         $startDate = new DateTime($user->dob);
-$endDate = new DateTime();
+        $endDate = new DateTime();
 
-$diffInYears = $endDate->format('Y') - $startDate->format('Y');
+        $diffInYears = $endDate->format('Y') - $startDate->format('Y');
 
         $years = $diffInYears;
         $ageGroupListNumRange = [
@@ -266,19 +271,19 @@ $diffInYears = $endDate->format('Y') - $startDate->format('Y');
         ];
         $age_group_string = array("0-14", "15-24", "25-34", "35-44", "45 & Above");
         if ($years <= 14) {
-            $age_range=$ageGroupListNumRange[0];
+            $age_range = $ageGroupListNumRange[0];
             $age_group = $age_group_string[0];
         } elseif ($years >= 15 && $years <= 24) {
-            $age_range=$ageGroupListNumRange[1];
+            $age_range = $ageGroupListNumRange[1];
             $age_group = $age_group_string[1];
         } elseif ($years >= 25 && $years <= 34) {
-            $age_range=$ageGroupListNumRange[2];
+            $age_range = $ageGroupListNumRange[2];
             $age_group = $age_group_string[2];
         } elseif ($years >= 35 && $years <= 44) {
-            $age_range=$ageGroupListNumRange[3];
+            $age_range = $ageGroupListNumRange[3];
             $age_group = $age_group_string[3];
         } elseif ($years >= 45) {
-            $age_range=$ageGroupListNumRange[4];
+            $age_range = $ageGroupListNumRange[4];
             $age_group = $age_group_string[4];
         }
 
@@ -287,18 +292,18 @@ $diffInYears = $endDate->format('Y') - $startDate->format('Y');
             where('address', 'like', '%' . $user->address . '%')
             ->where('gender', 'like', '%' . $user->gender . '%')
             ->where('economic_status', 'like', '%' . $user->economic_status . '%')
-            ->whereNotIn('id', $user_deselected)
+            ->whereIn('id', $User_selected)
             //->whereBetween('age', [$req->age1, $req->age2])
-                            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) >= ?', [$age_range[0]])
-                            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) <= ?', [$age_range[1]])
-                            ->whereNotNull('dob')
-                            ->whereNotNull('economic_status')
-                            ->whereNotNull('gender')
-                            ->whereNotNull('address')
+            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) >= ?', [$age_range[0]])
+            ->whereRaw('YEAR(CURDATE()) - YEAR(dob) <= ?', [$age_range[1]])
+            ->whereNotNull('dob')
+            ->whereNotNull('economic_status')
+            ->whereNotNull('gender')
+            ->whereNotNull('address')
             ->count();
-            $startDateTime=date("Y-m-d");
+        $startDateTime = date("Y-m-d");
         $universe = Universe::where('start', '<=', $startDateTime)
-                ->where('end', '>=', $startDateTime)
+            ->where('end', '>=', $startDateTime)
             ->where('region', 'like', '%' . strtolower($user->address) . '%')
             ->where('gender', 'like', '%' . $user->gender . '%')
             ->where('sec', 'like', '%' . $user->economic_status . '%')
@@ -312,7 +317,7 @@ $diffInYears = $endDate->format('Y') - $startDate->format('Y');
         $arr = array($systemUniverse, $universe, $cat);
         return $arr;
     }
-    
+
     public function datafix(Request $req)
     {
         $startDate = substr($req->start, 0, 10);
@@ -321,24 +326,24 @@ $diffInYears = $endDate->format('Y') - $startDate->format('Y');
         $finishTime = substr($req->finish, 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
-        $i=0;
+        $i = 0;
         //return response()->json(["values" => $finishDateTime], 200);
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
-        ->where('started_watching_at', '<', $finishDateTime)
-        //->where('universe', '=', 1)
+            ->where('started_watching_at', '<', $finishDateTime)
+            //->where('universe', '=', 1)
 
             ->get();
-            foreach ($ram_logs as $ram_log) {
-                //return response()->json(["values" => $ram_log], 200);
-                $uni = $this->get_universe($ram_log->user_id);
-                //return response()->json(["values" => $uni], 200);
-                $ram_log->system = ($uni[0]!=0)?$uni[0]:1;
-                $ram_log->universe = ($uni[1]!=null)?$uni[1]->universe:1;
-                $ram_log->category_id = ($uni[2]!=null)?$uni[2]->id:-1;
-                $ram_log->save();
-                $i++;
-            }
-        return response()->json(["values" => $i,"total"=>count($ram_logs)], 200);
+        foreach ($ram_logs as $ram_log) {
+            //return response()->json(["values" => $ram_log], 200);
+            $uni = $this->get_universe($ram_log->user_id);
+            //return response()->json(["values" => $uni], 200);
+            $ram_log->system = ($uni[0] != 0) ? $uni[0] : 1;
+            $ram_log->universe = ($uni[1] != null) ? $uni[1]->universe : 1;
+            $ram_log->category_id = ($uni[2] != null) ? $uni[2]->id : -1;
+            $ram_log->save();
+            $i++;
+        }
+        return response()->json(["values" => $i, "total" => count($ram_logs)], 200);
     }
 
 
@@ -383,9 +388,9 @@ $diffInYears = $endDate->format('Y') - $startDate->format('Y');
                 $var->channel_id = $channel_id;
                 $var->started_watching_at = $request->start;
                 $var->finished_watching_at = $request->finish;
-                $var->system = ($uni[0]!=0)?$uni[0]:1;
-                $var->universe = ($uni[1]!=null)?$uni[1]->universe:1;
-                $var->category_id = ($uni[2]!=null)?$uni[2]->id:-1;
+                $var->system = ($uni[0] != 0) ? $uni[0] : 1;
+                $var->universe = ($uni[1] != null) ? $uni[1]->universe : 1;
+                $var->category_id = ($uni[2] != null) ? $uni[2]->id : -1;
                 $var->duration_minute = abs(strtotime($var->started_watching_at) - strtotime($var->finished_watching_at)) / 60;
                 if (strtotime($var->started_watching_at) < strtotime($var->finished_watching_at)) {
 
@@ -417,9 +422,9 @@ $diffInYears = $endDate->format('Y') - $startDate->format('Y');
                 $var->started_watching_at = $request->start;
                 $var->finished_watching_at = $request->finish;
 
-                $var->system = ($uni[0]!=0)?$uni[0]:1;
-                $var->universe = ($uni[1]!=null)?$uni[1]->universe:1;
-                $var->category_id = ($uni[2]!=null)?$uni[2]->id:-1;
+                $var->system = ($uni[0] != 0) ? $uni[0] : 1;
+                $var->universe = ($uni[1] != null) ? $uni[1]->universe : 1;
+                $var->category_id = ($uni[2] != null) ? $uni[2]->id : -1;
                 $var->duration_minute = abs(strtotime($var->started_watching_at) - strtotime($var->finished_watching_at)) / 60;
                 if (strtotime($var->started_watching_at) < strtotime($var->finished_watching_at)) {
 
@@ -507,10 +512,10 @@ $diffInYears = $endDate->format('Y') - $startDate->format('Y');
 
     public function deselect()
     {
-       
+
         $user_deselected = DeselectPeriod::whereNotNull('start_date')->whereNull('end_date')->pluck('device_id')->toArray();
-        $user_deselected=User::whereIn('device_id',$user_deselected)->pluck('id')->toArray();
-        
+        $user_deselected = User::whereIn('device_id', $user_deselected)->pluck('id')->toArray();
+
         return response()->json(["response" => $user_deselected], 200);
     }
     public function logs($id)

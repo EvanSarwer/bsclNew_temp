@@ -112,6 +112,9 @@ class DataCleanseController extends Controller
         foreach ($divisions as $division) {
             $deviceIds = Device::where('district', strtolower($division))
                 ->whereNotIn('Id', $deselectedIds)
+                ->whereNotNull('contact_person')
+                ->whereNotNull('contact_email')
+                ->whereNotNull('contact_number')
                 ->pluck('Id')
                 ->toArray();
 

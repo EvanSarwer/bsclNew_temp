@@ -107,6 +107,7 @@ class AppUserController extends Controller
         foreach($admins as $a){
             $admn = AppUser::where('user_name',$a->user_name)->first();
             $admn->active = $a->active;
+            $admn->login = $admn->login;
             array_push($admin_users,$admn);
         }
 
@@ -115,6 +116,7 @@ class AppUserController extends Controller
         foreach($channelUsers as $c){
             $chnl = AppUser::where('user_name',$c->user_name)->first();
             $chnl->active = $c->active;
+            $chnl->login = $chnl->login;
             array_push($channel_users,$chnl);
         }
 
@@ -123,6 +125,7 @@ class AppUserController extends Controller
         foreach($addAgencies as $ad){
             $agency = AppUser::where('user_name',$ad->user_name)->first();
             $agency->active = $ad->active;
+            $agency->login = $agency->login;
             array_push($addAgency_users,$agency);
         }
 
@@ -131,6 +134,7 @@ class AppUserController extends Controller
         foreach($deployers as $d){
             $dep = DeployerInfo::where('user_name',$d->user_name)->first();
             $dep->active = $d->active;
+            $dep->login = $dep->login;
             array_push($deployer_users,$dep);
         }
 
@@ -139,6 +143,7 @@ class AppUserController extends Controller
         foreach($operators as $o){
             $operat = AppUser::where('user_name',$o->user_name)->first();
             $operat->active = $o->active;
+            $operat->login = $operat->login;
             array_push($operator_users,$operat);
         }
         

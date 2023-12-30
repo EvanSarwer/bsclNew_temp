@@ -124,6 +124,8 @@ class TrendController extends Controller
                 })
                 ->where('started_watching_at', '<', date("Y-m-d H:i:s", strtotime($time[$i + 1])))
                 ->whereIn('user_id', $userids)
+                ->where('category_id', '!=',-1)
+                ->whereNotNull('category_id')
                 ->get();
 
             foreach ($viewers as $v) {

@@ -212,6 +212,8 @@ class DayPartsGenerate extends Command
             })
             ->where('started_watching_at', '<', $finish)
             ->whereIn('user_id', $userids)
+            ->where('category_id', '!=',-1)
+            ->whereNotNull('category_id')
             ->get();
 
         foreach ($viewers as $v) {

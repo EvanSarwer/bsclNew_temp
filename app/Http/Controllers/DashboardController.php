@@ -10,6 +10,7 @@ use App\Models\Channel;
 use App\Models\DashboardTempData;
 use App\Models\Notification;
 use App\Models\RawRequest;
+use App\Models\SystemUniverse;
 use App\Models\Token;
 use App\Models\Universe;
 use App\Models\User;
@@ -654,7 +655,9 @@ class DashboardController extends Controller
             ->where('started_watching_at', '<', $finishDateTime)
             ->get();
 
-        $total_user = User::count();
+        //$total_user = User::count();
+        $sample_size = SystemUniverse::where('date_of_gen', $startDateTime)
+                ->sum('universe');
         $universe_size = Universe::where('start', '<=', $startDateTime)
                 ->where('end', '>=', $startDateTime)
                 ->sum(DB::raw('universe / 1000'));
@@ -685,7 +688,7 @@ class DashboardController extends Controller
             "top_reach" => $reach->reach_channel[0],
             "top_tvr" => $tvr->tvr_channel[0],
             "universe" => $universe_size,
-            "sample" => $total_user,
+            "sample" => $sample_size,
         ];
 
         $td = new DashboardTempData();

@@ -8,6 +8,7 @@ use App\Models\AppUser;
 use App\Models\DeployerInfo;
 use App\Models\Token;
 use App\Models\UserLoginSession;
+use App\Models\UserActivityLog;
 
 
 class Login extends Model
@@ -30,5 +31,9 @@ class Login extends Model
 
     public function userLoginSessions(){
         return $this->hasMany(UserLoginSession::class,'user_id');
+    }
+
+    public function userActivityLogs(){
+        return $this->hasMany(UserActivityLog::class,'user_id');
     }
 }

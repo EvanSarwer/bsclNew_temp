@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\ViewLog;
 use App\Models\Channel;
+use App\Models\SystemUniverse;
 use App\Models\Universe;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Support\Facades\DB;
 use stdClass;
+use App\Services\AppUserActivityService;
 
 
 class OverviewController extends Controller
@@ -35,24 +38,13 @@ class OverviewController extends Controller
         $channel_label = [];
         $channel_id = [];
         if ($req->userType == "STB") {
-            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
-            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
-            $userids = User::where('type', $req->userType)
-                ->where('address', 'like', '%' . $req->region . '%')
+
+            //Categori Wise Ids // Replace of userIds (Not updated for userType OTT&ALL)
+            $categoryIds = Category::whereIn('age_group', $req->ageGroup)
+                ->where('region', 'like', '%' . $req->region . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
-                ->where('economic_status', 'like', '%' . $req->economic . '%')
-                ->where('socio_status', 'like', '%' . $req->socio . '%')
-                //->whereBetween('age', [$req->age1, $req->age2])
-                ->whereBetween('dob', [$minDate, $maxDate])
+                ->where('sec', 'like', '%' . $req->economic . '%')
                 ->pluck('id')->toArray();
-
-            $age_group = [];
-            for ($i = $req->age1; $i <= $req->age2; $i++) {
-                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
-            }
-
-            
 
             // Create an array of DateOnly objects
             $dates = [];
@@ -60,12 +52,19 @@ class OverviewController extends Controller
             $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
-                $dates[] = $date->toDateString();
+                $dates[] = $date->format('Y-m-d'); // Use format() instead of date()
             }
 
             // Query the database using Eloquent
-            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
-                ->where('rs', 'like', '%' . $req->socio . '%')
+            $allSystemUniverses = SystemUniverse::whereIn('date_of_gen', $dates)
+                ->whereIn('age_group', $req->ageGroup)
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->get();
+
+            $allUniverses = Universe::whereIn('age_group', $req->ageGroup)
+                // ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
@@ -73,32 +72,27 @@ class OverviewController extends Controller
 
             $suniverses = [];
             foreach ($dates as $date) {
+                $sCount = $allSystemUniverses->where('date_of_gen', $date)
+                    ->sum('universe');
+
                 $uCount = $allUniverses->where('start', '<=', $date)
                     ->where('end', '>=', $date)
                     ->sum('universe');
 
                 $suniverses[] = [
                     'date' => $date,
+                    'snum' => $sCount,
                     'unum' => $uCount / 1000,
                 ];
             }
-
+            $sample_size = max(array_column($suniverses, 'snum'));
             $universe_size = max(array_column($suniverses, 'unum'));
-
-            // $universe_size = Universe::whereIn('age_group', array_unique($age_group))
-            //     ->where('rs', 'like', '%' . $req->socio . '%')
-            //     ->where('sec', 'like', '%' . $req->economic . '%')
-            //     ->where('gender', 'like', '%' . $req->gender . '%')
-            //     ->where('region', 'like', '%' . $req->region . '%')
-            //     ->where('start', '<=', $startDate)
-            //     ->where('end', '>=', $finishDate)
-            //     ->sum(DB::raw('universe / 1000'));
-
         } else if ($req->userType == "OTT") {
+            // userids Not working, OTT have no category yet.
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
 
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -127,6 +121,7 @@ class OverviewController extends Controller
 
             // $universe_size = Universe::sum(DB::raw('universe / 1000'));
         } else {
+            // userids Not working, OTT have no category yet.
             $userids = User::pluck('id')->toArray();
 
             // Create an array of DateOnly objects
@@ -159,7 +154,7 @@ class OverviewController extends Controller
 
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
-            ->whereIn('user_id', $userids)
+            ->whereIn('category_id', $categoryIds)
             ->get();
         //return response()->json(["reachsum" => $ram_logs], 200);
         foreach ($channels as $c) {
@@ -192,13 +187,16 @@ class OverviewController extends Controller
         $inputData->gender = $req->gender;
         $inputData->economic = $req->economic;
         $inputData->socio = $req->socio;
-        $inputData->age1 = $req->age1;
-        $inputData->age2 = $req->age2;
+        $inputData->ageGroup = $req->ageGroup;
         $inputData->universe = $universe_size;
-        $inputData->sample =  count($userids);
-        return response()->json(["input_data" => $inputData , "reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
+        $inputData->sample =  $sample_size;
+
+        // App User Reporting Generate Log saving
+        app(AppUserActivityService::class)->AppUserReportGenarateOldLogSubmit($req->header('Authorization'), $inputData);
+
+        return response()->json(["input_data" => $inputData, "reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
     }
-    
+
     public function reachpercentgraph(Request $req)
     {
         $startDate = substr($req->start, 0, 10);
@@ -214,23 +212,12 @@ class OverviewController extends Controller
         $channel_label = [];
         $channel_id = [];
         if ($req->userType == "STB") {
-            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
-            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
-            $userids = User::where('type', $req->userType)
-                ->where('address', 'like', '%' . $req->region . '%')
+            //Categori Wise Ids // Replace of userIds (Not updated for userType OTT&ALL)
+            $categoryIds = Category::whereIn('age_group', $req->ageGroup)
+                ->where('region', 'like', '%' . $req->region . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
-                ->where('economic_status', 'like', '%' . $req->economic . '%')
-                ->where('socio_status', 'like', '%' . $req->socio . '%')
-                //->whereBetween('age', [$req->age1, $req->age2])
-                ->whereBetween('dob', [$minDate, $maxDate])
+                ->where('sec', 'like', '%' . $req->economic . '%')
                 ->pluck('id')->toArray();
-
-
-            $age_group = [];
-            for ($i = $req->age1; $i <= $req->age2; $i++) {
-                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
-            }
 
             // Create an array of DateOnly objects
             $dates = [];
@@ -238,12 +225,19 @@ class OverviewController extends Controller
             $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
-                $dates[] = $date->toDateString();
+                $dates[] = $date->format('Y-m-d'); // Use format() instead of date()
             }
 
             // Query the database using Eloquent
-            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
-                ->where('rs', 'like', '%' . $req->socio . '%')
+            $allSystemUniverses = SystemUniverse::whereIn('date_of_gen', $dates)
+                ->whereIn('age_group', $req->ageGroup)
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->get();
+
+            $allUniverses = Universe::whereIn('age_group', $req->ageGroup)
+                // ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
@@ -251,22 +245,25 @@ class OverviewController extends Controller
 
             $suniverses = [];
             foreach ($dates as $date) {
+                $sCount = $allSystemUniverses->where('date_of_gen', $date)
+                    ->sum('universe');
+
                 $uCount = $allUniverses->where('start', '<=', $date)
                     ->where('end', '>=', $date)
                     ->sum('universe');
 
                 $suniverses[] = [
                     'date' => $date,
+                    'snum' => $sCount,
                     'unum' => $uCount / 1000,
                 ];
             }
-
+            $sample_size = max(array_column($suniverses, 'snum'));
             $universe_size = max(array_column($suniverses, 'unum'));
-
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -292,10 +289,9 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         } else {
             $userids = User::pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -321,11 +317,10 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
-            ->whereIn('user_id', $userids)
+            ->whereIn('category_id', $categoryIds)
             ->get();
         //return response()->json(["reachsum" => $ram_logs], 200);
         foreach ($channels as $c) {
@@ -362,10 +357,13 @@ class OverviewController extends Controller
         $inputData->gender = $req->gender;
         $inputData->economic = $req->economic;
         $inputData->socio = $req->socio;
-        $inputData->age1 = $req->age1;
-        $inputData->age2 = $req->age2;
+        $inputData->ageGroup = $req->ageGroup;
         $inputData->universe = $universe_size;
-        $inputData->sample =  count($userids);
+        $inputData->sample =  $sample_size;
+
+        // App User Reporting Generate Log saving
+        app(AppUserActivityService::class)->AppUserReportGenarateOldLogSubmit($req->header('Authorization'), $inputData);
+
         return response()->json(["input_data" => $inputData, "reachsum" => array_sum($number_of_user), "reach" => $number_of_user, "channels" => $channel_label, "channel_ids" => $channel_id], 200);
     }
 
@@ -388,22 +386,12 @@ class OverviewController extends Controller
         $diff = abs($to_time - $from_time) / 60;
 
         if ($req->userType == "STB") {
-            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
-            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
-            $userids = User::where('type', $req->userType)
-                ->where('address', 'like', '%' . $req->region . '%')
+            //Categori Wise Ids // Replace of userIds (Not updated for userType OTT&ALL)
+            $categoryIds = Category::whereIn('age_group', $req->ageGroup)
+                ->where('region', 'like', '%' . $req->region . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
-                ->where('economic_status', 'like', '%' . $req->economic . '%')
-                ->where('socio_status', 'like', '%' . $req->socio . '%')
-                //->whereBetween('age', [$req->age1, $req->age2])
-                ->whereBetween('dob', [$minDate, $maxDate])
+                ->where('sec', 'like', '%' . $req->economic . '%')
                 ->pluck('id')->toArray();
-
-            $age_group = [];
-            for ($i = $req->age1; $i <= $req->age2; $i++) {
-                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
-            }
 
             // Create an array of DateOnly objects
             $dates = [];
@@ -411,12 +399,19 @@ class OverviewController extends Controller
             $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
-                $dates[] = $date->toDateString();
+                $dates[] = $date->format('Y-m-d'); // Use format() instead of date()
             }
 
             // Query the database using Eloquent
-            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
-                ->where('rs', 'like', '%' . $req->socio . '%')
+            $allSystemUniverses = SystemUniverse::whereIn('date_of_gen', $dates)
+                ->whereIn('age_group', $req->ageGroup)
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->get();
+
+            $allUniverses = Universe::whereIn('age_group', $req->ageGroup)
+                // ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
@@ -424,24 +419,26 @@ class OverviewController extends Controller
 
             $suniverses = [];
             foreach ($dates as $date) {
+                $sCount = $allSystemUniverses->where('date_of_gen', $date)
+                    ->sum('universe');
+
                 $uCount = $allUniverses->where('start', '<=', $date)
                     ->where('end', '>=', $date)
                     ->sum('universe');
 
                 $suniverses[] = [
                     'date' => $date,
+                    'snum' => $sCount,
                     'unum' => $uCount / 1000,
                 ];
             }
-
+            $sample_size = max(array_column($suniverses, 'snum'));
             $universe_size = max(array_column($suniverses, 'unum'));
-
-
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -467,10 +464,9 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         } else {
             $userids = User::pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -496,11 +492,10 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
-            ->whereIn('user_id', $userids)
+            ->whereIn('category_id', $categoryIds)
             ->get();
         //return response()->json(["reachsum" => $ram_logs], 200);
         foreach ($channels as $c) {
@@ -549,10 +544,13 @@ class OverviewController extends Controller
         $inputData->gender = $req->gender;
         $inputData->economic = $req->economic;
         $inputData->socio = $req->socio;
-        $inputData->age1 = $req->age1;
-        $inputData->age2 = $req->age2;
+        $inputData->ageGroup = $req->ageGroup;
         $inputData->universe = $universe_size;
-        $inputData->sample =  count($userids);
+        $inputData->sample =  $sample_size;
+
+        // App User Reporting Generate Log saving
+        app(AppUserActivityService::class)->AppUserReportGenarateOldLogSubmit($req->header('Authorization'), $inputData);
+
         return response()->json(["input_data" => $inputData, "tvrs" => $tvrs, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
     }
 
@@ -574,22 +572,12 @@ class OverviewController extends Controller
         $from_time = strtotime($finishDateTime);
 
         if ($req->userType == "STB") {
-            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
-            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
-            $userids = User::where('type', $req->userType)
-                ->where('address', 'like', '%' . $req->region . '%')
+            //Categori Wise Ids // Replace of userIds (Not updated for userType OTT&ALL)
+            $categoryIds = Category::whereIn('age_group', $req->ageGroup)
+                ->where('region', 'like', '%' . $req->region . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
-                ->where('economic_status', 'like', '%' . $req->economic . '%')
-                ->where('socio_status', 'like', '%' . $req->socio . '%')
-                //->whereBetween('age', [$req->age1, $req->age2])
-                ->whereBetween('dob', [$minDate, $maxDate])
+                ->where('sec', 'like', '%' . $req->economic . '%')
                 ->pluck('id')->toArray();
-
-            $age_group = [];
-            for ($i = $req->age1; $i <= $req->age2; $i++) {
-                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
-            }
 
             // Create an array of DateOnly objects
             $dates = [];
@@ -597,12 +585,19 @@ class OverviewController extends Controller
             $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
-                $dates[] = $date->toDateString();
+                $dates[] = $date->format('Y-m-d'); // Use format() instead of date()
             }
 
             // Query the database using Eloquent
-            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
-                ->where('rs', 'like', '%' . $req->socio . '%')
+            $allSystemUniverses = SystemUniverse::whereIn('date_of_gen', $dates)
+                ->whereIn('age_group', $req->ageGroup)
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->get();
+
+            $allUniverses = Universe::whereIn('age_group', $req->ageGroup)
+                // ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
@@ -610,24 +605,26 @@ class OverviewController extends Controller
 
             $suniverses = [];
             foreach ($dates as $date) {
+                $sCount = $allSystemUniverses->where('date_of_gen', $date)
+                    ->sum('universe');
+
                 $uCount = $allUniverses->where('start', '<=', $date)
                     ->where('end', '>=', $date)
                     ->sum('universe');
 
                 $suniverses[] = [
                     'date' => $date,
+                    'snum' => $sCount,
                     'unum' => $uCount / 1000,
                 ];
             }
-
+            $sample_size = max(array_column($suniverses, 'snum'));
             $universe_size = max(array_column($suniverses, 'unum'));
-
-
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -653,10 +650,9 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         } else {
             $userids = User::pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -682,11 +678,10 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
-            ->whereIn('user_id', $userids)
+            ->whereIn('category_id', $categoryIds)
             ->get();
         //return response()->json(["reachsum" => $ram_logs], 200);
         foreach ($channels as $c) {
@@ -734,10 +729,13 @@ class OverviewController extends Controller
         $inputData->gender = $req->gender;
         $inputData->economic = $req->economic;
         $inputData->socio = $req->socio;
-        $inputData->age1 = $req->age1;
-        $inputData->age2 = $req->age2;
+        $inputData->ageGroup = $req->ageGroup;
         $inputData->universe = $universe_size;
-        $inputData->sample =  count($userids);
+        $inputData->sample =  $sample_size;
+
+        // App User Reporting Generate Log saving
+        app(AppUserActivityService::class)->AppUserReportGenarateOldLogSubmit($req->header('Authorization'), $inputData);
+
         return response()->json(["input_data" => $inputData, "totaltime" => $total_time, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
     }
 
@@ -763,23 +761,12 @@ class OverviewController extends Controller
         $shares = array();
 
         if ($req->userType == "STB") {
-            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
-            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
-            $userids = User::where('type', $req->userType)
-                ->where('address', 'like', '%' . $req->region . '%')
+            //Categori Wise Ids // Replace of userIds (Not updated for userType OTT&ALL)
+            $categoryIds = Category::whereIn('age_group', $req->ageGroup)
+                ->where('region', 'like', '%' . $req->region . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
-                ->where('economic_status', 'like', '%' . $req->economic . '%')
-                ->where('socio_status', 'like', '%' . $req->socio . '%')
-                //->whereBetween('age', [$req->age1, $req->age2])
-                ->whereBetween('dob', [$minDate, $maxDate])
+                ->where('sec', 'like', '%' . $req->economic . '%')
                 ->pluck('id')->toArray();
-
-
-            $age_group = [];
-            for ($i = $req->age1; $i <= $req->age2; $i++) {
-                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
-            }
 
             // Create an array of DateOnly objects
             $dates = [];
@@ -787,12 +774,19 @@ class OverviewController extends Controller
             $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
-                $dates[] = $date->toDateString();
+                $dates[] = $date->format('Y-m-d'); // Use format() instead of date()
             }
 
             // Query the database using Eloquent
-            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
-                ->where('rs', 'like', '%' . $req->socio . '%')
+            $allSystemUniverses = SystemUniverse::whereIn('date_of_gen', $dates)
+                ->whereIn('age_group', $req->ageGroup)
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->get();
+
+            $allUniverses = Universe::whereIn('age_group', $req->ageGroup)
+                // ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
@@ -800,22 +794,26 @@ class OverviewController extends Controller
 
             $suniverses = [];
             foreach ($dates as $date) {
+                $sCount = $allSystemUniverses->where('date_of_gen', $date)
+                    ->sum('universe');
+
                 $uCount = $allUniverses->where('start', '<=', $date)
                     ->where('end', '>=', $date)
                     ->sum('universe');
 
                 $suniverses[] = [
                     'date' => $date,
+                    'snum' => $sCount,
                     'unum' => $uCount / 1000,
                 ];
             }
-
+            $sample_size = max(array_column($suniverses, 'snum'));
             $universe_size = max(array_column($suniverses, 'unum'));
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -841,10 +839,9 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         } else {
             $userids = User::pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -870,11 +867,10 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
-            ->whereIn('user_id', $userids)
+            ->whereIn('category_id', $categoryIds)
             ->get();
         //return response()->json(["reachsum" => $ram_logs], 200);
         foreach ($channels as $c) {
@@ -936,10 +932,13 @@ class OverviewController extends Controller
         $inputData->gender = $req->gender;
         $inputData->economic = $req->economic;
         $inputData->socio = $req->socio;
-        $inputData->age1 = $req->age1;
-        $inputData->age2 = $req->age2;
+        $inputData->ageGroup = $req->ageGroup;
         $inputData->universe = $universe_size;
-        $inputData->sample =  count($userids);
+        $inputData->sample =  $sample_size;
+
+        // App User Reporting Generate Log saving
+        app(AppUserActivityService::class)->AppUserReportGenarateOldLogSubmit($req->header('Authorization'), $inputData);
+
         return response()->json(["input_data" => $inputData, "share" => $shares, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
     }
 
@@ -951,7 +950,7 @@ class OverviewController extends Controller
         $finishTime = substr($req->finish, 11, 19);
         $startDateTime = date($startDate) . " " . $startTime;
         $finishDateTime = date($finishDate) . " " . $finishTime;
-        
+
         $channelArray = array();
         $channel_id = [];
         $tvrs = array();
@@ -962,22 +961,12 @@ class OverviewController extends Controller
         $diff = abs($to_time - $from_time) / 60;
 
         if ($req->userType == "STB") {
-            $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
-            $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
-            //return response()->json(["minDate" => $minDate, "maxDate" => $maxDate], 200);
-            $userids = User::where('type', $req->userType)
-                ->where('address', 'like', '%' . $req->region . '%')
+            //Categori Wise Ids // Replace of userIds (Not updated for userType OTT&ALL)
+            $categoryIds = Category::whereIn('age_group', $req->ageGroup)
+                ->where('region', 'like', '%' . $req->region . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
-                ->where('economic_status', 'like', '%' . $req->economic . '%')
-                ->where('socio_status', 'like', '%' . $req->socio . '%')
-                //->whereBetween('age', [$req->age1, $req->age2])
-                ->whereBetween('dob', [$minDate, $maxDate])
+                ->where('sec', 'like', '%' . $req->economic . '%')
                 ->pluck('id')->toArray();
-
-            $age_group = [];
-            for ($i = $req->age1; $i <= $req->age2; $i++) {
-                $age_group[] = ($i < 15) ? "0-14" : (($i < 25) ? "15-24" : (($i < 35) ? "25-34" : (($i < 45) ? "35-44" : "45 & Above")));
-            }
 
             // Create an array of DateOnly objects
             $dates = [];
@@ -985,12 +974,19 @@ class OverviewController extends Controller
             $endDate_ = Carbon::parse($finishDate);
 
             for ($date = $startDate_; $date->lte($endDate_); $date->addDay()) {
-                $dates[] = $date->toDateString();
+                $dates[] = $date->format('Y-m-d'); // Use format() instead of date()
             }
 
             // Query the database using Eloquent
-            $allUniverses = Universe::whereIn('age_group', array_unique($age_group))
-                ->where('rs', 'like', '%' . $req->socio . '%')
+            $allSystemUniverses = SystemUniverse::whereIn('date_of_gen', $dates)
+                ->whereIn('age_group', $req->ageGroup)
+                ->where('sec', 'like', '%' . $req->economic . '%')
+                ->where('gender', 'like', '%' . $req->gender . '%')
+                ->where('region', 'like', '%' . $req->region . '%')
+                ->get();
+
+            $allUniverses = Universe::whereIn('age_group', $req->ageGroup)
+                // ->where('rs', 'like', '%' . $req->socio . '%')
                 ->where('sec', 'like', '%' . $req->economic . '%')
                 ->where('gender', 'like', '%' . $req->gender . '%')
                 ->where('region', 'like', '%' . $req->region . '%')
@@ -998,24 +994,26 @@ class OverviewController extends Controller
 
             $suniverses = [];
             foreach ($dates as $date) {
+                $sCount = $allSystemUniverses->where('date_of_gen', $date)
+                    ->sum('universe');
+
                 $uCount = $allUniverses->where('start', '<=', $date)
                     ->where('end', '>=', $date)
                     ->sum('universe');
 
                 $suniverses[] = [
                     'date' => $date,
+                    'snum' => $sCount,
                     'unum' => $uCount / 1000,
                 ];
             }
-
+            $sample_size = max(array_column($suniverses, 'snum'));
             $universe_size = max(array_column($suniverses, 'unum'));
-
-
 
         } else if ($req->userType == "OTT") {
             $userids = User::where('type', $req->userType)
                 ->pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -1041,10 +1039,9 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         } else {
             $userids = User::pluck('id')->toArray();
-            
+
             // Create an array of DateOnly objects
             $dates = [];
             $startDate_ = Carbon::parse($startDate);
@@ -1070,11 +1067,10 @@ class OverviewController extends Controller
             }
 
             $universe_size = max(array_column($suniverses, 'unum'));
-
         }
         $ram_logs = ViewLog::where('finished_watching_at', '>', $startDateTime)
             ->where('started_watching_at', '<', $finishDateTime)
-            ->whereIn('user_id', $userids)
+            ->whereIn('category_id', $categoryIds)
             ->get();
         //return response()->json(["reachsum" => $ram_logs], 200);
         foreach ($channels as $c) {
@@ -1128,10 +1124,13 @@ class OverviewController extends Controller
         $inputData->gender = $req->gender;
         $inputData->economic = $req->economic;
         $inputData->socio = $req->socio;
-        $inputData->age1 = $req->age1;
-        $inputData->age2 = $req->age2;
+        $inputData->ageGroup = $req->ageGroup;
         $inputData->universe = $universe_size;
-        $inputData->sample =  count($userids);
+        $inputData->sample =  $sample_size;
+
+        // App User Reporting Generate Log saving
+        app(AppUserActivityService::class)->AppUserReportGenarateOldLogSubmit($req->header('Authorization'), $inputData);
+        
         return response()->json(["input_data" => $inputData, "tvrs" => $tvrs, "channels" => $channelArray, "channel_ids" => $channel_id], 200);
     }
 

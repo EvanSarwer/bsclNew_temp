@@ -259,6 +259,21 @@ class AppUserController extends Controller
     }
 
 
+    public function getUserActivityLog($session_id){
+        $user_login_sessions = UserLoginSession::where('id', $session_id)->first();
+        if($user_login_sessions){
+            $user_activity_logs = $user_login_sessions->userActivityLogs;
+            foreach ($user_activity_logs as $log) {
+                $log->data_json = $log->data;
+                $log->data = json_decode($log->data);
+            }
+            $userData = $user_login_sessions->login;
+            return response()->json(["userData" => $userData, "user_activity_logs" => $user_activity_logs],200);
+        }
+        return response()->json(["msg" => "error"],402);
+    }
+
+
 
 
 }

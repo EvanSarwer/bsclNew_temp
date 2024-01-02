@@ -9,6 +9,7 @@ use App\Models\Channel;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
+use App\Services\AppUserActivityService;
 
 use App\Models\DataCleanse;
 class TrendController extends Controller
@@ -177,7 +178,7 @@ class TrendController extends Controller
 
         }
 
-
+        app(AppUserActivityService::class)->AppUserReportGenarateOldLogSubmit($req->header('Authorization'), $req);
         return response()->json(["reachp" => $reachps, "reach0" => $reach0s, "tvrp" => $tvrps, "tvr0" => $tvr0s, "label" => $label], 200);
     }
     public function mult_sum($inputArray)

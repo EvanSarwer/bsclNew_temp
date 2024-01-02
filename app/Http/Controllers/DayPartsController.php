@@ -11,6 +11,7 @@ use App\Models\DayPartProcess;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
+use App\Services\AppUserActivityService;
 
 class DayPartsController extends Controller
 {
@@ -463,6 +464,7 @@ public function dayrangedtrendsaver($req)
                 $tvr0[$i] += (json_decode($d->data))->tvr0[$i];
             }
         }
+        app(AppUserActivityService::class)->AppUserReportGenarateOldLogSubmit($req->header('Authorization'), $req);
         return response()->json(["channel" => $channel->channel_name, "value" => ((object)(["label" => $label, "reach0" => $reach0, "reachp" => $reachp, "tvr0" => $tvr0, "tvrp" => $tvrp]))], 200);
     }
 

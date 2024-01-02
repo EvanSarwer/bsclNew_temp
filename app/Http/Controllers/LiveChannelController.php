@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ViewLog;
 use App\Models\Channel;
+use App\Models\DeselectPeriod;
+use App\Models\Device;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
@@ -100,23 +102,23 @@ class LiveChannelController extends Controller
             $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
 
             $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - 45)))->where('users.tvoff', 1)
-                            ->select('users.id', 'users.user_name', 'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
-                            ->where('users.type', $req->userType)
-                            ->where('users.address', 'like', '%' . $req->region . '%')
-                            ->where('users.gender', 'like', '%' . $req->gender . '%')
-                            ->where('users.economic_status', 'like', '%' . $req->economic . '%')
-                            ->where('users.socio_status', 'like', '%' . $req->socio . '%')
-                            ->whereBetween('users.dob', [$minDate, $maxDate])
-                            ->get();
+                ->select('users.id', 'users.user_name', 'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
+                ->where('users.type', $req->userType)
+                ->where('users.address', 'like', '%' . $req->region . '%')
+                ->where('users.gender', 'like', '%' . $req->gender . '%')
+                ->where('users.economic_status', 'like', '%' . $req->economic . '%')
+                ->where('users.socio_status', 'like', '%' . $req->socio . '%')
+                ->whereBetween('users.dob', [$minDate, $maxDate])
+                ->get();
         } else if ($req->userType == "OTT") {
             $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - 45)))->where('users.tvoff', 1)
-                            ->select('users.id', 'users.user_name',  'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
-                            ->where('users.type', $req->userType)
-                            ->get();
+                ->select('users.id', 'users.user_name',  'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
+                ->where('users.type', $req->userType)
+                ->get();
         } else {
             $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - 45)))->where('users.tvoff', 1)
-                            ->select('users.id', 'users.user_name',  'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
-                            ->get();
+                ->select('users.id', 'users.user_name',  'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
+                ->get();
         }
 
         foreach ($channels as $c) {
@@ -134,6 +136,32 @@ class LiveChannelController extends Controller
         }
 
         return response()->json(["channels" => $activeChannels, "user_count" => $number_of_user, "points" => $users], 200);
+    }
+    public function activedevicelistmap()
+    {
+        $User_deSelected = DeselectPeriod::whereNotNull('start_date')->whereNull('end_date')->pluck('device_id')->toArray();
+        $User_selected = Device::whereNotNull('contact_person')
+            ->whereNotNull('contact_email')
+            ->whereNotNull('contact_number')
+            ->whereNotIn('id', $User_deSelected)
+            ->pluck('Id')
+            ->toArray();
+
+        $green = Device::where('last_request', '>', date('Y-m-d H:i:s', strtotime('-120 seconds')))
+            ->whereIN('id', $User_selected)
+            ->select('id', 'device_name as title',  'lat', 'lng')
+            ->get();
+        $red = Device::where('last_request', '<', date('Y-m-d H:i:s', strtotime('-15 days')))
+            ->whereIN('id', $User_selected)
+            ->select('id', 'device_name as title',  'lat', 'lng')
+            ->get();
+
+        $gray = Device::where('last_request', '<=', date('Y-m-d H:i:s', strtotime('-120 seconds')))
+            ->where('last_request', '>=', date('Y-m-d H:i:s', strtotime('-15 days')))
+            ->whereIN('id', $User_selected)
+            ->select('id', 'device_name as title',  'lat', 'lng')
+            ->get();
+        return response()->json(["red" => $red, "green" => $green, "gray" => $gray], 200);
     }
 
 

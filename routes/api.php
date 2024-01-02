@@ -134,7 +134,7 @@ Route::get('/dashboard/seennotification', [DashboardController::class, 'seen_not
 
 Route::get('/dashboard/CurrentStatusTopTvrReach', [DashboardController::class, 'CurrentStatusTopTvrReach'])->middleware('auth.admin.user');
 Route::get('/allgraph/dashboard', [DashboardController::class, 'allgraphdashboard'])->middleware('auth.admin.user'); //->middleware('auth.admin.user')
-Route::get('/dashboard/graphGenerate/byDate/{date}', [DashboardController::class, 'dashboradGraph_generate_byDate'])->middleware('auth.admin');     //->middleware('auth.admin.user')
+Route::get('/dashboard/graphGenerate/byDate/{date}', [DashboardController::class, 'dashboradGraph_generate_byDate']);//->middleware('auth.admin');     //->middleware('auth.admin.user')
 
 // Route::get('/allgraph/dashboard/generate', [DashboardController::class, 'test_dashboradGraph_generate']);
 /////////END////////////
@@ -174,7 +174,8 @@ Route::post('/user/userdefined/usertimespent',[UserController::class,'usertimesp
 ///////////END//////////////
 
 //////////Live Channels/////////
-Route::post('/livechannel/activechannellistgraph',[LiveChannelController::class,'activechannellistgraph'])->middleware('auth.admin.user'); 
+Route::post('/livechannel/activechannellistgraph',[LiveChannelController::class,'activechannellistgraph'])->middleware('auth.admin.user');
+Route::get('/activedevicelistmap',[LiveChannelController::class,'activedevicelistmap'])->middleware('auth.admin.user'); 
 Route::post('/livechannel/activechannellistgraphfast',[LiveChannelController::class,'activechannellistgraphfast'])->middleware('auth.admin.user'); //->middleware('auth.admin.user')
 
 ///////////END////////////////

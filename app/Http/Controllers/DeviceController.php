@@ -154,87 +154,8 @@ class DeviceController extends Controller
         }
 
 
-        // if ($req->socio_status == "u") {
-        //     if ($req->household_condition == "Flat owner / Flat in apartment") {
-        //         if ($req->monthly_income == "a") {
-        //             $req->economic_status = "b";
-        //         } else if ($req->monthly_income == "b") {
-        //             $req->economic_status = "c";
-        //         } else if ($req->monthly_income == "c") {
-        //             $req->economic_status = "d";
-        //         } else if ($req->monthly_income == "d") {
-        //             $req->economic_status = "d";
-        //         } else if ($req->monthly_income == "e") {
-        //             $req->economic_status = "e";
-        //         }
-        //     } else if ($req->household_condition == "Rented flat / Non-Flat apartment where there is no security guard and parking") {
-        //         if ($req->monthly_income == "a") {
-        //             $req->economic_status = "a";
-        //         } else if ($req->monthly_income == "b") {
-        //             $req->economic_status = "b";
-        //         } else if ($req->monthly_income == "c") {
-        //             $req->economic_status = "c";
-        //         } else if ($req->monthly_income == "d") {
-        //             $req->economic_status = "d";
-        //         } else if ($req->monthly_income == "e") {
-        //             $req->economic_status = "d";
-        //         }
-        //     } else if ($req->household_condition == "Lower tier house") {
-        //         if ($req->monthly_income == "a") {
-        //             $req->economic_status = "a";
-        //         } else if ($req->monthly_income == "b") {
-        //             $req->economic_status = "a";
-        //         } else if ($req->monthly_income == "c") {
-        //             $req->economic_status = "b";
-        //         } else if ($req->monthly_income == "d") {
-        //             $req->economic_status = "c";
-        //         } else if ($req->monthly_income == "e") {
-        //             $req->economic_status = "d";
-        //         }
-        //     }
-        // } else if ($req->socio_status == "r") {
-        //     if ($req->household_condition == "Full Concrete house (wall, floor and roof)") {
-        //         if ($req->monthly_income == "a") {
-        //             $req->economic_status = "b";
-        //         } else if ($req->monthly_income == "b") {
-        //             $req->economic_status = "c";
-        //         } else if ($req->monthly_income == "c") {
-        //             $req->economic_status = "d";
-        //         } else if ($req->monthly_income == "d") {
-        //             $req->economic_status = "d";
-        //         } else if ($req->monthly_income == "e") {
-        //             $req->economic_status = "e";
-        //         }
-        //     } else if ($req->household_condition == "Semi Concrete house (wall and floor concrete but the roof is made by Tin)") {
-        //         if ($req->monthly_income == "a") {
-        //             $req->economic_status = "a";
-        //         } else if ($req->monthly_income == "b") {
-        //             $req->economic_status = "b";
-        //         } else if ($req->monthly_income == "c") {
-        //             $req->economic_status = "c";
-        //         } else if ($req->monthly_income == "d") {
-        //             $req->economic_status = "d";
-        //         } else if ($req->monthly_income == "e") {
-        //             $req->economic_status = "d";
-        //         }
-        //     } else if ($req->household_condition == "Non-Concrete (Made by Tin/Wood/Bamboo etc.)") {
-        //         if ($req->monthly_income == "a") {
-        //             $req->economic_status = "a";
-        //         } else if ($req->monthly_income == "b") {
-        //             $req->economic_status = "a";
-        //         } else if ($req->monthly_income == "c") {
-        //             $req->economic_status = "b";
-        //         } else if ($req->monthly_income == "d") {
-        //             $req->economic_status = "c";
-        //         } else if ($req->monthly_income == "e") {
-        //             $req->economic_status = "d";
-        //         }
-        //     }
-        // }
-
-
         $device->update([
-            "type" => $req->type, "contact_person" => $req->contact_person, "contact_email" => $req->contact_email, "contact_number" => $req->contact_number, "alt_number" => $req->alt_number, "payment_type" => $req->payment_type, "payment_number" => $req->payment_number, "other_payment_type" => $req->other_payment_type, "other_payment_number" => $req->other_payment_number,
+            "type" => $req->type, "contact_person" => $req->contact_person, "contact_email" => $req->contact_email, "contact_number" => $req->contact_number, "alt_number" => $req->alt_number, "payment_type" => $req->payment_type, "payment_number" => $req->payment_number, "other_payment_type" => $req->other_payment_type, "other_payment_number" => $req->other_payment_number, "economic_status" => $req->economic_status,
             "house_name" => $req->house_name, "house_number" => $req->house_number, "road_number" => $req->road_number, "state_name" => $req->state_name, "ward_no" => $req->ward_no, "zone_thana" => $req->zone_thana, "city_corporation" => $req->city_corporation, "city_name" => $req->city_name, "zip_code" => $req->zip_code, "district" => $req->district, "lat" => $req->lat, "lng" => $req->lng,
             "household_condition" => $req->household_condition, "description" => $req->description, "tv_type" => $req->tv_type, "tv_brand" => $req->tv_brand, "tv_placement" => $req->tv_placement, "gsm_signal_strength" => $req->gsm_signal_strength, "wifi" => $req->wifi, "wifi_signal_strength" => $req->wifi_signal_strength, "stb_provider_name" => $req->stb_provider_name, "stb_subscription_type" => $req->stb_subscription_type, "stb_subscription_charge" => $req->stb_subscription_charge,
             "socio_status" => $req->socio_status, "monthly_income" => $req->monthly_income, "installer_name" => $req->installer_name, "survey_date" => new Datetime(), "installation_date" => new Datetime(),  "updated_at" => new Datetime()
@@ -328,7 +249,8 @@ class DeviceController extends Controller
             "device_name" => "required|unique:devices,device_name",
             "lat" => "required",
             "lng" => "required",
-            "monthly_income" => "required",
+            "economic_status" => "required",
+            //"monthly_income" => "required",
             "socio_status" => "required",
             "contact_person" => "required",
             "contact_email" => "required",
@@ -344,7 +266,7 @@ class DeviceController extends Controller
             "zip_code" => "required",
             "installer_name" => "required",
             "district" => "required",
-            "household_condition" => "required",
+            //"household_condition" => "required",
             "tv_type" => "required",
             "tv_brand" => "required",
             "tv_placement" => "required",

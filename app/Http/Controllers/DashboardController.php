@@ -8,6 +8,8 @@ use App\Models\ViewLog;
 use App\Models\Device;
 use App\Models\Channel;
 use App\Models\DashboardTempData;
+use App\Models\DeselectPeriod;
+use App\Models\Login;
 use App\Models\Notification;
 use App\Models\RawRequest;
 use App\Models\SystemUniverse;
@@ -29,16 +31,35 @@ class DashboardController extends Controller
   //       $this->middleware('auth.admin','auth.user');
   // }
 
-  public function CurrentStatusUser()
+  public function CurrentStatusUser($isadmin=false)
   {
     //$total_user = User::all()->count();
-    $stb_all = Device::all()->count();
+    if($isadmin){
+    $device_selected = DeselectPeriod::whereNotNull('start_date')->whereNull('end_date')->pluck('device_id')->toArray();
+        $device_selected = Device::whereNotNull('contact_person')
+            ->whereNotNull('contact_email')
+            ->whereNotNull('contact_number')
+            ->whereNotIn('id', $device_selected)
+            ->pluck('Id')
+            ->toArray();
+        $User_selected = User::whereIn('device_id', $device_selected)->pluck('id')->toArray();
+    $stb_all = count($device_selected);//Device::all()->count();
+    $stb_total = Device::whereNotNull('contact_email')->whereNotNull('household_condition')->whereNotNull('monthly_income')
+      ->get()->count();
+    $total_user = 
+    User::whereNotNull('devices.contact_email')->whereNotNull('devices.household_condition')->whereNotNull('devices.monthly_income')
+      ->whereIn('users.id', $User_selected)
+      ->join('devices', 'devices.id', '=', 'users.device_id')
+      ->get()->count();
+    }
+    else{
+      $stb_all = 500;//Device::all()->count();
     $stb_total = Device::whereNotNull('contact_email')->whereNotNull('household_condition')->whereNotNull('monthly_income')
       ->get()->count();
     $total_user = User::whereNotNull('devices.contact_email')->whereNotNull('devices.household_condition')->whereNotNull('devices.monthly_income')
       ->join('devices', 'devices.id', '=', 'users.device_id')
       ->get()->count();
-
+    }
 
 
 
@@ -834,8 +855,13 @@ class DashboardController extends Controller
     //return response()->json($actives, 200);
   }
 
-  public function dashboardstatus()
+  public function dashboardstatus(Request $req)
   {
+    $token = $req->header('Authorization');
+        $id = Token::where('token', $token)->first()->user_id;
+        $role=Login::where('id',$id)->first()->role;
+        $isadmin=$role=='admin'?true:false;
+        //$isadmin=false;
     $activeChannels = [];
     $actives = [];
     $compare_date = date('Y-m-d H:i:s', (time() - 45)); //where('users.last_request', '>', $compare_date)
@@ -866,7 +892,7 @@ class DashboardController extends Controller
       array_push($allChnlList, $chnl);
     }
 
-    $currentStatusUser = $this->CurrentStatusUser();
+    $currentStatusUser = $this->CurrentStatusUser($isadmin);
 
     //return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "ott_active" => $currentStatusUser->ott_active, "active_user" => $currentStatusUser->active_user, "active_percent" => $currentStatusUser->active_percent ], 200);
     return response()->json(["activeUsers" => $actives, "activeChannels" => $allChnlList, "stb_all" => $currentStatusUser->stb_all, "total_user" => $currentStatusUser->total_user, "stb_total" => $currentStatusUser->stb_total, "ott_total" => $currentStatusUser->ott_total, "stb_active" => $currentStatusUser->stb_active, "stb_active_user" => $currentStatusUser->stb_active_user, "ott_active_user" => $currentStatusUser->ott_active_user, "active_percent" => $currentStatusUser->active_percent], 200);

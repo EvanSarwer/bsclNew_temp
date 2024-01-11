@@ -121,15 +121,26 @@ class LiveChannelController extends Controller
                 ->select('users.id', 'users.user_name',  'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
                 ->get();
         }
-
+        $userIds = $users->pluck('id')->toArray();
+        $latestLogs = ViewLog::whereIn('user_id', $userIds)
+    ->selectRaw('user_id, MAX(finished_watching_at) as latest_finished_watching_at')
+    ->groupBy('user_id')
+    ->orderBy('user_id')
+    ->get();
+//return response()->json(["users" => $latestLogs], 200);
+// Now, fetch the complete records based on the latest finished_watching_at
+$latestLogsWithDetails = ViewLog::whereIn('user_id', $latestLogs->pluck('user_id'))
+    ->whereIn('finished_watching_at',  $latestLogs->pluck('latest_finished_watching_at'))
+    ->orderBy('user_id')
+    ->orderByDesc('finished_watching_at')
+    ->get();
+        //return response()->json(["users" => $latestLogsWithDetails], 200);
         foreach ($channels as $c) {
+            
             $u_count = array();
-            foreach ($users as $u) {
-                $view_log = ViewLog::where('user_id', $u->id)->latest('id')->first();
-                if ($view_log) {
-                    if ($c->id == $view_log->channel_id) {
-                        array_push($u_count, $u->user_id);
-                    }
+            foreach ($latestLogsWithDetails as $value) {
+                if ($c->id == $value->channel_id) {
+                    array_push($u_count, $value->user_id);
                 }
             }
             array_push($number_of_user, count($u_count));

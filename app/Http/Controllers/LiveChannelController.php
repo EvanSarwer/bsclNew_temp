@@ -96,12 +96,13 @@ class LiveChannelController extends Controller
         $activeChannels = [];
         $number_of_user = [];
         $allusers = [];
+        $time = 45;
 
         if ($req->userType == "STB") {
             $minDate = Carbon::today()->subYears($req->age2 + 1); // make sure to use Carbon\Carbon in the class
             $maxDate = Carbon::today()->subYears($req->age1)->endOfDay();
 
-            $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - 45)))->where('users.tvoff', 1)
+            $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - $time)))->where('users.tvoff', 1)
                 ->select('users.id', 'users.user_name', 'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
                 ->where('users.type', $req->userType)
                 ->where('users.address', 'like', '%' . $req->region . '%')
@@ -111,12 +112,12 @@ class LiveChannelController extends Controller
                 ->whereBetween('users.dob', [$minDate, $maxDate])
                 ->get();
         } else if ($req->userType == "OTT") {
-            $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - 45)))->where('users.tvoff', 1)
+            $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - $time)))->where('users.tvoff', 1)
                 ->select('users.id', 'users.user_name',  'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
                 ->where('users.type', $req->userType)
                 ->get();
         } else {
-            $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - 45)))->where('users.tvoff', 1)
+            $users = User::join('devices', 'devices.id', '=', 'users.device_id')->where('users.last_request', '>', date('Y-m-d H:i:s', (time() - $time)))->where('users.tvoff', 1)
                 ->select('users.id', 'users.user_name',  'devices.device_name as title', 'devices.id as device_id', 'devices.lat', 'devices.lng')
                 ->get();
         }
@@ -124,9 +125,11 @@ class LiveChannelController extends Controller
         foreach ($channels as $c) {
             $u_count = array();
             foreach ($users as $u) {
-                $u->view_log = ViewLog::where('user_id', $u->id)->latest('id')->first();
-                if ($c->id == $u->view_log->channel_id) {
-                    array_push($u_count, $u->user_id);
+                $view_log = ViewLog::where('user_id', $u->id)->latest('id')->first();
+                if ($view_log) {
+                    if ($c->id == $view_log->channel_id) {
+                        array_push($u_count, $u->user_id);
+                    }
                 }
             }
             array_push($number_of_user, count($u_count));

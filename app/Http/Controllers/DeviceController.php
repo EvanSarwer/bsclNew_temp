@@ -130,7 +130,10 @@ class DeviceController extends Controller
     public function editDevice(Request $req)
     {
         $rules = array_diff_key($this->rules(), array_flip((array) ['device_name']));
-        $validator = Validator::make($req->all(), $rules);
+        $customMessages = [
+            'district.required' => 'The division field is required.', // Customize error message for 'district'
+        ];
+        $validator = Validator::make($req->all(), $rules, $customMessages);
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }

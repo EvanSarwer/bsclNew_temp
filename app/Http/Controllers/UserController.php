@@ -22,6 +22,7 @@ use App\Models\DeselectPeriod;
 use App\Models\Device;
 use App\Models\SystemUniverse;
 use App\Models\SystemUniverseAll;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -30,6 +31,101 @@ class UserController extends Controller
     //     $this->middleware('auth.admin');
     // }
 
+   
+    public function get_last_SystemUniverse()
+    {
+
+        // Perform the query using Laravel Eloquent
+        $result = SystemUniverse::select(
+            'system_universe.region',
+            'system_universe.sec',
+            'system_universe.gender',
+            'system_universe.age_group',
+            'system_universe.universe as system',
+            DB::raw('universe.universe/1000 as universe'),
+            DB::raw('(universe.universe/1000)/system_universe.universe as multiplication_factor')
+        )
+            ->join('universe', function ($join) {
+                $join->on('system_universe.region', '=', 'universe.region')
+                    ->on('system_universe.sec', '=', 'universe.sec')
+                    ->on('system_universe.gender', '=', 'universe.gender')
+                    ->on('system_universe.age_group', '=', 'universe.age_group')
+                    ->whereRaw('system_universe.date_of_gen between universe.start and universe.`end`');
+            })
+            ->where('system_universe.date_of_gen', '=', function ($query) {
+                $query->select(DB::raw('MAX(`date_of_gen`)'))
+                    ->from('system_universe');
+            })
+            ->get();
+
+        // Prepare the array
+        $dataArray = [];
+
+        // Add headers to the array
+        $headers = ['region', 'sec', 'gender', 'age_group', 'system', 'universe', 'multiplication_factor'];
+        $dataArray[] = $headers;
+        
+        // Add data to the array
+        foreach ($result as $row) {
+            $dataArray[] = [
+                $row->region,
+                $row->sec,
+                $row->gender,
+                $row->age_group,
+                $row->system,
+                $row->universe,
+                $row->multiplication_factor,
+            ];
+        }
+        return response()->json(["data" => $dataArray], 200);
+    }
+    public function get_last_SystemUniverseAll()
+    {
+
+        // Perform the query using Laravel Eloquent
+        $result = SystemUniverseAll::select(
+            'system_universe_all.region',
+            'system_universe_all.sec',
+            'system_universe_all.gender',
+            'system_universe_all.age_group',
+            'system_universe_all.universe as system',
+            DB::raw('universe.universe/1000 as universe'),
+            DB::raw('(universe.universe/1000)/system_universe_all.universe as multiplication_factor')
+        )
+            ->join('universe', function ($join) {
+                $join->on('system_universe_all.region', '=', 'universe.region')
+                    ->on('system_universe_all.sec', '=', 'universe.sec')
+                    ->on('system_universe_all.gender', '=', 'universe.gender')
+                    ->on('system_universe_all.age_group', '=', 'universe.age_group')
+                    ->whereRaw('system_universe_all.date_of_gen between universe.start and universe.`end`');
+            })
+            ->where('system_universe_all.date_of_gen', '=', function ($query) {
+                $query->select(DB::raw('MAX(`date_of_gen`)'))
+                    ->from('system_universe_all');
+            })
+            ->get();
+
+        // Prepare the array
+        $dataArray = [];
+
+        // Add headers to the array
+        $headers = ['region', 'sec', 'gender', 'age_group', 'system', 'universe', 'multiplication_factor'];
+        $dataArray[] = $headers;
+        
+        // Add data to the array
+        foreach ($result as $row) {
+            $dataArray[] = [
+                $row->region,
+                $row->sec,
+                $row->gender,
+                $row->age_group,
+                $row->system,
+                $row->universe,
+                $row->multiplication_factor,
+            ];
+        }
+        return response()->json(["data" => $dataArray], 200);
+    }
     public function logs(Request $req)
     {
         if ($req->user != "" && $req->start != "" && $req->finish != "") {
@@ -652,7 +748,7 @@ class UserController extends Controller
             $user->economic_status = "SEC D";
         } elseif ($user->device->economic_status == "e") {
             $user->economic_status = "SEC E";
-        }else{
+        } else {
             $user->economic_status = $user->device->economic_status;
         }
 
@@ -776,19 +872,20 @@ class UserController extends Controller
     }
 
 
-    
-    function getDatesBetween($startDate, $endDate) {
+
+    function getDatesBetween($startDate, $endDate)
+    {
         $dateArray = array();
-    
+
         $currentDate = new DateTime($startDate);
         $endDate = new DateTime($endDate);
-    
+
         while ($currentDate < $endDate) {
-            
+
             $currentDate->modify('+1 day');
             $dateArray[] = $currentDate->format('Y-m-d');
         }
-    
+
         return $dateArray;
     }
     function demo_test()
@@ -796,7 +893,7 @@ class UserController extends Controller
         //$this->systemUniverse();
         $this->systemUniverseAll();
         return response()->json(["data" => "done"], 200);
-        $endDate = DataCleanse::where('status',1)->latest('id')->first()->date;
+        $endDate = DataCleanse::where('status', 1)->latest('id')->first()->date;
         $startDate = systemUniverse::max('date_of_gen');
         $dates = $this->getDatesBetween($startDate, $endDate);
         return response()->json(["data" => $dates], 200);
@@ -817,7 +914,7 @@ class UserController extends Controller
             [35, 44],
             [45, 150],
         ];
-        
+
         $cc = 0;
         foreach ($divisions as $division) {
             $deviceIds = Device::where('district', strtolower($division))
@@ -825,13 +922,13 @@ class UserController extends Controller
                 ->pluck('Id')
                 ->toArray();
 
-            
+
             foreach ($genders as $gender) {
                 foreach ($ageGroups as $i => $ageGroup) {
                     foreach ($secs as $s) {
                         $noOfUsers = User::whereIn('Device_Id', $deviceIds)
-                            ->where('economic_status', 'like', '%' .  $s. '%')
-                            ->where('gender', 'like', '%' .  $gender. '%')
+                            ->where('economic_status', 'like', '%' .  $s . '%')
+                            ->where('gender', 'like', '%' .  $gender . '%')
                             ->where('address', 'like', '%' . $division . '%')
                             ->whereRaw('YEAR(CURDATE()) - YEAR(dob) >= ?', [$ageGroupListNumRange[$i][0]])
                             ->whereRaw('YEAR(CURDATE()) - YEAR(dob) <= ?', [$ageGroupListNumRange[$i][1]])
@@ -881,7 +978,7 @@ class UserController extends Controller
             [35, 44],
             [45, 150],
         ];
-        
+
         $cc = 0;
         foreach ($divisions as $division) {
             $deviceIds = Device::where('district', strtolower($division))
@@ -889,13 +986,13 @@ class UserController extends Controller
                 ->pluck('Id')
                 ->toArray();
 
-            
+
             foreach ($genders as $gender) {
                 foreach ($ageGroups as $i => $ageGroup) {
                     foreach ($secs as $s) {
                         $noOfUsers = User::whereIn('Device_Id', $deviceIds)
-                            ->where('economic_status', 'like', '%' .  $s. '%')
-                            ->where('gender', 'like', '%' .  $gender. '%')
+                            ->where('economic_status', 'like', '%' .  $s . '%')
+                            ->where('gender', 'like', '%' .  $gender . '%')
                             ->where('address', 'like', '%' . $division . '%')
                             ->whereRaw('YEAR(CURDATE()) - YEAR(dob) >= ?', [$ageGroupListNumRange[$i][0]])
                             ->whereRaw('YEAR(CURDATE()) - YEAR(dob) <= ?', [$ageGroupListNumRange[$i][1]])

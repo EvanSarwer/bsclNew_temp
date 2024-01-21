@@ -248,6 +248,8 @@ Route::post('/receive/reliabilitylog',[RequestController::class,'receiveReliabil
 Route::get('/receive/reliabilitylog',[RequestController::class,'receiveReliabilityLog']);
 //////////END/////////////////
 
+Route::get("/getsystemuniverse",[UserController::class,'get_last_SystemUniverse']);
+Route::get("/getsystemuniverseall",[UserController::class,'get_last_SystemUniverseAll']);
 Route::get("/systemuniverseall",[UserController::class,'systemUniverseAll']);
 Route::get("/systemuniverse",[UserController::class,'systemUniverse']);
 Route::get("/test",[UserController::class,'demo_test']);

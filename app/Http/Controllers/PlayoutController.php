@@ -17,7 +17,7 @@ class PlayoutController extends Controller
     public function adlog(Request $req)
     {
         $channel_ids = array();
-        $ad_date = date("Y-m-d", strtotime($req->data[0]->ad_date));
+        $ad_date = date("Y-m-d", strtotime($req->data[0]['ad_date']));
         //return response()->json(["status" =>$req ], 200);
         $ids = array();
         foreach ($req->data as $logs) {
@@ -60,14 +60,14 @@ class PlayoutController extends Controller
             AdLog::whereIn('id', $ids)->delete();
             return response()->json(["error" => "Faulty Data"], 422);
         }
-        $this->ad_status($ad_date, $channel_ids);
+        $this->ad_status_insert($ad_date, $channel_ids);
         return response()->json(["status" => "done"], 200);
     }
    
     public function ad_status_insert($ad_date, $channel_ids)
     {
         $ids = array();
-        $CheckChannel_ids = AdStatus::where('ad_date', $ad_date)->pluck('channel_id')->get();
+        $CheckChannel_ids = AdStatus::where('ad_date', $ad_date)->pluck('channel_id')->toArray();
         foreach ($channel_ids as $channel_id) {
             if (!in_array($channel_id, $CheckChannel_ids)) {
                 $log = new AdStatus();
@@ -81,7 +81,7 @@ class PlayoutController extends Controller
     public function program_status_insert($program_date, $channel_ids)
     {
         $ids = array();
-        $CheckChannel_ids = ProgramStatus::where('program_date', $program_date)->pluck('channel_id')->get();
+        $CheckChannel_ids = ProgramStatus::where('program_date', $program_date)->pluck('channel_id')->toArray();
         foreach ($channel_ids as $channel_id) {
             if (!in_array($channel_id, $CheckChannel_ids)) {
                 $log = new ProgramStatus();
@@ -94,8 +94,9 @@ class PlayoutController extends Controller
     }
     public function programlog(Request $req)
     {
+        //return response()->json(["status" => $req->data[0]], 200);
         $channel_ids = array();
-        $program_date = date("Y-m-d", strtotime($req->data[0]->program_date));
+        $program_date = date("Y-m-d", strtotime($req->data[0]['program_date']));
         $ids = array();
         foreach ($req->data as $logs) {
             $logs = (object)$logs;
@@ -123,7 +124,7 @@ class PlayoutController extends Controller
             ProgramLog::whereIn('id', $ids)->delete();
             return response()->json(["error" => "Faulty Data"], 422);
         }
-        $this->program_status($program_date, $channel_ids);
+        $this->program_status_insert($program_date, $channel_ids);
         return response()->json(["status" => "done"], 200);
     }
     public function receive(Request $req)

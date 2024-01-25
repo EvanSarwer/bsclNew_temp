@@ -636,5 +636,38 @@ class DeviceController extends Controller
         return response()->json(["device" => $device, "device_box_history_logs" => $device_box_history_logs],200);
     }
 
+
+    public function deviceViewingStatusList(){
+
+        $latestLogs = ViewLog::selectRaw('user_id, MAX(finished_watching_at) as finished_watching_at')
+            ->groupBy('user_id')
+            ->get(); 
+
+        $device_viewing_status_list = Device::whereNotNull('contact_person')->whereNotNull('contact_email')->whereNotNull('contact_number')->select('id','device_name','last_request')->get();
+
+        foreach ($device_viewing_status_list as $d) {
+            $d->userIds = $d->users->pluck('id');
+
+            //deselect Status Check
+            $user_deselect = DeselectPeriod::where('device_id', $d->id)->whereNotNull('start_date')
+                ->whereNull('end_date')->first();
+            if ($user_deselect) {
+                $d->deselect = "deselected";
+            } else {
+                $d->deselect = "selected";
+            }
+
+            $d->last_request_fromViewlog = $latestLogs->whereIn('user_id', $d->userIds)->sortByDesc('finished_watching_at')->pluck('finished_watching_at')->first();
+            // days count from now to last viewlog
+            $d->days_since_last_viewlog = Carbon::parse($d->last_request_fromViewlog)->diffInDays(Carbon::now());
+
+            $d->deviceBoxId = $d->deviceBox->id ?? null;
+            if($d->deviceBoxId != null){
+                $d->connected_at = DeviceHistoryLog::where('device_id', $d->id)->where('box_id', $d->deviceBoxId)->whereNull('disconnected_at')->pluck('connected_at')->first();
+            }
+        }
+        return response()->json($device_viewing_status_list);
+    }
+
    
 }

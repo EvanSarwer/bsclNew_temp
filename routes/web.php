@@ -17,5 +17,3 @@ use App\Http\Controllers\RequestController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/receive',[RequestController::class, 'receive']);
-Route::get('/raw/{id}',[RequestController::class,'raw']);
